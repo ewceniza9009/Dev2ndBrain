@@ -10,7 +10,8 @@ interface NoteDetailViewProps {
 }
 
 const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
-  const [isEditing, setIsEditing] = useState(false);
+  // Set the default state to true to show the editor initially
+  const [isEditing, setIsEditing] = useState(true);
   const { deleteNote, updateNote } = useNoteStore();
   const editorRef = useRef<any>(null);
 
@@ -33,7 +34,8 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
   useEffect(() => {
     if (note) {
       setEditedTitle(note.title);
-      setIsEditing(false);
+      // Reset to editing mode whenever a new note is selected
+      setIsEditing(true); 
     }
   }, [note]);
 
