@@ -1,12 +1,13 @@
 import React from 'react';
+import GraphView from '../components/graph/GraphView';
 
 const GraphPage: React.FC = () => {
   return (
-    <div className="h-full">
-      <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-200">Note Graph</h1>
-      <div className="mt-4 p-4 h-[80vh] bg-white rounded-lg shadow-xs dark:bg-gray-800">
-        <p>The interactive D3.js force-directed graph for visualizing note links will be rendered here.</p>
-      </div>
+    <div className="h-full w-full bg-white dark:bg-gray-900 rounded-lg overflow-hidden p-6">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">Note Graph</h1>
+        <div className="h-[calc(100%-4rem)] w-full border border-gray-200 dark:border-gray-700 rounded-lg">
+            <GraphView />
+        </div>
     </div>
   );
 };

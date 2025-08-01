@@ -12,10 +12,10 @@ const GitHubLoginButton: React.FC = () => {
 
   return (
     <button
-      onClick={handleLogin}
-      className="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
+        onClick={handleLogin}
+        className="px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-teal-600 border border-transparent rounded-lg active:bg-teal-600 hover:bg-teal-700 focus:outline-none focus:shadow-outline-teal"
     >
-      Login with GitHub
+        Login with GitHub
     </button>
   );
 };

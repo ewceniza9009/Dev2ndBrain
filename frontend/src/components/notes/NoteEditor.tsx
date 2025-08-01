@@ -1,25 +1,23 @@
 import React, { useCallback } from 'react';
 import Editor from '@monaco-editor/react';
-import { useNoteStore } from '../stores/useNoteStore';
-import type { Note } from '../types';
+import { useNoteStore } from '../../stores/useNoteStore';
+import type { Note } from '../../types';
 import { debounce } from 'lodash-es';
+import { useAppStore } from '../../stores/useAppStore';
 
-// Define the component's props interface
 interface NoteEditorProps {
   note: Note;
-  editorRef: React.MutableRefObject<any>; // This line declares the missing prop
+  editorRef: React.MutableRefObject<any>;
 }
 
 const NoteEditor: React.FC<NoteEditorProps> = ({ note, editorRef }) => {
   const updateNote = useNoteStore((state) => state.updateNote);
+  const theme = useAppStore((state) => state.theme);
 
-  // This function receives the editor instance when it mounts
   const handleEditorDidMount = (editor: any) => {
-    // Attach the editor instance to the ref passed from the parent
     editorRef.current = editor;
   };
 
-  // Debounce the auto-save function
   const debouncedUpdate = useCallback(
     debounce((id: number, content: string) => {
       updateNote(id, { content });
@@ -34,12 +32,13 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, editorRef }) => {
   };
 
   return (
-    <div className="h-full w-full rounded-lg overflow-hidden">
+    <div className="h-full w-full rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700">
       <Editor
+        key={note.id}
         height="100%"
         defaultLanguage="markdown"
         defaultValue={note.content}
-        theme="vs-dark"
+        theme={theme === 'light' ? 'vs' : 'vs-dark'}
         onMount={handleEditorDidMount}
         onChange={handleEditorChange}
         options={{
