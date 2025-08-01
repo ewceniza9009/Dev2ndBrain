@@ -14,3 +14,6 @@ backend/.vs/backend/DesignTimeBuild/.dtbcache.v2
 backend/.vs/ProjectEvaluation/backend.metadata.v9.bin
 backend/.vs/ProjectEvaluation/backend.projects.v9.bin
 backend/.vs/ProjectEvaluation/backend.strings.v9.bin
+/backend/dev2ndbrain.db
+/backend/dev2ndbrain.db-shm
+/backend/dev2ndbrain.db-wal
