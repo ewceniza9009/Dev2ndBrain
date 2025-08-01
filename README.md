@@ -1,4 +1,3 @@
-```markdown
 # 🧠✨ Dev2ndBrain
 
 **The second brain every developer deserves.**  
@@ -156,4 +155,3 @@ Visit [http://localhost:5173](http://localhost:5173) and log in with GitHub! �
 
 ## 📜 License
 Distributed By: Erwin Wilson Ceniza
-```
