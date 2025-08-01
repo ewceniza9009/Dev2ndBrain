@@ -1,3 +1,26 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom Scrollbar Styling */
+/* Works on Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #14b8a6 #374151; /* Teal thumb, gray track */
+}
+
+/* Works on Chrome, Edge, and Safari */
+*::-webkit-scrollbar {
+  width: 12px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #374151; /* Gray-700 from Tailwind */
+  border-radius: 10px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #14b8a6; /* Teal-500 from Tailwind */
+  border-radius: 10px;
+  border: 3px solid #374151;
+}

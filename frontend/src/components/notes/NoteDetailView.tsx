@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useNoteStore } from '../../stores/useNoteStore';
 import NoteEditor from './NoteEditor';
+import NoteViewer from './NoteViewer';
 import LinkModal from './LinkModal';
 import type { Note } from '../../types';
-import { debounce } from 'lodash-es'; // Import debounce for auto-saving
+import { debounce } from 'lodash-es';
 
 interface NoteDetailViewProps {
   note: Note | null;
@@ -11,36 +12,34 @@ interface NoteDetailViewProps {
 
 const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
   const [isLinkModalOpen, setLinkModalOpen] = useState(false);
-  const { deleteNote, updateNote } = useNoteStore(); // Get updateNote from the store
+  // Set the default state to false to show the preview initially
+  const [isEditing, setIsEditing] = useState(false); 
+  const { deleteNote, updateNote } = useNoteStore();
   const editorRef = useRef<any>(null);
 
-  // Local state to manage the title input
   const [editedTitle, setEditedTitle] = useState(note?.title || '');
 
-  // Debounced function to save the title after the user stops typing
   const debouncedUpdateTitle = useCallback(
     debounce((id: number, title: string) => {
       updateNote(id, { title });
-    }, 1000), // 1-second delay
-    [] // No dependencies needed for the debounced function itself
+    }, 1000),
+    []
   );
 
-  // Effect to trigger the debounced save when the title changes
   useEffect(() => {
     if (note && editedTitle !== note.title) {
       debouncedUpdateTitle(note.id!, editedTitle);
     }
-    // Cleanup the debounce timer if the component unmounts
     return () => debouncedUpdateTitle.cancel();
   }, [editedTitle, note, debouncedUpdateTitle]);
 
-  // Effect to update the local title when a new note is selected
   useEffect(() => {
     if (note) {
       setEditedTitle(note.title);
+      // Reset to preview mode whenever a new note is selected
+      setIsEditing(false); 
     }
   }, [note]);
-
 
   const handleSelectNote = (selectedNote: Note) => {
     const linkText = `[[${selectedNote.uuid}]]`;
@@ -70,7 +69,6 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
         onSelectNote={handleSelectNote}
       />
       <div className="flex justify-between items-center mb-4 pb-2">
-        {/* The H1 is now an input field for the title */}
         <input
           type="text"
           value={editedTitle}
@@ -79,12 +77,22 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
           placeholder="Note Title"
         />
         <div className="flex space-x-2 flex-shrink-0 ml-4">
+          <button
+            onClick={() => setIsEditing(!isEditing)}
+            className="px-4 py-2 text-sm bg-blue-600 rounded-lg text-white"
+          >
+            {isEditing ? 'Preview' : 'Edit'}
+          </button>
           <button onClick={() => setLinkModalOpen(true)} className="px-4 py-2 text-sm bg-purple-600 rounded-lg text-white">Link Note</button>
           <button onClick={handleDelete} className="px-4 py-2 text-sm bg-red-600 rounded-lg text-white">Delete</button>
         </div>
       </div>
-      <div className="flex-grow pt-2">
-        <NoteEditor note={note} editorRef={editorRef} />
+      <div className="flex-grow pt-2 h-full">
+        {isEditing ? (
+          <NoteEditor note={note} editorRef={editorRef} />
+        ) : (
+          <NoteViewer note={note} />
+        )}
       </div>
     </div>
   );

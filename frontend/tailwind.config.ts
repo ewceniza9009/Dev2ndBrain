@@ -1,7 +1,8 @@
-import type { Config } from 'tailwindcss'
+import type { Config } from 'tailwindcss';
+import typography from '@tailwindcss/typography';
 
 const config: Config = {
-  darkMode: 'class', // Enable class-based dark mode
+  darkMode: 'class',
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
@@ -9,7 +10,9 @@ const config: Config = {
   theme: {
     extend: {},
   },
-  plugins: [],
-}
+  plugins: [
+    typography,
+  ],
+};
 
-export default config
+export default config;

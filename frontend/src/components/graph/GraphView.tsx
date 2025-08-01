@@ -62,9 +62,23 @@ const GraphView: React.FC = () => {
       .selectAll('g')
       .data(graphNodes)
       .join('g')
+      .attr('class', 'node-group') // Add a class for easier selection
       .call(drag(simulation) as any)
       .on('click', (_event: MouseEvent, d: GraphNode) => {
         navigate(`/notes`, { state: { selectedId: d.noteId } });
+      })
+      .on('mouseover', (_event: MouseEvent, d: GraphNode) => {
+        // Highlight logic
+        link.attr('stroke-opacity', (l: any) => (l.source.id === d.id || l.target.id === d.id ? 1.0 : 0.2));
+        link.attr('stroke', (l: any) => (l.source.id === d.id || l.target.id === d.id ? '#14B8A6' : '#999'));
+        
+        node.attr('opacity', (n: any) => (n.id === d.id || links.some((l: any) => (l.source.id === n.id && l.target.id === d.id) || (l.target.id === n.id && l.source.id === d.id)) ? 1 : 0.2));
+      })
+      .on('mouseout', () => {
+        // Reset highlight
+        link.attr('stroke-opacity', 0.6);
+        link.attr('stroke', '#999');
+        node.attr('opacity', 1);
       });
 
     node.append('circle')
