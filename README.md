@@ -1,55 +1,199 @@
-# 🧠✨ 𝗗𝗲𝘃𝟮𝗻𝗱𝗕𝗿𝗮𝗶𝗻 – 𝘠𝘰𝘶𝘳 𝘈𝘋𝘝𝘈𝘕𝘊𝘌𝘋 𝘒𝘯𝘰𝘸𝘭𝘦𝘥𝘨𝘦 𝘔𝘢𝘯𝘢𝘨𝘦𝘮𝘦𝘯𝘵 𝘈𝘱𝘱 👨‍💻📚
+Dev2ndBrain 🧠
+Dev2ndBrain is a powerful knowledge management application tailored for developers to organize notes 📝, code snippets 💻, and flashcards 📚 efficiently. It features a robust note-taking system with linking capabilities, a code snippet manager with GitHub Gist integration, and a flashcard system leveraging the SM-2 spaced repetition algorithm for optimized learning.
+✨ Features
 
-> 🛠️ A developer-centric second brain for organizing notes, code snippets, and flashcards with Markdown, GitHub Gist sync, spaced repetition, and interactive knowledge graphs.
+📝 Note Management: Create, edit, and organize notes with Markdown support. Link notes using [[uuid]] syntax for a graph-based knowledge network.
+💻 Code Snippet Management: Store and manage code snippets with syntax highlighting for multiple languages. Sync snippets to GitHub Gists for sharing and backup.
+📚 Flashcard System: Create decks and flashcards with a spaced repetition system (SM-2 algorithm) to enhance learning and retention.
+🌐 Graph Visualization: Visualize note connections using an interactive graph powered by D3.js.
+🔍 Search Functionality: Full-text search across notes and snippets using MiniSearch.
+🔗 GitHub Integration: Authenticate with GitHub to sync snippets and import Gists.
+🌙 Dark/Light Mode: Toggle between themes for a comfortable user experience.
+💾 Local Storage: Uses Dexie.js for indexedDB-based persistent storage of notes, snippets, flashcards, and user data.
 
----
+🛠️ Tech Stack
+Frontend
 
-## 🚀 𝗙𝗲𝗮𝘁𝘂𝗿𝗲𝘀
+React ⚛️: UI library for building components.
+TypeScript 📜: Type-safe JavaScript for better developer experience.
+Vite 🚀: Fast build tool and development server.
+Tailwind CSS 🎨: Utility-first CSS framework for styling.
+Monaco Editor 📝: Code editor for snippets and Markdown notes.
+D3.js 📊: For rendering the note graph visualization.
+Zustand 🗃️: State management for notes, snippets, flashcards, and app settings.
+Dexie.js 💽: IndexedDB wrapper for local storage.
+MiniSearch 🔎: Lightweight full-text search library.
+React Router 🛤️: For navigation and routing.
 
-- 📝 **𝗡𝗼𝘁𝗲 𝗠𝗮𝗻𝗮𝗴𝗲𝗺𝗲𝗻𝘁**  
-  Create, link, and edit notes in **Markdown**. Use `[[uuid]]` for backlinks and build a **graph-based knowledge web**.
+Backend
 
-- 🧠 **𝗙𝗹𝗮𝘀𝗵𝗰𝗮𝗿𝗱 𝗦𝘆𝘀𝘁𝗲𝗺**  
-  Leverage the **SM-2 spaced repetition algorithm** to remember key concepts and reinforce learning over time.
+ASP.NET Core 🔧: REST API for handling GitHub authentication and Gist operations.
+Octokit 🐙: GitHub API client for .NET.
+HttpClient 🌐: For making HTTP requests to GitHub's OAuth and Gist APIs.
 
-- 💾 **𝗖𝗼𝗱𝗲 𝗦𝗻𝗶𝗽𝗽𝗲𝘁 𝗠𝗮𝗻𝗮𝗴𝗲𝗺𝗲𝗻𝘁**  
-  Store code snippets with syntax highlighting across languages. Sync with **GitHub Gists** 🐙.
+📂 Project Structure
+X:\Dev2ndBrain
+├── backend
+│   ├── Controllers
+│   │   ├── GistController.cs
+│   │   └── GitHubController.cs
+│   ├── Models
+│   │   ├── GitHubTokenRequest.cs
+│   │   └── GithubUser.cs
+│   ├── Services
+│   │   └── GithubService.cs
+│   ├── backend.csproj
+│   ├── backend.sln
+│   └── Program.cs
+├── frontend
+│   ├── src
+│   │   ├── components
+│   │   │   ├── auth
+│   │   │   │   └── GitHubLoginButton.tsx
+│   │   │   ├── common
+│   │   │   │   └── SearchBar.tsx
+│   │   │   ├── flashcards
+│   │   │   │   ├── DeckList.tsx
+│   │   │   │   ├── DeckView.tsx
+│   │   │   │   └── FlashcardPlayer.tsx
+│   │   │   ├── graph
+│   │   │   │   └── GraphView.tsx
+│   │   │   ├── layout
+│   │   │   │   ├── Header.tsx
+│   │   │   │   ├── Layout.tsx
+│   │   │   │   └── Sidebar.tsx
+│   │   │   ├── notes
+│   │   │   │   ├── LinkModal.tsx
+│   │   │   │   ├── NoteDetailView.tsx
+│   │   │   │   ├── NoteEditor.tsx
+│   │   │   │   └── NoteList.tsx
+│   │   │   └── snippets
+│   │   │       ├── SnippetCard.tsx
+│   │   │       ├── SnippetDetail.tsx
+│   │   │       └── SnippetList.tsx
+│   │   ├── pages
+│   │   │   ├── DashboardPage.tsx
+│   │   │   ├── FlashcardsPage.tsx
+│   │   │   ├── GraphPage.tsx
+│   │   │   ├── NoteDetailPage.tsx
+│   │   │   ├── NotesListPage.tsx
+│   │   │   ├── OAuthCallbackPage.tsx
+│   │   │   ├── SettingsPage.tsx
+│   │   │   └── SnippetsPage.tsx
+│   │   ├── services
+│   │   │   ├── cryptoService.ts
+│   │   │   ├── db.ts
+│   │   │   ├── githubService.ts
+│   │   │   └── searchService.ts
+│   │   ├── stores
+│   │   │   ├── useAppStore.ts
+│   │   │   ├── useAuthStore.ts
+│   │   │   ├── useFlashcardStore.ts
+│   │   │   ├── useNoteStore.ts
+│   │   │   └── useSnippetStore.ts
+│   │   ├── types
+│   │   │   └── index.ts
+│   │   ├── App.css
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   └── main.tsx
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── postcss.config.cjs
+│   ├── README.md
+│   ├── tailwind.config.ts
+│   └── vite.config.ts
+└── .gitignore
 
-- 🌐 **𝗚𝗿𝗮𝗽𝗵 𝗩𝗶𝘀𝘂𝗮𝗹𝗶𝘇𝗮𝘁𝗶𝗼𝗻**  
-  Visualize relationships between notes with an **interactive D3.js graph**.
+🚀 Setup Instructions
+Prerequisites
 
-- 🔍 **𝗙𝘂𝗹𝗹-𝗧𝗲𝘅𝘁 𝗦𝗲𝗮𝗿𝗰𝗵**  
-  Find notes and snippets instantly using **MiniSearch**.
+Node.js (v18 or later)
+.NET SDK (8.0 or later)
+GitHub OAuth App 🔑: Create an app on GitHub to get a ClientId and ClientSecret. Set the callback URL to http://localhost:5173/oauth/callback.
 
-- 🔐 **𝗚𝗶𝘁𝗛𝘂𝗯 𝗜𝗻𝘁𝗲𝗴𝗿𝗮𝘁𝗶𝗼𝗻**  
-  Authenticate via OAuth to **sync and import Gists** directly from GitHub.
+Backend Setup
 
-- 🌙🌞 **𝗗𝗮𝗿𝗸/𝗟𝗶𝗴𝗵𝘁 𝗠𝗼𝗱𝗲**  
-  Switch themes for optimal focus and comfort.
+Navigate to the backend directory:cd backend
 
-- 🗃️ **𝗟𝗼𝗰𝗮𝗹 𝗣𝗲𝗿𝘀𝗶𝘀𝘁𝗲𝗻𝗰𝗲**  
-  Store all data locally using **Dexie.js (IndexedDB)** – your data stays **offline & secure**.
 
----
+Create an appsettings.json file with:{
+  "FrontendOrigin": "http://localhost:5173",
+  "GitHub": {
+    "ClientId": "your-github-client-id",
+    "ClientSecret": "your-github-client-secret"
+  }
+}
 
-## 🛠️ 𝗧𝗲𝗰𝗵 𝗦𝘁𝗮𝗰𝗸
 
-**🖼️ Frontend:**
-- ⚛️ React 18 + TypeScript + Vite
-- 🎨 Tailwind CSS
-- 🧠 Zustand (state management)
-- 🧩 Monaco Editor (Markdown + code)
-- 📊 D3.js (graph)
-- 💾 Dexie.js (local DB)
-- 🔍 MiniSearch (search engine)
-- 🧭 React Router
+Restore dependencies and run the backend:dotnet restore
+dotnet run
 
-**🧰 Backend:**
-- 🌐 ASP.NET Core 8.0
-- 🔐 Octokit.NET (GitHub API)
-- 🌍 HttpClient for OAuth & Gist sync
+The backend runs on https://localhost:7150.
 
----
+Frontend Setup
 
-## 📂 𝗣𝗿𝗼𝗷𝗲𝗰𝘁 𝗦𝘁𝗿𝘂𝗰𝘁𝘂𝗿𝗲
+Navigate to the frontend directory:cd frontend
 
+
+Create a .env.local file with:VITE_GITHUB_CLIENT_ID=your-github-client-id
+
+
+Install dependencies and start the development server:npm install
+npm run dev
+
+The frontend runs on http://localhost:5173.
+
+Running the Application
+
+Start the backend server (dotnet run in the backend directory).
+Start the frontend server (npm run dev in the frontend directory).
+Open http://localhost:5173 in your browser 🌐.
+Log in with GitHub to enable Gist syncing and importing 🔗.
+
+📖 Usage
+
+🏠 Dashboard: View recent notes, flashcard review status, and quick stats.
+📝 Notes: Create and link notes, edit with Markdown, and visualize connections in the Graph view.
+💻 Snippets: Add code snippets, sync to GitHub Gists, or import existing Gists.
+📚 Flashcards: Create decks, add cards, and review using spaced repetition.
+🔍 Search: Use the search bar to find notes and snippets by title, content, or tags.
+⚙️ Settings: Manage GitHub authentication and log out.
+
+🛠️ Development
+Frontend
+
+Linting: Run npm run lint to check for code issues.
+Build: Run npm run build for production builds.
+Type Checking: TypeScript ensures type safety. Verify no type errors during development.
+
+Backend
+
+Controllers: GitHubController.cs handles OAuth token exchange; GistController.cs manages Gist creation and retrieval.
+Services: GitHubService.cs encapsulates GitHub API interactions using Octokit.
+
+Extending the Application
+
+Add new note types or snippet languages in types/index.ts.
+Enhance the SM-2 algorithm in useFlashcardStore.ts for custom review logic.
+Expand search capabilities in searchService.ts by adding new fields or types.
+Add more backend endpoints in Controllers for additional GitHub features.
+
+⚠️ Known Limitations
+
+The crypto key in cryptoService.ts is hardcoded for simplicity. In production, use a secure key management system 🔒.
+The backend CORS is configured for localhost:5173. Update appsettings.json for other origins.
+The graph view may slow down with a large number of notes due to D3.js rendering 📊.
+
+🤝 Contributing
+Contributions are welcome! Please:
+
+Fork the repository 🍴.
+Create a feature branch (git checkout -b feature/YourFeature).
+Commit changes (git commit -m "Add your feature").
+Push to the branch (git push origin feature/YourFeature).
+Open a pull request 📬.
+
+📄 License
+This project is licensed under the MIT License.
