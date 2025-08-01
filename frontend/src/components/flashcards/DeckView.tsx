@@ -7,7 +7,7 @@ interface DeckViewProps {
 }
 
 const DeckView: React.FC<DeckViewProps> = ({ deck }) => {
-  const { cards, fetchCardsByDeck, addCard } = useFlashcardStore();
+  const { cards, fetchCardsByDeck, addCard, deleteDeck } = useFlashcardStore();
   const [newCard, setNewCard] = useState({ question: '', answer: '' });
   const questionInputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -26,9 +26,21 @@ const DeckView: React.FC<DeckViewProps> = ({ deck }) => {
     }
   };
 
+  const handleDeleteDeck = () => {
+    if (deck.id) {
+      deleteDeck(deck.id);
+    }
+  }
+
   return (
     <div>
-      <h2 className="text-3xl text-gray-900 dark:text-white font-bold mb-6">{deck.name}</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl text-gray-900 dark:text-white font-bold">{deck.name}</h2>
+        <button onClick={handleDeleteDeck} className="px-4 py-2 text-sm bg-red-600 rounded-lg text-white">
+            Delete Deck
+        </button>
+      </div>
+      
       <div className="bg-gray-100 dark:bg-gray-800 p-6 rounded-lg mb-8">
         <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Add New Card</h3>
         <form onSubmit={handleAddCard} className="space-y-4">

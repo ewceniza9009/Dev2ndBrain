@@ -23,10 +23,11 @@ const sm2 = (card: Flashcard, quality: number): Partial<Flashcard> => {
 interface FlashcardState {
   decks: Deck[];
   cards: Flashcard[];
-  allCards: Flashcard[]; // <-- Add this property
+  allCards: Flashcard[];
   fetchDecks: () => Promise<void>;
   fetchAllCards: () => Promise<void>;
   addDeck: (name: string) => Promise<void>;
+  deleteDeck: (deckId: number) => Promise<void>;
   getDeckById: (id: number) => Deck | undefined;
   fetchCardsByDeck: (deckId: number) => Promise<void>;
   addCard: (cardData: Omit<Flashcard, 'id' | 'nextReview' | 'easeFactor' | 'repetitions' | 'interval'>) => Promise<void>;
@@ -36,23 +37,38 @@ interface FlashcardState {
 export const useFlashcardStore = create<FlashcardState>((set, get) => ({
   decks: [],
   cards: [],
-  allCards: [], // <-- Initialize the state here
+  allCards: [],
   
-  fetchAllCards: async () => {
-    const allCards = await db.flashcards.toArray();
-    set({ allCards });
-  },
-
   fetchDecks: async () => {
     const decks = await db.decks.toArray();
     set({ decks });
+  },
+
+  fetchAllCards: async () => {
+    const allCards = await db.flashcards.toArray();
+    set({ allCards });
   },
 
   addDeck: async (name) => {
     const newDeck: Deck = { name, createdAt: new Date() };
     const id = await db.decks.add(newDeck);
     set(state => ({ decks: [...state.decks, { ...newDeck, id }] }));
-    get().fetchAllCards(); // Refresh counts when a deck is added
+    get().fetchAllCards();
+  },
+
+  deleteDeck: async (deckId: number) => {
+    if (!window.confirm("Are you sure you want to delete this deck and all its cards? This action cannot be undone.")) {
+      return;
+    }
+    await db.transaction('rw', db.decks, db.flashcards, async () => {
+      await db.flashcards.where('deckId').equals(deckId).delete();
+      await db.decks.delete(deckId);
+    });
+
+    set((state) => ({
+      decks: state.decks.filter((d) => d.id !== deckId),
+      allCards: state.allCards.filter((c) => c.deckId !== deckId),
+    }));
   },
   
   getDeckById: (id) => {
@@ -73,8 +89,8 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
       interval: 0,
     };
     await db.flashcards.add(newCard);
-    get().fetchCardsByDeck(cardData.deckId); // Refresh the view for the current deck
-    get().fetchAllCards(); // Refresh the counts
+    get().fetchCardsByDeck(cardData.deckId);
+    get().fetchAllCards();
   },
 
   reviewCard: async (cardId, quality) => {

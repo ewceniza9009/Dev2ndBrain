@@ -4,10 +4,11 @@ import type { Flashcard } from '../../types';
 
 interface FlashcardPlayerProps {
   deckId: number;
+  reviewMode: 'due' | 'all';
   onFinish: () => void;
 }
 
-const FlashcardPlayer: React.FC<FlashcardPlayerProps> = ({ deckId, onFinish }) => {
+const FlashcardPlayer: React.FC<FlashcardPlayerProps> = ({ deckId, reviewMode, onFinish }) => {
   const { cards, fetchCardsByDeck, reviewCard } = useFlashcardStore();
   const [queue, setQueue] = useState<Flashcard[]>([]);
   const [currentCard, setCurrentCard] = useState<Flashcard | null>(null);
@@ -18,12 +19,16 @@ const FlashcardPlayer: React.FC<FlashcardPlayerProps> = ({ deckId, onFinish }) =
   }, [deckId, fetchCardsByDeck]);
 
   const reviewQueue = useMemo(() => {
+    if (reviewMode === 'all') {
+      return cards;
+    }
     return cards.filter(c => new Date(c.nextReview) <= new Date());
-  }, [cards]);
+  }, [cards, reviewMode]);
 
   useEffect(() => {
     setQueue(reviewQueue);
     setCurrentCard(reviewQueue[0] || null);
+    setIsFlipped(false);
   }, [reviewQueue]);
 
   const handleNextCard = (quality: number) => {
@@ -39,7 +44,7 @@ const FlashcardPlayer: React.FC<FlashcardPlayerProps> = ({ deckId, onFinish }) =
     return (
       <div className="text-center">
         <h2 className="text-2xl text-gray-900 dark:text-white">All done for now! 🎉</h2>
-        <p className="text-gray-600 dark:text-gray-400">You've reviewed all due cards in this deck.</p>
+        <p className="text-gray-600 dark:text-gray-400">You've completed this review session.</p>
         <button onClick={onFinish} className="mt-4 px-4 py-2 bg-teal-600 rounded text-white">Back to Decks</button>
       </div>
     );
