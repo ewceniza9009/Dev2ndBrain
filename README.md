@@ -1,7 +1,4 @@
 ```markdown
-<!-- README.md -->
-<div align="center">
-
 # 🧠✨ Dev2ndBrain
 
 **The second brain every developer deserves.**  
