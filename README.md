@@ -1,199 +1,162 @@
-Dev2ndBrain 🧠
-Dev2ndBrain is a powerful knowledge management application tailored for developers to organize notes 📝, code snippets 💻, and flashcards 📚 efficiently. It features a robust note-taking system with linking capabilities, a code snippet manager with GitHub Gist integration, and a flashcard system leveraging the SM-2 spaced repetition algorithm for optimized learning.
-✨ Features
+```markdown
+<!-- README.md -->
+<div align="center">
 
-📝 Note Management: Create, edit, and organize notes with Markdown support. Link notes using [[uuid]] syntax for a graph-based knowledge network.
-💻 Code Snippet Management: Store and manage code snippets with syntax highlighting for multiple languages. Sync snippets to GitHub Gists for sharing and backup.
-📚 Flashcard System: Create decks and flashcards with a spaced repetition system (SM-2 algorithm) to enhance learning and retention.
-🌐 Graph Visualization: Visualize note connections using an interactive graph powered by D3.js.
-🔍 Search Functionality: Full-text search across notes and snippets using MiniSearch.
-🔗 GitHub Integration: Authenticate with GitHub to sync snippets and import Gists.
-🌙 Dark/Light Mode: Toggle between themes for a comfortable user experience.
-💾 Local Storage: Uses Dexie.js for indexedDB-based persistent storage of notes, snippets, flashcards, and user data.
+# 🧠✨ Dev2ndBrain
 
-🛠️ Tech Stack
-Frontend
+**The second brain every developer deserves.**  
+Organize notes 📝, code snippets 💻, and flashcards 📚 — all in one elegant workspace.
 
-React ⚛️: UI library for building components.
-TypeScript 📜: Type-safe JavaScript for better developer experience.
-Vite 🚀: Fast build tool and development server.
-Tailwind CSS 🎨: Utility-first CSS framework for styling.
-Monaco Editor 📝: Code editor for snippets and Markdown notes.
-D3.js 📊: For rendering the note graph visualization.
-Zustand 🗃️: State management for notes, snippets, flashcards, and app settings.
-Dexie.js 💽: IndexedDB wrapper for local storage.
-MiniSearch 🔎: Lightweight full-text search library.
-React Router 🛤️: For navigation and routing.
+![MIT License](https://img.shields.io/badge/license-MIT-green)
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
+![ASP.NET](https://img.shields.io/badge/ASP.NET-512BD4?style=flat&logo=.net&logoColor=white)
 
-Backend
+</div>
 
-ASP.NET Core 🔧: REST API for handling GitHub authentication and Gist operations.
-Octokit 🐙: GitHub API client for .NET.
-HttpClient 🌐: For making HTTP requests to GitHub's OAuth and Gist APIs.
+---
 
-📂 Project Structure
-X:\Dev2ndBrain
-├── backend
-│   ├── Controllers
-│   │   ├── GistController.cs
-│   │   └── GitHubController.cs
-│   ├── Models
-│   │   ├── GitHubTokenRequest.cs
-│   │   └── GithubUser.cs
-│   ├── Services
-│   │   └── GithubService.cs
-│   ├── backend.csproj
-│   ├── backend.sln
+## 🌟 Features
+
+| Feature | Description |
+|---------|-------------|
+| 📝 **Note Management** | Markdown notes with bi-directional linking & live graph. |
+| 💻 **Code Snippets** | Syntax-highlighted snippets, synced with **GitHub Gists**. |
+| 📚 **Flashcards** | Spaced-repetition decks powered by **SM-2**. |
+| 🔍 **Full-text Search** | Lightning-fast search across everything via **MiniSearch**. |
+| 🌐 **Graph View** | Interactive D3.js graph of your knowledge base. |
+| 🌙 **Theme Toggle** | Dark / light mode in one click. |
+| 🔐 **GitHub Auth** | Login with GitHub, sync & import Gists instantly. |
+| 💾 **Local-First** | Persistent storage via **IndexedDB (Dexie.js)**. |
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/-Vite-646CFF?logo=vite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/-TailwindCSS-06B6D4?logo=tailwindcss&logoColor=white) ![Monaco](https://img.shields.io/badge/-Monaco-007ACC?logo=microsoft&logoColor=white) ![D3](https://img.shields.io/badge/-D3.js-F9A03C?logo=d3&logoColor=white) ![Zustand](https://img.shields.io/badge/-Zustand-20232A?logo=react&logoColor=white) ![Dexie](https://img.shields.io/badge/-Dexie.js-2F2F2F?logo=indexeddb&logoColor=white) ![MiniSearch](https://img.shields.io/badge/-MiniSearch-64B5F6?logo=javascript&logoColor=white)
+
+### Backend
+![ASP.NET Core](https://img.shields.io/badge/-ASP.NET%20Core-512BD4?logo=.net&logoColor=white) ![Octokit](https://img.shields.io/badge/-Octokit-181717?logo=github&logoColor=white) ![HttpClient](https://img.shields.io/badge/-HttpClient-0078D4?logo=microsoft&logoColor=white)
+
+---
+
+## 📂 Project Structure
+
+```
+Dev2ndBrain/
+├── backend/                 # ASP.NET Core API
+│   ├── Controllers/
+│   ├── Models/
+│   ├── Services/
 │   └── Program.cs
-├── frontend
-│   ├── src
-│   │   ├── components
-│   │   │   ├── auth
-│   │   │   │   └── GitHubLoginButton.tsx
-│   │   │   ├── common
-│   │   │   │   └── SearchBar.tsx
-│   │   │   ├── flashcards
-│   │   │   │   ├── DeckList.tsx
-│   │   │   │   ├── DeckView.tsx
-│   │   │   │   └── FlashcardPlayer.tsx
-│   │   │   ├── graph
-│   │   │   │   └── GraphView.tsx
-│   │   │   ├── layout
-│   │   │   │   ├── Header.tsx
-│   │   │   │   ├── Layout.tsx
-│   │   │   │   └── Sidebar.tsx
-│   │   │   ├── notes
-│   │   │   │   ├── LinkModal.tsx
-│   │   │   │   ├── NoteDetailView.tsx
-│   │   │   │   ├── NoteEditor.tsx
-│   │   │   │   └── NoteList.tsx
-│   │   │   └── snippets
-│   │   │       ├── SnippetCard.tsx
-│   │   │       ├── SnippetDetail.tsx
-│   │   │       └── SnippetList.tsx
-│   │   ├── pages
-│   │   │   ├── DashboardPage.tsx
-│   │   │   ├── FlashcardsPage.tsx
-│   │   │   ├── GraphPage.tsx
-│   │   │   ├── NoteDetailPage.tsx
-│   │   │   ├── NotesListPage.tsx
-│   │   │   ├── OAuthCallbackPage.tsx
-│   │   │   ├── SettingsPage.tsx
-│   │   │   └── SnippetsPage.tsx
-│   │   ├── services
-│   │   │   ├── cryptoService.ts
-│   │   │   ├── db.ts
-│   │   │   ├── githubService.ts
-│   │   │   └── searchService.ts
-│   │   ├── stores
-│   │   │   ├── useAppStore.ts
-│   │   │   ├── useAuthStore.ts
-│   │   │   ├── useFlashcardStore.ts
-│   │   │   ├── useNoteStore.ts
-│   │   │   └── useSnippetStore.ts
-│   │   ├── types
-│   │   │   └── index.ts
-│   │   ├── App.css
-│   │   ├── App.tsx
-│   │   ├── index.css
-│   │   └── main.tsx
-│   ├── eslint.config.js
-│   ├── index.html
-│   ├── package.json
-│   ├── postcss.config.cjs
-│   ├── README.md
-│   ├── tailwind.config.ts
-│   └── vite.config.ts
-└── .gitignore
+├── frontend/                # React (Vite) SPA
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   ├── services/
+│   │   ├── stores/
+│   │   └── types/
+│   └── package.json
+└── README.md
+```
 
-🚀 Setup Instructions
-Prerequisites
+---
 
-Node.js (v18 or later)
-.NET SDK (8.0 or later)
-GitHub OAuth App 🔑: Create an app on GitHub to get a ClientId and ClientSecret. Set the callback URL to http://localhost:5173/oauth/callback.
+## 🚀 Quick Start
 
-Backend Setup
+### Prerequisites
+- **Node.js** ≥ 18
+- **.NET SDK** ≥ 8.0
+- A GitHub OAuth App ([create here](https://github.com/settings/developers))  
+  Set **Authorization callback URL** to `http://localhost:5173/oauth/callback`
 
-Navigate to the backend directory:cd backend
+### 1. Backend
 
+```bash
+cd backend
+```
 
-Create an appsettings.json file with:{
+Create `appsettings.json`
+
+```json
+{
   "FrontendOrigin": "http://localhost:5173",
   "GitHub": {
     "ClientId": "your-github-client-id",
     "ClientSecret": "your-github-client-secret"
   }
 }
+```
 
+```bash
+dotnet restore
+dotnet run                  # https://localhost:7150
+```
 
-Restore dependencies and run the backend:dotnet restore
-dotnet run
+### 2. Frontend
 
-The backend runs on https://localhost:7150.
+```bash
+cd ../frontend
+```
 
-Frontend Setup
+Create `.env.local`
 
-Navigate to the frontend directory:cd frontend
+```bash
+VITE_GITHUB_CLIENT_ID=your-github-client-id
+```
 
+```bash
+npm install
+npm run dev                 # http://localhost:5173
+```
 
-Create a .env.local file with:VITE_GITHUB_CLIENT_ID=your-github-client-id
+Visit [http://localhost:5173](http://localhost:5173) and log in with GitHub! 🎉
 
+---
 
-Install dependencies and start the development server:npm install
-npm run dev
+## 📝 Usage
 
-The frontend runs on http://localhost:5173.
+| Page | What to do |
+|------|------------|
+| 🏠 **Dashboard**    | See recent notes, flashcard stats & quick actions. |
+| 📝 **Notes**        | Write Markdown, link notes, view graph. |
+| 💻 **Snippets**     | Save, tag, and sync code with GitHub Gists. |
+| 📚 **Flashcards**   | Create decks → review using the SM-2 algorithm. |
+| 🔍 **Search**       | `Ctrl+K` to open the global search bar. |
+| ⚙️ **Settings**     | Log out or revoke GitHub access. |
 
-Running the Application
+---
 
-Start the backend server (dotnet run in the backend directory).
-Start the frontend server (npm run dev in the frontend directory).
-Open http://localhost:5173 in your browser 🌐.
-Log in with GitHub to enable Gist syncing and importing 🔗.
+## 🛠️ Development Tips
 
-📖 Usage
+| Task | Command |
+|------|---------|
+| **Frontend lint** | `npm run lint` |
+| **Frontend build** | `npm run build` |
+| **Add new type** | `frontend/src/types/index.ts` |
+| **Extend SM-2** | `useFlashcardStore.ts` |
+| **New endpoint** | Add controller in `backend/Controllers/` |
 
-🏠 Dashboard: View recent notes, flashcard review status, and quick stats.
-📝 Notes: Create and link notes, edit with Markdown, and visualize connections in the Graph view.
-💻 Snippets: Add code snippets, sync to GitHub Gists, or import existing Gists.
-📚 Flashcards: Create decks, add cards, and review using spaced repetition.
-🔍 Search: Use the search bar to find notes and snippets by title, content, or tags.
-⚙️ Settings: Manage GitHub authentication and log out.
+---
 
-🛠️ Development
-Frontend
+## ⚠️ Known Limitations
+- **Crypto key** is hard-coded in `cryptoService.ts` → replace with secure key management in production.  
+- **CORS** is configured for `localhost:5173` only → update `appsettings.json` for other origins.  
+- **Graph performance** may degrade with 1000+ notes → consider virtualization.
 
-Linting: Run npm run lint to check for code issues.
-Build: Run npm run build for production builds.
-Type Checking: TypeScript ensures type safety. Verify no type errors during development.
+---
 
-Backend
+## 🤝 Contributing
 
-Controllers: GitHubController.cs handles OAuth token exchange; GistController.cs manages Gist creation and retrieval.
-Services: GitHubService.cs encapsulates GitHub API interactions using Octokit.
+1. Fork the repo 🍴  
+2. Create your feature branch: `git checkout -b feature/AmazingFeature`  
+3. Commit: `git commit -m 'Add AmazingFeature'`  
+4. Push: `git push origin feature/AmazingFeature`  
+5. Open a Pull Request 📬  
 
-Extending the Application
+---
 
-Add new note types or snippet languages in types/index.ts.
-Enhance the SM-2 algorithm in useFlashcardStore.ts for custom review logic.
-Expand search capabilities in searchService.ts by adding new fields or types.
-Add more backend endpoints in Controllers for additional GitHub features.
-
-⚠️ Known Limitations
-
-The crypto key in cryptoService.ts is hardcoded for simplicity. In production, use a secure key management system 🔒.
-The backend CORS is configured for localhost:5173. Update appsettings.json for other origins.
-The graph view may slow down with a large number of notes due to D3.js rendering 📊.
-
-🤝 Contributing
-Contributions are welcome! Please:
-
-Fork the repository 🍴.
-Create a feature branch (git checkout -b feature/YourFeature).
-Commit changes (git commit -m "Add your feature").
-Push to the branch (git push origin feature/YourFeature).
-Open a pull request 📬.
-
-📄 License
-This project is licensed under the MIT License.
+## 📜 License
+Distributed By: Erwin Wilson Ceniza
+```
