@@ -9,7 +9,7 @@ const SettingsPage: React.FC = () => {
 
   return (
     <div>
-      <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-200">Settings</h1>
+      <h1 className="mx-4 mt-3 text-2xl font-semibold text-gray-700 dark:text-gray-200">Settings</h1>
       <div className="mt-4 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
         <h2 className="text-xl font-medium text-gray-700 dark:text-gray-200">GitHub Sync</h2>
         {isAuthenticated && user ? (
