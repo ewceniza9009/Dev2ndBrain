@@ -4,7 +4,8 @@ const ALGORITHM = 'AES-GCM';
 const a2b = (str: string) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
 const b2a = (buf: ArrayBuffer) => btoa(String.fromCharCode(...new Uint8Array(buf)));
 
-const secretKey = new TextEncoder().encode('a-very-secret-32-byte-long-key!');
+// This key is now exactly 32 bytes (256 bits) long.
+const secretKey = new TextEncoder().encode('a-very-secret-32-byte-long-key!!');
 
 async function getCryptoKey(): Promise<CryptoKey> {
   return await window.crypto.subtle.importKey('raw', secretKey, { name: ALGORITHM }, false, ['encrypt', 'decrypt']);

@@ -1,9 +1,8 @@
 import { create } from 'zustand';
 import { db } from '../services/db';
 import { encryptToken, decryptToken } from '../services/cryptoService';
-import type { GitHubUser, EncryptedData } from '../types';
+import type { GitHubUser } from '../types';
 
-// The AuthState type is now exported
 export interface AuthState {
   isAuthenticated: boolean;
   user: GitHubUser | null;
@@ -14,9 +13,8 @@ export interface AuthState {
   getDecryptedToken: () => Promise<string | null>;
 }
 
-const API_BASE_URL = 'http://localhost:5000'; // ASP.NET Core default HTTP port
+const API_BASE_URL = 'https://localhost:7150'; 
 
-// This is a named export, which is correct.
 export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,
   user: null,

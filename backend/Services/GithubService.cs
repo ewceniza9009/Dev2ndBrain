@@ -1,5 +1,4 @@
-﻿using System.Text.Json;
-using Dev2ndBrain.Models;
+﻿using Dev2ndBrain.Models;
 using Octokit;
 
 namespace Dev2ndBrain.Services
@@ -26,7 +25,13 @@ namespace Dev2ndBrain.Services
                 throw new InvalidOperationException("GitHub ClientId or ClientSecret is not configured.");
             }
 
-            var request = new OauthTokenRequest(clientId, clientSecret, code);
+            var redirectUri = new Uri("http://localhost:5173/oauth/callback");
+
+            var request = new OauthTokenRequest(clientId, clientSecret, code)
+            {
+                RedirectUri = redirectUri
+            };
+
             var client = new GitHubClient(new ProductHeaderValue("Dev2ndBrain"));
             try
             {
@@ -36,7 +41,6 @@ namespace Dev2ndBrain.Services
                     return (null, null);
                 }
 
-                // Use the token to get user info
                 var userClient = new GitHubClient(new ProductHeaderValue("Dev2ndBrain"))
                 {
                     Credentials = new Credentials(token.AccessToken)
@@ -55,7 +59,6 @@ namespace Dev2ndBrain.Services
             }
             catch (Exception ex)
             {
-                // Log the exception
                 Console.WriteLine($"Error exchanging code for token: {ex.Message}");
                 return (null, null);
             }
