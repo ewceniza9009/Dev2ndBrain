@@ -13,7 +13,7 @@ export interface AuthState {
   getDecryptedToken: () => Promise<string | null>;
 }
 
-const API_BASE_URL = 'https://localhost:7150'; 
+const API_BASE_URL =  import.meta.env.VITE_API_BASE_URL;
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   isAuthenticated: false,

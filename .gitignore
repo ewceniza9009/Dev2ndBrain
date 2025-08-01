@@ -9,3 +9,8 @@
 /backend/.vs/backend/v17/.futdcache.v2
 /backend/.cr/
 /backend/Architecture.md
+frontend/.env
+backend/.vs/backend/DesignTimeBuild/.dtbcache.v2
+backend/.vs/ProjectEvaluation/backend.metadata.v9.bin
+backend/.vs/ProjectEvaluation/backend.projects.v9.bin
+backend/.vs/ProjectEvaluation/backend.strings.v9.bin
