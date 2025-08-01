@@ -63,5 +63,29 @@ namespace Dev2ndBrain.Services
                 return (null, null);
             }
         }
+
+        public async Task<Gist> CreateGistAsync(string accessToken, string description, string filename, string content, bool isPublic)
+        {
+            var client = new GitHubClient(new ProductHeaderValue("Dev2ndBrain"))
+            {
+                Credentials = new Credentials(accessToken)
+            };
+            var newGist = new NewGist
+            {
+                Description = description,
+                Public = isPublic
+            };
+            newGist.Files.Add(filename, content);
+            return await client.Gist.Create(newGist);
+        }
+
+        public async Task<IReadOnlyList<Gist>> GetUserGistsAsync(string accessToken)
+        {
+            var client = new GitHubClient(new ProductHeaderValue("Dev2ndBrain"))
+            {
+                Credentials = new Credentials(accessToken)
+            };
+            return await client.Gist.GetAll();
+        }
     }
 }

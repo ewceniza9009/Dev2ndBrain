@@ -1,5 +1,7 @@
 import React from 'react';
 import type { Snippet } from '../../types';
+import { useSnippetStore } from '../../stores/useSnippetStore';
+import { useAuthStore } from '../../stores/useAuthStore';
 
 interface SnippetListProps {
   snippets: Snippet[];
@@ -14,15 +16,26 @@ const SnippetList: React.FC<SnippetListProps> = ({
   onSelectSnippet,
   onNewSnippet,
 }) => {
+  const { importFromGists } = useSnippetStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  
   return (
     <div className="bg-gray-100 dark:bg-gray-800 h-full flex flex-col">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-2">
         <button
           onClick={onNewSnippet}
           className="w-full px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700"
         >
           New Snippet
         </button>
+        {isAuthenticated && (
+          <button
+            onClick={importFromGists}
+            className="w-full px-4 py-2 text-sm font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700"
+          >
+            Import from Gists
+          </button>
+        )}
       </div>
       <ul className="flex-grow overflow-y-auto">
         {snippets.map((snippet) => (
