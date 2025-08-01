@@ -22,20 +22,21 @@ export const searchService = {
   }),
 
   async initialize() {
+    this.miniSearch.removeAll(); // Add this line to clear the index
     const notes = await db.notes.toArray();
     const snippets = await db.snippets.toArray();
 
     const documents: SearchDocument[] = [
       ...notes.map(note => ({
         id: `note-${note.id!}`,
-        type: 'note' as const, // Fix: Use 'as const'
+        type: 'note' as const,
         title: note.title,
         content: note.content,
         tags: note.tags,
       })),
       ...snippets.map(snippet => ({
         id: `snippet-${snippet.id!}`,
-        type: 'snippet' as const, // Fix: Use 'as const'
+        type: 'snippet' as const,
         title: snippet.title,
         content: snippet.code,
         tags: snippet.tags,
@@ -44,7 +45,7 @@ export const searchService = {
 
     await this.miniSearch.addAllAsync(documents);
   },
-  
+
   add(document: Note | Snippet, type: 'note' | 'snippet') {
     const doc: SearchDocument = {
       id: `${type}-${document.id}`,
