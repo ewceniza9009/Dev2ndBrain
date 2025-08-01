@@ -4,6 +4,9 @@
 .json
 
 /backend/appsettings.json
+/backend/.cr/
 /backend/.vs/
 /backend/obj/
 /backend/bin/
+/backend/.vs/backend/CopilotIndices/17.14.939.21063/CodeChunks.db
+/backend/.vs/backend/CopilotIndices/17.14.939.21063/SemanticSymbols.db
