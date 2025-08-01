@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { db } from '../services/db';
 import { searchService } from '../services/searchService';
-import type { Note } from '../types';
+import { type Note, IconType, IconColor } from '../types';
 
 interface NoteState {
   notes: Note[];
@@ -10,6 +10,7 @@ interface NoteState {
   getNoteById: (id: number) => Note | undefined;
   addNote: (newNote: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'uuid' | 'linkedNoteIds'>) => Promise<Note>;
   updateNote: (id: number, updatedContent: Partial<Note>) => Promise<void>;
+  updateNodePosition: (id: number, x: number, y: number) => Promise<void>; // New action
   deleteNote: (id: number) => Promise<void>;
 }
 
@@ -33,6 +34,8 @@ export const useNoteStore = create<NoteState>((set, get) => ({
       ...newNoteData,
       uuid: crypto.randomUUID(),
       linkedNoteIds: [],
+      iconType: IconType.Circle,
+      iconColor: IconColor.Primary,
       createdAt: now,
       updatedAt: now,
     };
@@ -55,6 +58,14 @@ export const useNoteStore = create<NoteState>((set, get) => ({
     if (updatedNote) {
       searchService.add(updatedNote, 'note');
     }
+  },
+
+  // New action to update only the node position
+  updateNodePosition: async (id, x, y) => {
+    await db.notes.update(id, { x, y, fx: x, fy: y });
+    set((state) => ({
+      notes: state.notes.map((note) => (note.id === id ? { ...note, x, y, fx: x, fy: y } : note)),
+    }));
   },
 
   deleteNote: async (id) => {

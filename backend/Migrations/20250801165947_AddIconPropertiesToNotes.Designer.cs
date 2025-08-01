@@ -3,6 +3,7 @@ using System;
 using Dev2ndBrain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250801165947_AddIconPropertiesToNotes")]
+    partial class AddIconPropertiesToNotes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
@@ -82,12 +85,6 @@ namespace backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<double?>("Fx")
-                        .HasColumnType("REAL");
-
-                    b.Property<double?>("Fy")
-                        .HasColumnType("REAL");
-
                     b.Property<string>("IconColor")
                         .HasColumnType("TEXT");
 
@@ -111,12 +108,6 @@ namespace backend.Migrations
 
                     b.Property<Guid>("Uuid")
                         .HasColumnType("TEXT");
-
-                    b.Property<double?>("X")
-                        .HasColumnType("REAL");
-
-                    b.Property<double?>("Y")
-                        .HasColumnType("REAL");
 
                     b.HasKey("Id");
 

@@ -3,10 +3,12 @@ import { useLocation } from 'react-router-dom';
 import { useNoteStore } from '../stores/useNoteStore';
 import NoteList from '../components/notes/NoteList';
 import NoteDetailView from '../components/notes/NoteDetailView';
+import type { Note } from '../types';
 
 const NotesListPage: React.FC = () => {
   const { notes, fetchNotes, addNote } = useNoteStore();
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
+  const [initialLoad, setInitialLoad] = useState(true); // New state variable
   const location = useLocation();
 
   useEffect(() => {
@@ -14,16 +16,17 @@ const NotesListPage: React.FC = () => {
   }, [fetchNotes]);
 
   useEffect(() => {
-    // Check for an ID passed from the search bar
-    if (location.state?.selectedId) {
-      setSelectedNoteId(location.state.selectedId);
-    } 
-    // Otherwise, select the most recent note
-    else if (!selectedNoteId && notes.length > 0) {
-      const sortedNotes = [...notes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-      setSelectedNoteId(sortedNotes[0].id!);
+    // This logic should only run on the initial load of the component
+    if (initialLoad) {
+      if (location.state?.selectedId) {
+        setSelectedNoteId(location.state.selectedId);
+      } else if (notes.length > 0) {
+        const sortedNotes = [...notes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        setSelectedNoteId(sortedNotes[0].id!);
+      }
+      setInitialLoad(false);
     }
-  }, [notes, selectedNoteId, location.state]);
+  }, [notes, location.state, initialLoad]);
 
   const handleNewNote = async () => {
     const newNote = await addNote({
@@ -36,7 +39,7 @@ const NotesListPage: React.FC = () => {
     }
   };
 
-  const selectedNote = notes.find(n => n.id === selectedNoteId) || null;
+  const selectedNote = notes.find((n: Note) => n.id === selectedNoteId) || null;
 
   return (
     <div className="flex h-full">

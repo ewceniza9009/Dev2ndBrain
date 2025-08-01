@@ -10,8 +10,9 @@ class AppDatabase extends Dexie {
 
   constructor() {
     super('Dev2ndBrainDB');
-    this.version(1).stores({
-      notes: '++id, uuid, title, *tags, createdAt, updatedAt',
+    // Increment version for migration
+    this.version(3).stores({ 
+      notes: '++id, uuid, title, *tags, createdAt, updatedAt, iconType, iconColor, x, y, fx, fy', 
       snippets: '++id, title, language, *tags, gistId',
       flashcards: '++id, deckId, nextReview',
       decks: '++id, name',
@@ -19,31 +20,31 @@ class AppDatabase extends Dexie {
     });
   }
 
-  async getGitHubToken(): Promise<EncryptedData | null> {
-    const setting = await this.settings.get('githubAuthToken');
-    return setting ? (setting.value as EncryptedData) : null;
-  }
+  async getGitHubToken(): Promise<EncryptedData | null> {
+    const setting = await this.settings.get('githubAuthToken');
+    return setting ? (setting.value as EncryptedData) : null;
+  }
 
-  async setGitHubToken(token: EncryptedData): Promise<void> {
-    await this.settings.put({ key: 'githubAuthToken', value: token });
-  }
+  async setGitHubToken(token: EncryptedData): Promise<void> {
+    await this.settings.put({ key: 'githubAuthToken', value: token });
+  }
 
-  async deleteGitHubToken(): Promise<void> {
-    await this.settings.delete('githubAuthToken');
-  }
+  async deleteGitHubToken(): Promise<void> {
+    await this.settings.delete('githubAuthToken');
+  }
 
-  async getGitHubUser(): Promise<GitHubUser | null> {
-     const setting = await this.settings.get('githubUser');
-     return setting ? (setting.value as GitHubUser) : null;
-  }
+  async getGitHubUser(): Promise<GitHubUser | null> {
+     const setting = await this.settings.get('githubUser');
+     return setting ? (setting.value as GitHubUser) : null;
+  }
 
-  async setGitHubUser(user: GitHubUser): Promise<void> {
-    await this.settings.put({ key: 'githubUser', value: user });
-  }
+  async setGitHubUser(user: GitHubUser): Promise<void> {
+    await this.settings.put({ key: 'githubUser', value: user });
+  }
 
-  async deleteGitHubUser(): Promise<void> {
-    await this.settings.delete('githubUser');
-  }
+  async deleteGitHubUser(): Promise<void> {
+    await this.settings.delete('githubUser');
+  }
 }
 
 export const db = new AppDatabase();

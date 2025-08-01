@@ -1,6 +1,4 @@
-﻿using Dev2ndBrain.Models;
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 
 namespace Dev2ndBrain.Models
@@ -12,6 +10,13 @@ namespace Dev2ndBrain.Models
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public List<string> Tags { get; set; } = new();
+        public List<string> LinkedNoteIds { get; set; } = new();    
+        public string? IconType { get; set; }    
+        public string? IconColor { get; set; }
+        public double? X { get; set; }    
+        public double? Y { get; set; }    
+        public double? Fx { get; set; }    
+        public double? Fy { get; set; }    
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
     }
