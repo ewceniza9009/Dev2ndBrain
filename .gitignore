@@ -2,40 +2,12 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/backend/.vs/backend/config
-/backend/.vs/backend/CopilotIndices/17.14.939.21063
-/backend/.vs/backend/v17/.suo
-/backend/.vs/backend/v17/DocumentLayout.backup.json
-/backend/.vs/backend/v17/DocumentLayout.json
-/backend/.vs/backend/FileContentIndex/5bf9b4d3-3740-40b0-a21b-ade41517523f.vsidx
-/backend/.vs/backend/FileContentIndex/8a482d33-da8d-451c-a605-b124f67d841c.vsidx
-/backend/obj/Debug/net8.0/ApiEndpoints.json
-/backend/obj/Debug/net8.0/apphost.exe
-/backend/obj/Debug/net8.0/backend.AssemblyInfo.cs
-/backend/obj/Debug/net8.0/backend.AssemblyInfoInputs.cache
-/backend/obj/Debug/net8.0/backend.csproj.FileListAbsolute.txt
-/backend/obj/Debug/net8.0/backend.dll
-/backend/obj/Debug/net8.0/backend.pdb
-/backend/obj/Debug/net8.0/backend.sourcelink.json
-/backend/obj/Debug/net8.0/rjsmcshtml.dswa.cache.json
-/backend/obj/Debug/net8.0/rjsmrazor.dswa.cache.json
-/backend/obj/Debug/net8.0/rpswa.dswa.cache.json
-/backend/obj/Debug/net8.0/ref/backend.dll
 /backend/appsettings.json
-/backend/bin/Debug/net8.0/appsettings.json
-/backend/bin/Debug/net8.0/backend.dll
-/backend/bin/Debug/net8.0/backend.exe
-/backend/bin/Debug/net8.0/backend.pdb
-/backend/obj/Debug/net8.0/refint/backend.dll
-/backend/.vs/backend/FileContentIndex/4b46eb5f-9631-4d68-9ccc-ae20a602ae8c.vsidx
-/backend/.vs/backend/FileContentIndex/8cf48ef0-c974-4c18-900d-5cd7afe2140f.vsidx
-/backend/.vs/backend/FileContentIndex/c1dad8df-09ad-4686-b299-e32495dff62b.vsidx
-/backend/.vs/backend/FileContentIndex/c9cda381-141b-45bf-9644-33d50033726f.vsidx
-/backend/.vs/backend/FileContentIndex/e374b28b-60da-4c8b-85b0-218b9ffba596.vsidx
-/backend/obj/Debug/net8.0/backend.csproj.BuildWithSkipAnalyzers
-/backend/.cr/personal/Navigation/Code Places.xml
-/backend/.vs
-.db
+/backend/obj/
+/backend/bin/
+/backend/.vs/backend/
+/backend/.vs/backend/v17/.futdcache.v2
+/backend/.cr/
 
-/backend/.vs/backend/CopilotIndices/17.14.939.21063/CodeChunks.db
-/backend/.vs/backend/CopilotIndices/17.14.939.21063/SemanticSymbols.db
+
+/backend/.vs/backend/v17/.futdcache.v2
