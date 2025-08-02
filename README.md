@@ -1,157 +1,136 @@
 # 🧠✨ Dev2ndBrain
 
 **The second brain every developer deserves.**  
-Organize notes 📝, code snippets 💻, and flashcards 📚 — all in one elegant workspace.
-
-![MIT License](https://img.shields.io/badge/license-MIT-green)
-![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
-![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)
-![ASP.NET](https://img.shields.io/badge/ASP.NET-512BD4?style=flat&logo=.net&logoColor=white)
-
-</div>
+Organize notes 📝, code snippets 💻, and flashcards 📚 — all in one elegant, local-first workspace.
 
 ---
 
-## 🌟 Features
+## 🌟 Features at a Glance
 
 | Feature | Description |
-|---------|-------------|
-| 📝 **Note Management** | Markdown notes with bi-directional linking & live graph. |
-| 💻 **Code Snippets** | Syntax-highlighted snippets, synced with **GitHub Gists**. |
-| 📚 **Flashcards** | Spaced-repetition decks powered by **SM-2**. |
-| 🔍 **Full-text Search** | Lightning-fast search across everything via **MiniSearch**. |
-| 🌐 **Graph View** | Interactive D3.js graph of your knowledge base. |
-| 🌙 **Theme Toggle** | Dark / light mode in one click. |
-| 🔐 **GitHub Auth** | Login with GitHub, sync & import Gists instantly. |
-| 💾 **Local-First** | Persistent storage via **IndexedDB (Dexie.js)**. |
+|--------|-------------|
+| 📝 **Note Management** | Write in Markdown, use note **templates**, and interlink notes with `[[bi-directional links]]`. |
+| 💻 **Code Snippet Manager** | Save syntax-highlighted snippets with **two-way GitHub Gist sync** (push, pull, import). |
+| 📚 **Smart Flashcards** | Learn effectively using spaced-repetition via the **SM-2 algorithm**. |
+| 🤖 **AI Assistant** | Let **Google Gemini** summarize notes, extract action items, or brainstorm ideas. |
+| 🔍 **Command Palette** | Press `Ctrl + K` to quickly navigate, search, and execute actions. |
+| 🌐 **Knowledge Graph** | Explore a dynamic D3.js graph with **hierarchical tag filters**. |
+| ✂️ **Web Clipper** | Instantly clip text from any webpage into a new note via browser extension. |
+| 💾 **Local-First Storage** | All data is stored on-device using **IndexedDB**, enabling offline use and privacy. |
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Frontend
-![React](https://img.shields.io/badge/-React-61DAFB?logo=react&logoColor=white) ![TypeScript](https://img.shields.io/badge/-TypeScript-3178C6?logo=typescript&logoColor=white) ![Vite](https://img.shields.io/badge/-Vite-646CFF?logo=vite&logoColor=white) ![TailwindCSS](https://img.shields.io/badge/-TailwindCSS-06B6D4?logo=tailwindcss&logoColor=white) ![Monaco](https://img.shields.io/badge/-Monaco-007ACC?logo=microsoft&logoColor=white) ![D3](https://img.shields.io/badge/-D3.js-F9A03C?logo=d3&logoColor=white) ![Zustand](https://img.shields.io/badge/-Zustand-20232A?logo=react&logoColor=white) ![Dexie](https://img.shields.io/badge/-Dexie.js-2F2F2F?logo=indexeddb&logoColor=white) ![MiniSearch](https://img.shields.io/badge/-MiniSearch-64B5F6?logo=javascript&logoColor=white)
-
-### Backend
-![ASP.NET Core](https://img.shields.io/badge/-ASP.NET%20Core-512BD4?logo=.net&logoColor=white) ![Octokit](https://img.shields.io/badge/-Octokit-181717?logo=github&logoColor=white) ![HttpClient](https://img.shields.io/badge/-HttpClient-0078D4?logo=microsoft&logoColor=white)
-
----
-
-## 📂 Project Structure
-
-```
-Dev2ndBrain/
-├── backend/                 # ASP.NET Core API
-│   ├── Controllers/
-│   ├── Models/
-│   ├── Services/
-│   └── Program.cs
-├── frontend/                # React (Vite) SPA
-│   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   ├── services/
-│   │   ├── stores/
-│   │   └── types/
-│   └── package.json
-└── README.md
-```
+| Layer | Technologies |
+|-------|--------------|
+| **Frontend** | React · TypeScript · Vite · Tailwind CSS · Monaco Editor · Zustand · D3.js · Dexie.js |
+| **Backend** | ASP.NET Core · Entity Framework Core · Octokit.NET · Google Gemini API |
+| **Browser Extension** | JavaScript · WebExtensions API |
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Getting Started
 
-### Prerequisites
-- **Node.js** ≥ 18
-- **.NET SDK** ≥ 8.0
-- A GitHub OAuth App ([create here](https://github.com/settings/developers))  
-  Set **Authorization callback URL** to `http://localhost:5173/oauth/callback`
+### ⚙️ Prerequisites
 
-### 1. Backend
+- [Node.js](https://nodejs.org/) (v18+)
+- [.NET SDK](https://dotnet.microsoft.com/en-us/download) (v8.0+)
+- GitHub OAuth App ([Create one](https://github.com/settings/developers))
+- Google Gemini API Key ([Get one](https://aistudio.google.com/app/apikey))
+
+---
+
+### 1️⃣ Backend Setup
 
 ```bash
 cd backend
-```
-
-Create `appsettings.json`
-
-```json
-{
-  "FrontendOrigin": "http://localhost:5173",
-  "GitHub": {
-    "ClientId": "your-github-client-id",
-    "ClientSecret": "your-github-client-secret"
-  }
-}
-```
+````
+Run the backend:
 
 ```bash
 dotnet restore
-dotnet run                  # https://localhost:7150
+dotnet run
 ```
 
-### 2. Frontend
+➡️ Now available at: `https://localhost:7150`
+
+---
+
+### 2️⃣ Frontend Setup
 
 ```bash
 cd ../frontend
 ```
 
-Create `.env.local`
+Create a `.env.local` file:
 
-```bash
-VITE_GITHUB_CLIENT_ID=your-github-client-id
+```env
+VITE_API_BASE_URL=https://localhost:7150
+VITE_CLIENT_ID=YOUR_GITHUB_CLIENT_ID
+VITE_REDIRECT_CALLBACK_URL=http://localhost:5173/oauth/callback
+VITE_GIST_SCOPE=read:user gist
 ```
+
+Start the app:
 
 ```bash
 npm install
-npm run dev                 # http://localhost:5173
+npm run dev
 ```
 
-Visit [http://localhost:5173](http://localhost:5173) and log in with GitHub! 🎉
+➡️ Now available at: `http://localhost:5173`
 
 ---
 
-## 📝 Usage
+### 3️⃣ Browser Extension Setup
 
-| Page | What to do |
-|------|------------|
-| 🏠 **Dashboard**    | See recent notes, flashcard stats & quick actions. |
-| 📝 **Notes**        | Write Markdown, link notes, view graph. |
-| 💻 **Snippets**     | Save, tag, and sync code with GitHub Gists. |
-| 📚 **Flashcards**   | Create decks → review using the SM-2 algorithm. |
-| 🔍 **Search**       | `Ctrl+K` to open the global search bar. |
-| ⚙️ **Settings**     | Log out or revoke GitHub access. |
+1. Open Chrome and go to `chrome://extensions`
+2. Enable **Developer Mode**
+3. Click **Load Unpacked**
+4. Select the `extension/` directory in the root of the project
 
----
-
-## 🛠️ Development Tips
-
-| Task | Command |
-|------|---------|
-| **Frontend lint** | `npm run lint` |
-| **Frontend build** | `npm run build` |
-| **Add new type** | `frontend/src/types/index.ts` |
-| **Extend SM-2** | `useFlashcardStore.ts` |
-| **New endpoint** | Add controller in `backend/Controllers/` |
-
----
-
-## ⚠️ Known Limitations
-- **Crypto key** is hard-coded in `cryptoService.ts` → replace with secure key management in production.  
-- **CORS** is configured for `localhost:5173` only → update `appsettings.json` for other origins.  
-- **Graph performance** may degrade with 1000+ notes → consider virtualization.
+🎉 The extension is ready! You can now clip content and log in with GitHub.
 
 ---
 
 ## 🤝 Contributing
 
-1. Fork the repo 🍴  
-2. Create your feature branch: `git checkout -b feature/AmazingFeature`  
-3. Commit: `git commit -m 'Add AmazingFeature'`  
-4. Push: `git push origin feature/AmazingFeature`  
-5. Open a Pull Request 📬  
+We welcome your contributions! Here's how you can help:
+
+1. Fork the repository
+2. Create a new branch
+
+   ```bash
+   git checkout -b feature/AmazingFeature
+   ```
+3. Commit your changes
+
+   ```bash
+   git commit -m "Add AmazingFeature"
+   ```
+4. Push to GitHub
+
+   ```bash
+   git push origin feature/AmazingFeature
+   ```
+5. Open a Pull Request 🎉
 
 ---
 
 ## 📜 License
+
 Distributed By: Erwin Wilson Ceniza
+
+---
+
+## Developed By: Erwin Wilson Ceniza
+
+---
+
+## 🔗 Project Link
+
+[👉 View on GitHub](https://github.com/your-username/Dev2ndBrain)
+
+Let me know if you'd like a version with badges, dark mode previews, or GitHub Actions integration.
+```
