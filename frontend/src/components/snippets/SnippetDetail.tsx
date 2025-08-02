@@ -9,14 +9,14 @@ interface SnippetDetailProps {
 }
 
 const SnippetDetail: React.FC<SnippetDetailProps> = ({ snippet }) => {
-  const { updateSnippet, deleteSnippet } = useSnippetStore();
+  const { updateSnippet, deleteSnippet, syncSnippetToGist, pullFromGist, pushToGist } = useSnippetStore();
   const theme = useAppStore((state) => state.theme);
   const [isEditing, setIsEditing] = useState(false);
   const [editedSnippet, setEditedSnippet] = useState(snippet);
 
   useEffect(() => {
     setEditedSnippet(snippet);
-    if (snippet && !snippet.id) { // If it's a new, unsaved snippet
+    if (snippet && snippet.title === "New Snippet" && snippet.code === "") {
         setIsEditing(true);
     } else {
         setIsEditing(false);
@@ -43,6 +43,7 @@ const SnippetDetail: React.FC<SnippetDetailProps> = ({ snippet }) => {
   if (!snippet || !editedSnippet) {
     return <div className="p-8 text-gray-500 dark:text-gray-400">Select a snippet from the list or create a new one.</div>;
   }
+
 
   if (isEditing) {
     return (
@@ -103,7 +104,7 @@ const SnippetDetail: React.FC<SnippetDetailProps> = ({ snippet }) => {
     );
   }
 
-  return (
+   return (
     <div className="p-6">
       <div className="flex justify-between items-start mb-4">
         <div>
@@ -118,7 +119,16 @@ const SnippetDetail: React.FC<SnippetDetailProps> = ({ snippet }) => {
           </div>
         </div>
         <div className="flex space-x-2 flex-shrink-0">
-            <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded-lg">Edit</button>
+            {snippet.gistId ? (
+                <>
+                    <a href={`https://gist.github.com/${snippet.gistId}`} target="_blank" rel="noopener noreferrer" className="px-3 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-black" title="View on Gist">🔗</a>
+                    <button onClick={() => pullFromGist(snippet.id!)} className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700" title="Pull from Gist">↓ Pull</button>
+                    <button onClick={() => pushToGist(snippet.id!)} className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700" title="Push to Gist">↑ Push</button>
+                </>
+            ) : (
+                <button onClick={() => syncSnippetToGist(snippet.id!)} className="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg">Sync to Gist</button>
+            )}
+            <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-gray-600 text-white rounded-lg">Edit</button>
             <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg">Delete</button>
         </div>
       </div>

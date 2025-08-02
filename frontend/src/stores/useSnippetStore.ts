@@ -13,6 +13,8 @@ interface SnippetState {
   deleteSnippet: (id: number) => Promise<void>;
   syncSnippetToGist: (snippetId: number) => Promise<void>;
   importFromGists: () => Promise<void>;
+  pullFromGist: (snippetId: number) => Promise<void>;
+  pushToGist: (snippetId: number) => Promise<void>;
 }
 
 export const useSnippetStore = create<SnippetState>((set, get) => ({
@@ -99,5 +101,43 @@ export const useSnippetStore = create<SnippetState>((set, get) => ({
         console.error("Gist import failed:", error);
         alert("Failed to import snippets from Gists.");
     }
-  }
+  },
+  
+  
+  pullFromGist: async (snippetId: number) => {
+    const snippet = get().snippets.find(s => s.id === snippetId);
+    if (!snippet?.gistId) throw new Error("Snippet is not linked to a Gist.");
+
+    try {
+      const gist = await githubService.getGist(snippet.gistId);
+      const firstFile = Object.values(gist.files)[0] as any;
+      if (!firstFile) throw new Error("Gist has no files.");
+
+      if (firstFile.content !== snippet.code) {
+        if (window.confirm("Remote Gist has changes. Overwrite your local snippet?")) {
+          await get().updateSnippet(snippetId, { code: firstFile.content, title: gist.description });
+          alert("Snippet updated from Gist!");
+        }
+      } else {
+        alert("Local snippet is already up-to-date.");
+      }
+    } catch (error) {
+      console.error("Gist pull failed:", error);
+      alert("Failed to pull changes from Gist.");
+    }
+  },
+
+  
+  pushToGist: async (snippetId: number) => {
+    const snippet = get().snippets.find(s => s.id === snippetId);
+    if (!snippet?.gistId) throw new Error("Snippet is not linked to a Gist.");
+
+    try {
+      await githubService.updateGist(snippet);
+      alert("Snippet successfully pushed to Gist!");
+    } catch (error) {
+      console.error("Gist push failed:", error);
+      alert("Failed to push changes to Gist.");
+    }
+  },
 }));
