@@ -15,14 +15,22 @@ const AiModal: React.FC<AiModalProps> = ({ isOpen, onClose, noteContent, onInser
 
   if (!isOpen) return null;
 
-  const handlePromptClick = async (prompt: string) => {
+  const handlePromptClick = async (prompt: string, isActionPlanPrompt: boolean) => {
     setIsLoading(true);
     setResponse('');
     try {
-      const res = await fetch(`${API_BASE_URL}/api/ai/prompt`, {
+      const url = isActionPlanPrompt
+        ? `${API_BASE_URL}/api/ai/action-plan`
+        : `${API_BASE_URL}/api/ai/prompt`;
+
+      const requestBody = isActionPlanPrompt
+        ? { content: noteContent }
+        : { prompt, content: noteContent };
+
+      const res = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ prompt, content: noteContent }),
+        body: JSON.stringify(requestBody),
       });
 
       const data = await res.json();
@@ -42,13 +50,13 @@ const AiModal: React.FC<AiModalProps> = ({ isOpen, onClose, noteContent, onInser
   const handleInsert = () => {
     onInsertText(`\n\n---\n**✨ AI Assistant:**\n${response}`);
     onClose();
-  }
+  };
 
   const promptButtons = [
-    { label: 'Summarize', prompt: 'Summarize the following note into key bullet points.' },
-    { label: 'Find Action Items', prompt: 'Extract any potential action items or to-do tasks from the following note.' },
-    { label: 'Explain This', prompt: 'Explain the concepts in this note as if I were a beginner.' },
-    { label: 'Generate Ideas', prompt: 'Based on this note, brainstorm three related ideas or topics to explore next.' },
+    { label: 'Summarize', prompt: 'Summarize the following note into key bullet points.', isActionPlan: false },
+    { label: 'Find Action Items', prompt: 'Extract any potential action items or to-do tasks from the following note.', isActionPlan: true },
+    { label: 'Explain This', prompt: 'Explain the concepts in this note as if I were a beginner.', isActionPlan: false },
+    { label: 'Generate Ideas', prompt: 'Based on this note, brainstorm three related ideas or topics to explore next.', isActionPlan: false },
   ];
 
   return (
@@ -57,8 +65,13 @@ const AiModal: React.FC<AiModalProps> = ({ isOpen, onClose, noteContent, onInser
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">AI Assistant ✨</h2>
         
         <div className="grid grid-cols-2 gap-2 mb-4">
-          {promptButtons.map(({ label, prompt }) => (
-            <button key={label} onClick={() => handlePromptClick(prompt)} disabled={isLoading} className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-500">
+          {promptButtons.map(({ label, prompt, isActionPlan }) => (
+            <button
+              key={label}
+              onClick={() => handlePromptClick(prompt, isActionPlan)}
+              disabled={isLoading}
+              className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-500"
+            >
               {label}
             </button>
           ))}
@@ -69,8 +82,12 @@ const AiModal: React.FC<AiModalProps> = ({ isOpen, onClose, noteContent, onInser
         </div>
 
         <div className="flex justify-end space-x-2 mt-4">
-           <button onClick={handleInsert} disabled={!response || isLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-500">Insert Below Note</button>
-           <button onClick={onClose} className="px-4 py-2 bg-gray-500 text-white rounded-lg">Close</button>
+          <button onClick={handleInsert} disabled={!response || isLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-500">
+            Insert Below Note
+          </button>
+          <button onClick={onClose} className="px-4 py-2 bg-gray-500 text-white rounded-lg">
+            Close
+          </button>
         </div>
       </div>
     </div>

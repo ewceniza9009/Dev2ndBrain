@@ -11,9 +11,10 @@ import { debounce } from 'lodash-es';
 const SelectDeckModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onSelectDeck: (deckId: number) => void;
+  onSelectDeck: (deckId: number, content: string) => void;
   decks: Deck[];
-}> = ({ isOpen, onClose, onSelectDeck, decks }) => {
+  noteContent: string;
+}> = ({ isOpen, onClose, onSelectDeck, decks, noteContent }) => {
   if (!isOpen) return null;
 
   return (
@@ -25,7 +26,7 @@ const SelectDeckModal: React.FC<{
           {decks.map(deck => (
             <li
               key={deck.id}
-              onClick={() => onSelectDeck(deck.id!)}
+              onClick={() => onSelectDeck(deck.id!, noteContent)}
               className="p-3 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-teal-700 rounded cursor-pointer"
             >
               {deck.name}
@@ -54,11 +55,21 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
   const [editedTitle, setEditedTitle] = useState(note?.title || '');
   const [isDeckModalOpen, setDeckModalOpen] = useState(false);
   const { decks, fetchDecks, createCardsFromContent } = useFlashcardStore();
+  const [editorContent, setEditorContent] = useState(note?.content || '');
 
   // This useEffect saves the state to localStorage whenever it changes
   useEffect(() => {
     localStorage.setItem('isEditing', JSON.stringify(isEditing));
   }, [isEditing]);
+
+  // This useEffect handles updating the component when a new note is selected
+  useEffect(() => {
+    if (note) {
+      setEditedTitle(note.title);
+      setEditorContent(note.content);
+      fetchDecks();
+    }
+  }, [note, fetchDecks]);
 
 
   const debouncedUpdateTitle = useCallback(
@@ -75,12 +86,6 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
     return () => debouncedUpdateTitle.cancel();
   }, [editedTitle, note, debouncedUpdateTitle]);
 
-  useEffect(() => {
-    if (note) {
-      setEditedTitle(note.title);
-      fetchDecks();
-    }
-  }, [note, fetchDecks]);
 
   const handleDelete = () => {
     if (note && window.confirm(`Are you sure you want to delete "${note.title}"?`)) {
@@ -94,9 +99,9 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
     }
   };
 
-  const handleCreateFlashcards = (deckId: number) => {
+  // Updated to handle content as a parameter
+  const handleCreateFlashcards = (deckId: number, content: string) => {
     if (note) {
-      const content = editorRef.current ? editorRef.current.getValue() : note.content;
       createCardsFromContent(content, deckId);
       setDeckModalOpen(false);
       alert('Flashcards created successfully!');
@@ -123,12 +128,16 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
             className="px-4 py-2 text-sm text-white rounded-lg transition-colors duration-200"
             style={{ backgroundColor: isEditing ? 'rgb(37, 99, 235)' : 'rgb(5, 150, 105)' }}
           >
-            {/* Swapped the text to reflect the opposite mode */}
-            {isEditing ? 'READING NOTES' : 'EDIT NOTES'}
+            {isEditing ? 'READ' : 'EDIT'}
           </button>
 
           <button
-            onClick={() => setDeckModalOpen(true)}
+            onClick={() => {
+              if (editorRef.current) {
+                setEditorContent(editorRef.current.getValue());
+              }
+              setDeckModalOpen(true);
+            }}
             className="px-4 py-2 text-sm bg-purple-600 rounded-lg text-white"
             title="Create Flashcards from Note"
           >
@@ -156,6 +165,7 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
         onClose={() => setDeckModalOpen(false)}
         onSelectDeck={handleCreateFlashcards}
         decks={decks}
+        noteContent={editorContent}
       />
     </div>
   );
