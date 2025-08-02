@@ -94,6 +94,16 @@ npm run dev
 
 ---
 
+### Video Demo
+
+
+
+https://github.com/user-attachments/assets/a7b5bd69-8b47-4cf3-8c9f-51c893af2fab
+
+
+
+---
+
 ## 🤝 Contributing
 
 We welcome your contributions! Here's how you can help:
