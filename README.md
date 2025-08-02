@@ -131,6 +131,3 @@ Distributed By: Erwin Wilson Ceniza
 ## 🔗 Project Link
 
 [👉 View on GitHub](https://github.com/your-username/Dev2ndBrain)
-
-Let me know if you'd like a version with badges, dark mode previews, or GitHub Actions integration.
-```
