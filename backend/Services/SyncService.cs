@@ -1,6 +1,6 @@
 ﻿using Dev2ndBrain.Models;
 using Dev2ndBrain.Repositories;
-using Octokit;
+using System.Threading.Tasks;
 
 namespace Dev2ndBrain.Services
 {
@@ -13,25 +13,24 @@ namespace Dev2ndBrain.Services
             _repository = repository;
         }
 
-        // Simulating the push logic (for simplicity, we just add the data)
         public async Task Push(SyncPayload payload, long userId)
         {
-            // Here you would implement your conflict resolution logic.
-            // For now, we assume the frontend is always authoritative.
-            // In a real app, you would compare timestamps and merge data.
+            // Note: In a real app, you would add UserId to all DTOs and filter here
             await _repository.SaveNotesAsync(payload.Notes);
             await _repository.SaveSnippetsAsync(payload.Snippets);
             await _repository.SaveDecksAsync(payload.Decks);
             await _repository.SaveFlashcardsAsync(payload.Flashcards);
+            await _repository.SaveTemplatesAsync(payload.Templates); // Sync templates
         }
 
         public async Task<SyncPayload> Pull(long userId)
         {
-            // Here we fetch all the data for the user from the database
+            // Note: In a real app, you would add UserId to all DTOs and filter here
             var notes = await _repository.GetNotesAsync();
             var snippets = await _repository.GetSnippetsAsync();
             var decks = await _repository.GetDecksAsync();
             var flashcards = await _repository.GetFlashcardsAsync();
+            var templates = await _repository.GetTemplatesAsync(); // Pull templates
 
             return new SyncPayload
             {
@@ -39,6 +38,7 @@ namespace Dev2ndBrain.Services
                 Snippets = snippets,
                 Decks = decks,
                 Flashcards = flashcards,
+                Templates = templates, // Add templates to the payload
             };
         }
     }

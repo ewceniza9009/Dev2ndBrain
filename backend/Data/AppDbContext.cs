@@ -9,6 +9,7 @@ namespace Dev2ndBrain.Data
         public DbSet<SnippetDto> Snippets { get; set; }
         public DbSet<DeckDto> Decks { get; set; }
         public DbSet<FlashcardDto> Flashcards { get; set; }
+        public DbSet<TemplateDto> Templates { get; set; }     
 
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -18,6 +19,7 @@ namespace Dev2ndBrain.Data
             modelBuilder.Entity<SnippetDto>().HasKey(s => s.Id);
             modelBuilder.Entity<DeckDto>().HasKey(d => d.Id);
             modelBuilder.Entity<FlashcardDto>().HasKey(f => f.Id);
+            modelBuilder.Entity<TemplateDto>().HasKey(t => t.Id);     
 
             modelBuilder.Entity<NoteDto>().Property(n => n.Tags).HasConversion(
                 v => string.Join(',', v),

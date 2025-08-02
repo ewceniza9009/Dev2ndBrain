@@ -84,9 +84,27 @@ namespace Dev2ndBrain.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task SaveTemplatesAsync(List<TemplateDto> templates)
+        {
+            foreach (var template in templates)
+            {
+                var existingTemplate = await _context.Templates.FindAsync(template.Id);
+                if (existingTemplate == null)
+                {
+                    _context.Templates.Add(template);
+                }
+                else
+                {
+                    _context.Entry(existingTemplate).CurrentValues.SetValues(template);
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<NoteDto>> GetNotesAsync() => await _context.Notes.ToListAsync();
         public async Task<List<SnippetDto>> GetSnippetsAsync() => await _context.Snippets.ToListAsync();
         public async Task<List<DeckDto>> GetDecksAsync() => await _context.Decks.ToListAsync();
         public async Task<List<FlashcardDto>> GetFlashcardsAsync() => await _context.Flashcards.ToListAsync();
+        public async Task<List<TemplateDto>> GetTemplatesAsync() => await _context.Templates.ToListAsync();
     }
 }
