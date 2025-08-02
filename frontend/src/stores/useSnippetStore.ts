@@ -86,24 +86,35 @@ export const useSnippetStore = create<SnippetState>((set, get) => ({
 
             const firstFile = Object.values(gist.files)[0] as any;
             if (!firstFile) continue;
-
-            await get().addSnippet({
-                title: gist.description || firstFile.filename || 'Untitled Gist',
-                language: (firstFile.language || 'plaintext').toLowerCase(),
-                code: firstFile.content,
-                tags: ['imported'],
-                gistId: gist.id,
-            });
-            importCount++;
+            
+            // To get the content, we may need to fetch the full Gist
+            const fullGist = await githubService.getGist(gist.id);
+            const fullFirstFile = Object.values(fullGist.files)[0] as any;
+            
+            if (fullFirstFile && fullFirstFile.content) {
+                await get().addSnippet({
+                    title: fullGist.description || fullFirstFile.filename || 'Untitled Gist',
+                    language: (fullFirstFile.language || 'plaintext').toLowerCase(),
+                    code: fullFirstFile.content,
+                    tags: ['imported'],
+                    gistId: fullGist.id,
+                });
+                importCount++;
+            }
         }
-        alert(`Successfully imported ${importCount} new snippets!`);
+        
+        if (importCount > 0) {
+            get().fetchSnippets();
+            alert(`Successfully imported ${importCount} new snippets!`);
+        } else {
+            alert("No new gists to import.");
+        }
     } catch (error) {
         console.error("Gist import failed:", error);
         alert("Failed to import snippets from Gists.");
     }
   },
-  
-  
+
   pullFromGist: async (snippetId: number) => {
     const snippet = get().snippets.find(s => s.id === snippetId);
     if (!snippet?.gistId) throw new Error("Snippet is not linked to a Gist.");
@@ -127,7 +138,6 @@ export const useSnippetStore = create<SnippetState>((set, get) => ({
     }
   },
 
-  
   pushToGist: async (snippetId: number) => {
     const snippet = get().snippets.find(s => s.id === snippetId);
     if (!snippet?.gistId) throw new Error("Snippet is not linked to a Gist.");

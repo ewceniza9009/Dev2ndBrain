@@ -9,6 +9,8 @@ var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
 
+builder.Services.AddHttpClient();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
 
@@ -40,7 +42,7 @@ if (app.Environment.IsDevelopment())
     using (var scope = app.Services.CreateScope())
     {
         var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        dbContext.Database.Migrate();       
+        dbContext.Database.Migrate();
     }
 }
 

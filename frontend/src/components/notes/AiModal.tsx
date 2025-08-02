@@ -1,0 +1,80 @@
+import React, { useState } from 'react';
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
+
+interface AiModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  noteContent: string;
+  onInsertText: (text: string) => void;
+}
+
+const AiModal: React.FC<AiModalProps> = ({ isOpen, onClose, noteContent, onInsertText }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [response, setResponse] = useState('');
+
+  if (!isOpen) return null;
+
+  const handlePromptClick = async (prompt: string) => {
+    setIsLoading(true);
+    setResponse('');
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/ai/prompt`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt, content: noteContent }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.message || 'AI service returned an error.');
+      }
+      
+      const completion = data.completion || 'No response from AI.';
+      setResponse(completion);
+    } catch (error: any) {
+      setResponse(`Error: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleInsert = () => {
+    onInsertText(`\n\n---\n**✨ AI Assistant:**\n${response}`);
+    onClose();
+  }
+
+  const promptButtons = [
+    { label: 'Summarize', prompt: 'Summarize the following note into key bullet points.' },
+    { label: 'Find Action Items', prompt: 'Extract any potential action items or to-do tasks from the following note.' },
+    { label: 'Explain This', prompt: 'Explain the concepts in this note as if I were a beginner.' },
+    { label: 'Generate Ideas', prompt: 'Based on this note, brainstorm three related ideas or topics to explore next.' },
+  ];
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl p-6" onClick={e => e.stopPropagation()}>
+        <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">AI Assistant ✨</h2>
+        
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {promptButtons.map(({ label, prompt }) => (
+            <button key={label} onClick={() => handlePromptClick(prompt)} disabled={isLoading} className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-500">
+              {label}
+            </button>
+          ))}
+        </div>
+
+        <div className="w-full p-4 h-64 overflow-y-auto bg-gray-100 dark:bg-gray-700 rounded-lg whitespace-pre-wrap">
+          {isLoading ? 'Thinking...' : (response || 'Select a prompt to begin.')}
+        </div>
+
+        <div className="flex justify-end space-x-2 mt-4">
+           <button onClick={handleInsert} disabled={!response || isLoading} className="px-4 py-2 bg-blue-600 text-white rounded-lg disabled:bg-gray-500">Insert Below Note</button>
+           <button onClick={onClose} className="px-4 py-2 bg-gray-500 text-white rounded-lg">Close</button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AiModal;
