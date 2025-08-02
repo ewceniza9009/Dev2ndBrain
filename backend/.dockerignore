@@ -1,0 +1,8 @@
+# Ignore build artifacts and local user settings
+bin/
+obj/
+.vs/
+*.user
+
+# Do not ignore the entrypoint script
+!entrypoint.sh

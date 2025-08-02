@@ -1,5 +1,5 @@
 // The base URL of your running frontend application
-const APP_URL = "http://localhost:5173";
+const APP_URL = "http://localhost:5174";
 
 // Create a context menu item when the extension is installed.
 chrome.runtime.onInstalled.addListener(() => {

@@ -19,7 +19,7 @@ export async function encryptToken(token: string): Promise<EncryptedData> {
   const encryptedBuffer = await window.crypto.subtle.encrypt({ name: ALGORITHM, iv }, key, encodedToken);
 
   return {
-    iv: b2a(iv),
+    iv: b2a(iv.buffer),
     encryptedToken: b2a(encryptedBuffer),
   };
 }

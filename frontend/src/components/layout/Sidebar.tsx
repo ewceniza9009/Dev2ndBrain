@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
     <aside className="z-20 flex-shrink-0 hidden w-64 overflow-y-auto bg-gray-100 dark:bg-gray-800 md:block">
       <div className="py-4 text-gray-500 dark:text-gray-400 flex flex-col h-full">
         <NavLink to="/" className="ml-6 text-lg font-bold text-gray-800 dark:text-gray-200 flex items-center">
-          <img src="/src/assets/dev2ndbrain.png" alt="Dev2ndBrain Logo" className="h-8 mr-2" />
+          <img src="/dev2ndbrain.png" alt="Dev2ndBrain Logo" className="h-8 mr-2" />
           Dev2ndBrain
         </NavLink>
         <ul className="mt-6 flex-grow">
@@ -41,7 +41,7 @@ const Sidebar: React.FC = () => {
 
         {/* This is the new, larger logo above the theme toggle */}
         <div className="flex justify-center px-6 my-2">
-          <img src="/src/assets/dev2ndbrain.png" alt="Dev2ndBrain Logo" className="h-34 w-auto" />
+          <img src="/dev2ndbrain.png" alt="Dev2ndBrain Logo" className="h-34 w-auto" />
         </div>
         <div className="px-6 my-2">
           <button

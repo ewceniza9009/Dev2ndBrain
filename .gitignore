@@ -17,3 +17,6 @@ backend/.vs/ProjectEvaluation/backend.strings.v9.bin
 /backend/dev2ndbrain.db
 /backend/dev2ndbrain.db-shm
 /backend/dev2ndbrain.db-wal
+docker-compose.yaml
+backend/Dockerfile
+frontend/Dockerfile

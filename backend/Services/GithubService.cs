@@ -33,7 +33,7 @@ namespace Dev2ndBrain.Services
                 throw new InvalidOperationException("GitHub ClientId or ClientSecret is not configured.");
             }
 
-            var redirectUri = new Uri("http://localhost:5173/oauth/callback");
+            var redirectUri = new Uri("http://localhost:5174/oauth/callback");
 
             var request = new OauthTokenRequest(clientId, clientSecret, code)
             {
