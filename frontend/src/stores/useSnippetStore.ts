@@ -8,7 +8,7 @@ interface SnippetState {
   snippets: Snippet[];
   isLoading: boolean;
   fetchSnippets: () => Promise<void>;
-  addSnippet: (newSnippet: Omit<Snippet, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  addSnippet: (newSnippet: Omit<Snippet, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Snippet | undefined>;
   updateSnippet: (id: number, updatedContent: Partial<Snippet>) => Promise<void>;
   deleteSnippet: (id: number) => Promise<void>;
   syncSnippetToGist: (snippetId: number) => Promise<void>;
@@ -37,6 +37,7 @@ export const useSnippetStore = create<SnippetState>((set, get) => ({
     
     set((state) => ({ snippets: [...state.snippets, createdSnippet] }));
     searchService.add(createdSnippet, 'snippet');
+    return createdSnippet;
   },
 
   updateSnippet: async (id, updatedContent) => {

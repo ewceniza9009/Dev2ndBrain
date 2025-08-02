@@ -4,11 +4,9 @@ import type { Deck, Flashcard } from '../types';
 
 // SM-2 Spaced Repetition Algorithm Logic
 const sm2 = (card: Flashcard, quality: number): Partial<Flashcard> => {
-    // If quality is 0, 1, or 2 (typo), repetitions reset
     if (quality < 3) {
         return { repetitions: 0, interval: 1, nextReview: new Date(Date.now() + 24 * 60 * 60 * 1000) };
     }
-    //... existing logic for quality >= 3
     let newEaseFactor = card.easeFactor + (0.1 - (5 - quality) * (0.08 + (5 - quality) * 0.02));
     if (newEaseFactor < 1.3) newEaseFactor = 1.3;
     let newInterval = card.repetitions === 0 ? 1 : card.repetitions === 1 ? 6 : Math.round(card.interval * newEaseFactor);
@@ -28,13 +26,14 @@ interface FlashcardState {
     allCards: Flashcard[];
     fetchDecks: () => Promise<void>;
     fetchAllCards: () => Promise<void>;
-    addDeck: (name: string) => Promise<void>;
+    addDeck: (name: string) => Promise<Deck | undefined>;
     deleteDeck: (deckId: number) => Promise<void>;
     getDeckById: (id: number) => Deck | undefined;
     fetchCardsByDeck: (deckId: number) => Promise<void>;
     addCard: (cardData: Omit<Flashcard, 'id' | 'nextReview' | 'easeFactor' | 'repetitions' | 'interval'>) => Promise<void>;
-    updateCard: (cardId: number, updatedContent: Partial<Flashcard>) => Promise<void>; // New action
+    updateCard: (cardId: number, updatedContent: Partial<Flashcard>) => Promise<void>;
     reviewCard: (cardId: number, quality: number) => Promise<void>;
+    createCardsFromContent: (content: string, deckId: number) => Promise<void>;
 }
 
 export const useFlashcardStore = create<FlashcardState>((set, get) => ({
@@ -55,8 +54,9 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     addDeck: async (name) => {
         const newDeck: Deck = { name, createdAt: new Date() };
         const id = await db.decks.add(newDeck);
-        set(state => ({ decks: [...state.decks, { ...newDeck, id }] }));
-        get().fetchAllCards();
+        const createdDeck = { ...newDeck, id };
+        set(state => ({ decks: [...state.decks, createdDeck] }));
+        return createdDeck;
     },
 
     deleteDeck: async (deckId: number) => {
@@ -110,5 +110,34 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
 
         const updates = sm2(card, quality);
         await db.flashcards.update(cardId, updates);
+    },
+
+    createCardsFromContent: async (content: string, deckId: number) => {
+        const regex = /Q:(.*?)\nA:(.*?)(?=\n--|\nQ:|$)/gs;
+        let matches;
+        const newCards: Omit<Flashcard, 'id'>[] = [];
+
+        while ((matches = regex.exec(content)) !== null) {
+            const question = matches[1].trim();
+            const answer = matches[2].trim();
+
+            if (question && answer) {
+                newCards.push({
+                    deckId,
+                    question,
+                    answer,
+                    nextReview: new Date(),
+                    easeFactor: 2.5,
+                    repetitions: 0,
+                    interval: 0,
+                });
+            }
+        }
+
+        if (newCards.length > 0) {
+            await db.flashcards.bulkAdd(newCards as Flashcard[]);
+            get().fetchAllCards();
+            get().fetchCardsByDeck(deckId);
+        }
     },
 }));

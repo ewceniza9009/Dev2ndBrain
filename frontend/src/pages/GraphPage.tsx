@@ -1,13 +1,91 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import GraphView from '../components/graph/GraphView';
+import { useNoteStore } from '../stores/useNoteStore';
+import TagTreeNodeComponent from '../components/graph/TagTree'; 
+
+
+interface TagTreeNode {
+  children: { [key: string]: TagTreeNode };
+  isEndOfTag: boolean;
+}
 
 const GraphPage: React.FC = () => {
+  const { notes, getUniqueTags } = useNoteStore();
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const uniqueTags = useMemo(() => getUniqueTags(), [notes]);
+
+  
+  const tagTree = useMemo((): TagTreeNode => {
+    const root: TagTreeNode = { children: {}, isEndOfTag: false };
+    uniqueTags.forEach(tag => {
+      let currentNode = root;
+      tag.split('/').forEach(part => {
+        if (!currentNode.children[part]) {
+          currentNode.children[part] = { children: {}, isEndOfTag: false };
+        }
+        currentNode = currentNode.children[part];
+      });
+      currentNode.isEndOfTag = true;
+    });
+    return root;
+  }, [uniqueTags]);
+
+  
+  const handleTagChange = (tag: string, isSelected: boolean) => {
+    const allDescendantTags = uniqueTags.filter(
+      t => t.startsWith(tag) && (t === tag || t[tag.length] === '/')
+    );
+
+    setSelectedTags(prev => {
+      let newSelection;
+      if (isSelected) {
+        
+        newSelection = [...new Set([...prev, ...allDescendantTags])];
+      } else {
+        
+        newSelection = prev.filter(t => !allDescendantTags.includes(t));
+      }
+      return newSelection;
+    });
+  };
+
+  const filteredNotes = useMemo(() => notes.filter(note => {
+    if (selectedTags.length === 0) return true; 
+    
+    return selectedTags.some(tag => note.tags.includes(tag));
+  }), [notes, selectedTags]);
+
   return (
-    <div className="h-full w-full bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
-        <h1 className="mx-4 mt-3 text-2xl font-semibold text-gray-900 dark:text-white mb-4">Note Graph</h1>
-        <div className="h-[calc(100%-4rem)] w-full border border-gray-200 dark:border-gray-700 rounded-lg">
-            <GraphView />
+    <div className="flex h-full">
+      {/* Filters Sidebar */}
+      <div className="w-64 flex-shrink-0 border-r border-gray-200 dark:border-gray-700 p-4 overflow-y-auto">
+        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Filters</h2>
+        <div>
+          <h3 className="text-md font-semibold text-gray-800 dark:text-gray-300 mb-2">Tags</h3>
+          {/* Render the Tag Tree */}
+          <TagTreeNodeComponent 
+            node={tagTree} 
+            path="" 
+            selectedTags={selectedTags} 
+            onTagChange={handleTagChange} 
+          />
+           {uniqueTags.length > 0 && (
+            <button
+              onClick={() => setSelectedTags([])}
+              className="w-full mt-4 px-3 py-1 text-sm font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700"
+            >
+              Clear All
+            </button>
+           )}
         </div>
+      </div>
+
+      {/* Graph View */}
+      <div className="flex-grow bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
+        <div className="h-full w-full">
+          <GraphView notes={filteredNotes} />
+        </div>
+      </div>
     </div>
   );
 };

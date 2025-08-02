@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Dev2ndBrain Clipper",
+  "version": "1.0",
+  "description": "Save selected text and links to your Dev2ndBrain.",
+  "permissions": [
+    "contextMenus",
+    "activeTab",
+    "scripting"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "48": "icon.png"
+  }
+}

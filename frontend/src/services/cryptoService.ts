@@ -4,8 +4,8 @@ const ALGORITHM = 'AES-GCM';
 const a2b = (str: string) => Uint8Array.from(atob(str), c => c.charCodeAt(0));
 const b2a = (buf: ArrayBuffer) => btoa(String.fromCharCode(...new Uint8Array(buf)));
 
-// This key is now exactly 32 bytes (256 bits) long.
-const secretKey = new TextEncoder().encode('a-very-secret-32-byte-long-key!!');
+const viteCryptoSecrerKey = import.meta.env.VITE_CRYPTO_SECRET_KEY;
+const secretKey = new TextEncoder().encode(viteCryptoSecrerKey);
 
 async function getCryptoKey(): Promise<CryptoKey> {
   return await window.crypto.subtle.importKey('raw', secretKey, { name: ALGORITHM }, false, ['encrypt', 'decrypt']);

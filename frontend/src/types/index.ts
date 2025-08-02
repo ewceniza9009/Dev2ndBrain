@@ -53,6 +53,14 @@ export interface Deck {
   createdAt: Date;
 }
 
+
+export interface Template {
+  id?: number;
+  title: string;
+  content: string;
+  createdAt: Date;
+}
+
 export interface GitHubUser {
   login: string;
   id: number;

@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import { useNavigate } from 'react-router-dom';
-import { useNoteStore } from '../../stores/useNoteStore';
 import { useAppStore } from '../../stores/useAppStore';
+import { useNoteStore } from '../../stores/useNoteStore';
 import type { Note } from '../../types';
 import { IconType, IconColor } from '../../types';
 
@@ -15,11 +15,15 @@ interface GraphNode extends d3.SimulationNodeDatum {
   isCollapsed?: boolean;
 }
 
-const GraphView: React.FC = () => {
+interface GraphViewProps {
+  notes: Note[]; // Accept notes as a prop
+}
+
+const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
   const ref = useRef<SVGSVGElement>(null);
   const navigate = useNavigate();
-  const notes = useNoteStore((state) => state.notes);
   const updateNodePosition = useNoteStore((state) => state.updateNodePosition);
+  const allNotes = useNoteStore((state) => state.notes); // Get all notes for link resolution
   const theme = useAppStore((state) => state.theme);
 
   const getIconPath = (type: typeof IconType[keyof typeof IconType]) => {
@@ -33,9 +37,14 @@ const GraphView: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!ref.current || notes.length === 0) return;
+    if (!ref.current) return;
 
+    // Clear previous graph
     d3.select(ref.current).selectAll("*").remove();
+
+    if (notes.length === 0) return;
+
+    const visibleNodeUUIDs = new Set(notes.map(n => n.uuid));
 
     const initialNodes: GraphNode[] = notes.map(note => {
       const nodeData = {
@@ -56,13 +65,14 @@ const GraphView: React.FC = () => {
     });
     
     let links: { source: string; target: string }[] = [];
-    const noteMap = new Map<string, Note>(notes.map(note => [note.uuid, note]));
+    const noteMap = new Map<string, Note>(allNotes.map(note => [note.uuid, note]));
     
+    // Create links only if both source and target are in the filtered view
     for (const note of notes) {
       const matches = note.content.match(/\[\[(.*?)\]\]/g) || [];
       for (const match of matches) {
         const targetUuid = match.slice(2, -2);
-        if (noteMap.has(targetUuid)) {
+        if (noteMap.has(targetUuid) && visibleNodeUUIDs.has(targetUuid)) {
           links.push({ source: note.uuid, target: targetUuid });
         }
       }
@@ -78,12 +88,12 @@ const GraphView: React.FC = () => {
 
     const g = svg.append('g');
 
-    const zoom = d3.zoom()
+    const zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.5, 4])
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
       });
-    svg.call(zoom as any);
+    svg.call(zoom);
 
     const simulation = d3.forceSimulation(initialNodes as any)
       .force('link', d3.forceLink(links).id((d: any) => d.id).distance(100))
@@ -100,13 +110,13 @@ const GraphView: React.FC = () => {
 
     let node = g.append('g')
       .selectAll('g')
-      .data(initialNodes)
+      .data(initialNodes, (d: any) => d.id)
       .join('g')
       .attr('class', 'node-group')
       .on('click', (_event: MouseEvent, d: GraphNode) => {
         navigate(`/notes`, { state: { selectedId: d.noteId } });
       })
-      .call(d3.drag()
+      .call(d3.drag<SVGGElement, GraphNode>()
         .on("start", (event: any, d: any) => {
           if (!event.active) simulation.alphaTarget(0.3).restart();
           d.fx = d.x;
@@ -118,11 +128,14 @@ const GraphView: React.FC = () => {
         })
         .on("end", (event: any, d: any) => {
           if (!event.active) simulation.alphaTarget(0);
-          d.fx = null;
-          d.fy = null;
+          // Only unfix position if it wasn't fixed before
+          if (noteMap.get(d.id)?.fx === undefined) {
+              d.fx = null;
+              d.fy = null;
+          }
           updateNodePosition(d.noteId, d.x!, d.y!);
         }) as any);
-      
+        
     node.append('path')
       .attr('d', (d: GraphNode) => getIconPath(d.iconType))
       .attr('fill', (d: GraphNode) => d.iconColor)
@@ -163,64 +176,6 @@ const GraphView: React.FC = () => {
       });
     });
 
-    const updateGraph = () => {
-      const isVisible = (nodeId: string) => {
-        const node = initialNodes.find(n => n.id === nodeId);
-        if (!node) return false;
-        if (node.isCollapsed) return false;
-        const parentLinks = links.filter((l: any) => (l.target as any).id === nodeId);
-        for (const parentLink of parentLinks) {
-          if (initialNodes.find(n => n.id === (parentLink.source as any).id)?.isCollapsed) {
-            return false;
-          }
-        }
-        return true;
-      };
-
-      const activeNodes = initialNodes.filter(n => isVisible(n.id));
-      const activeLinks = links.filter((l: any) => isVisible((l.source as any).id) && isVisible((l.target as any).id));
-
-      node = node.data(activeNodes, (d: any) => d.id)
-        .join(
-          enter => enter.append('g').call(enter => {
-            enter.append('path').attr('d', (d: any) => getIconPath(d.iconType)).attr('fill', (d: any) => d.iconColor);
-            enter.append('text').text((d: any) => d.title).attr('x', 16).attr('y', 5).attr('fill', theme === 'light' ? '#111827' : 'white');
-            enter.attr('class', 'node-group').call(d3.drag()
-            .on("start", (event: any, d: any) => {
-                if (!event.active) simulation.alphaTarget(0.3).restart();
-                d.fx = d.x;
-                d.fy = d.y;
-            })
-            .on("drag", (event: any, d: any) => {
-                d.fx = event.x;
-                d.fy = event.y;
-            })
-            .on("end", (event: any, d: any) => {
-                if (!event.active) simulation.alphaTarget(0);
-                d.fx = null;
-                d.fy = null;
-            }) as any)
-            .on('click', (_event: MouseEvent, d: GraphNode) => {
-              d.isCollapsed = !d.isCollapsed;
-              updateGraph();
-            });
-          }),
-          update => update,
-          exit => exit.remove()
-        );
-
-      link = link.data(activeLinks, (d: any) => `${(d.source as any).id}-${(d.target as any).id}`)
-        .join(
-          enter => enter.append('line'),
-          update => update,
-          exit => exit.remove()
-        );
-      
-      simulation.nodes(activeNodes as any);
-      simulation.force('link', d3.forceLink(activeLinks as any).id((d: any) => d.id).distance(100));
-      simulation.alpha(1).restart();
-    };
-
     simulation.on('tick', () => {
       link
         .attr('x1', (d: any) => d.source.x)
@@ -230,7 +185,7 @@ const GraphView: React.FC = () => {
 
       node.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
     });
-  }, [notes, navigate, theme, updateNodePosition]);
+  }, [notes, allNotes, navigate, theme, updateNodePosition]); // Rerun effect when filtered notes change
 
   return <svg ref={ref}></svg>;
 };

@@ -4,12 +4,15 @@ type Theme = 'light' | 'dark';
 
 interface AppState {
   theme: Theme;
+  isCommandPaletteOpen: boolean; 
   initTheme: () => void;
   toggleTheme: () => void;
+  toggleCommandPalette: () => void; 
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  theme: 'dark', // Default theme
+  theme: 'dark', 
+  isCommandPaletteOpen: false, 
 
   initTheme: () => {
     const savedTheme = localStorage.getItem('theme') as Theme | null;
@@ -37,5 +40,10 @@ export const useAppStore = create<AppState>((set, get) => ({
     } else {
       document.documentElement.classList.remove('dark');
     }
+  },
+
+  
+  toggleCommandPalette: () => {
+    set(state => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen }));
   },
 }));
