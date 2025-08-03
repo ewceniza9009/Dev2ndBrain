@@ -139,7 +139,7 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           />
         </div>
         <div className="flex space-x-2">
-          <button onClick={handleSave} className="px-4 py-2 bg-te Auctioneer-600 text-white rounded-lg">
+          <button onClick={handleSave} className="px-4 py-2 bg-teal-600 text-white rounded-lg">
             Save
           </button>
           <button
