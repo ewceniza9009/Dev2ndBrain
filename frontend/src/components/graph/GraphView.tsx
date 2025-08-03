@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as d3 from 'd3';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../stores/useAppStore';
@@ -26,14 +26,17 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
   const allNotes = useNoteStore((state) => state.notes);
   const theme = useAppStore((state) => state.theme);
 
-  // Use a ref to hold the simulation and other D3 objects
   const d3Ref = useRef<{
     simulation: d3.Simulation<GraphNode, undefined> | null;
     g: d3.Selection<SVGGElement, unknown, null, undefined> | null;
+    zoom: d3.ZoomBehavior<SVGSVGElement, unknown> | null;
   }>({
     simulation: null,
-    g: null
+    g: null,
+    zoom: null,
   });
+
+  const [transform, setTransform] = useState(d3.zoomIdentity);
 
   const getIconPath = (type: typeof IconType[keyof typeof IconType]) => {
     switch (type) {
@@ -45,8 +48,7 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
     }
   };
 
-  // EFFECT 1: INITIALIZATION
-  // This runs only ONCE when the component mounts. It sets up the SVG, zoom, and simulation.
+  // EFFECT 1: INITIALIZATION (RUNS ONLY ONCE)
   useEffect(() => {
     if (!ref.current) return;
 
@@ -58,7 +60,6 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
       .attr('height', height)
       .attr('viewBox', [-width / 2, -height / 2, width, height]);
 
-    // Clear previous content
     svg.selectAll('g').remove();
     const g = svg.append('g');
     d3Ref.current.g = g;
@@ -67,10 +68,12 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
       .scaleExtent([0.5, 4])
       .on('zoom', (event) => {
         g.attr('transform', event.transform);
+        setTransform(event.transform);
       });
     svg.call(zoom as any);
+    d3Ref.current.zoom = zoom;
 
-    const simulation = d3.forceSimulation<GraphNode>()
+    const newSimulation = d3.forceSimulation<GraphNode>()
       .force('link', d3.forceLink<GraphNode, { source: string; target: string }>()
         .id((d) => d.id)
         .distance(100)
@@ -78,24 +81,23 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
       .force('charge', d3.forceManyBody().strength(-300))
       .force('center', d3.forceCenter());
 
-    d3Ref.current.simulation = simulation;
+    d3Ref.current.simulation = newSimulation;
 
-    // Cleanup function for when the component unmounts
     return () => {
-      simulation.stop();
+      newSimulation.stop();
     };
+  }, []); // Empty dependency array: runs only once
 
-  }, []); // Empty dependency array means this runs only once
-
-  // EFFECT 2: UPDATES
-  // This runs whenever `notes` or other specified dependencies change.
+  // EFFECT 2: UPDATES (RUNS ON DATA CHANGE)
   useEffect(() => {
-    const { simulation, g } = d3Ref.current;
-    if (!simulation || !g) return;
+    const { simulation, g, zoom } = d3Ref.current;
+    if (!simulation || !g || !ref.current || !zoom) return;
+
+    d3.select(ref.current).call(zoom.transform as any, transform);
 
     const visibleNodeUUIDs = new Set(notes.map(n => n.uuid));
     const noteMap = new Map<string, Note>(allNotes.map(note => [note.uuid, note]));
-    
+
     let links: { source: string; target: string }[] = [];
     for (const note of notes) {
       const matches = note.content.match(/\[\[(.*?)\]\]/g) || [];
@@ -109,7 +111,6 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
 
     const initialNodes: GraphNode[] = notes.map(note => {
       const existingNode = simulation.nodes().find(n => n.id === note.uuid);
-      
       const nodeData: GraphNode = {
         id: note.uuid,
         title: note.title,
@@ -122,8 +123,15 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
         fx: existingNode?.fx,
         fy: existingNode?.fy,
       };
-
-      if (nodeData.x === undefined || nodeData.y === undefined) {
+      
+      // FIX: Use saved coordinates from the note prop if they exist.
+      if (note.x !== undefined && note.y !== undefined) {
+        nodeData.x = note.x;
+        nodeData.y = note.y;
+        nodeData.fx = note.x;
+        nodeData.fy = note.y;
+      }
+      else if (nodeData.x === undefined || nodeData.y === undefined) {
         const parentLink = links.find(l => l.target === nodeData.id);
         if (parentLink) {
           const parentNote = allNotes.find(n => n.uuid === parentLink.source);
@@ -142,15 +150,13 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
       return nodeData;
     });
 
-    // UPDATE LINKS
     const link = g.selectAll<SVGLineElement, { source: string; target: string }>('line')
       .data(links, d => `${d.source}-${d.target}`)
       .join('line')
       .attr('stroke', '#999')
       .attr('stroke-opacity', 0.6)
       .attr('stroke-width', 1.5);
-    
-    // UPDATE NODES
+
     const node = g.selectAll<SVGGElement, GraphNode>('.node-group')
       .data(initialNodes, d => d.id)
       .join(
@@ -173,13 +179,14 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
               })
               .on("end", (event: any, d: any) => {
                 if (!event.active) simulation.alphaTarget(0);
+                // Unfix position only if it wasn't fixed before
                 if (noteMap.get(d.id)?.fx === undefined) {
-                    d.fx = null;
-                    d.fy = null;
+                  d.fx = null;
+                  d.fy = null;
                 }
                 updateNodePosition(d.noteId, d.x!, d.y!);
               }) as any);
-          
+
           nodeEnter.append('path')
             .attr('d', (d: GraphNode) => getIconPath(d.iconType))
             .attr('fill', (d: GraphNode) => d.iconColor)
@@ -192,7 +199,7 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
             .attr('y', 5)
             .attr('fill', theme === 'light' ? '#111827' : 'white')
             .style('cursor', 'pointer');
-            
+
           return nodeEnter;
         },
         update => update,
@@ -223,7 +230,7 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
         });
       });
 
-    simulation.nodes(initialNodes);
+    simulation.nodes(initialNodes as any);
     (simulation.force('link') as d3.ForceLink<GraphNode, { source: string; target: string }>).links(links);
     simulation.alpha(1).restart();
 
@@ -233,10 +240,9 @@ const GraphView: React.FC<GraphViewProps> = ({ notes }) => {
         .attr('y1', (d: any) => d.source.y)
         .attr('x2', (d: any) => d.target.x)
         .attr('y2', (d: any) => d.target.y);
-      
+
       node.attr('transform', (d: any) => `translate(${d.x},${d.y})`);
     });
-
   }, [notes, allNotes, navigate, theme, updateNodePosition]);
 
   return <svg ref={ref}></svg>;

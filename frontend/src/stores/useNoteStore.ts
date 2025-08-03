@@ -5,14 +5,14 @@ import { type Note, type Template, IconType, IconColor } from '../types';
 
 interface NoteState {
   notes: Note[];
-  templates: Template[]; 
+  templates: Template[];
   isLoading: boolean;
   getUniqueTags: () => string[]; // New selector function
   fetchNotes: () => Promise<void>;
   fetchTemplates: () => Promise<void>;
-  addTemplate: (template: Omit<Template, 'id' | 'createdAt'>) => Promise<void>; 
-  updateTemplate: (id: number, content: Partial<Template>) => Promise<void>; 
-  deleteTemplate: (id: number) => Promise<void>; 
+  addTemplate: (template: Omit<Template, 'id' | 'createdAt'>) => Promise<void>;
+  updateTemplate: (id: number, content: Partial<Template>) => Promise<void>;
+  deleteTemplate: (id: number) => Promise<void>;
   getNoteById: (id: number) => Note | undefined;
   addNote: (newNote: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'uuid' | 'linkedNoteIds'>) => Promise<Note>;
   updateNote: (id: number, updatedContent: Partial<Note>) => Promise<void>;
@@ -95,7 +95,10 @@ export const useNoteStore = create<NoteState>((set, get) => ({
     }
   },
 
+  // FIX: This function now correctly saves the fixed positions (fx, fy) to the database.
   updateNodePosition: async (id, x, y) => {
+    // The force-directed graph uses `fx` and `fy` to fix a node's position.
+    // We should save these values as well so the position persists.
     await db.notes.update(id, { x, y, fx: x, fy: y });
     set((state) => ({
       notes: state.notes.map((note) => (note.id === id ? { ...note, x, y, fx: x, fy: y } : note)),
