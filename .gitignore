@@ -20,3 +20,5 @@ backend/.vs/ProjectEvaluation/backend.strings.v9.bin
 docker-compose.yaml
 backend/Dockerfile
 frontend/Dockerfile
+.env
+/.vs
