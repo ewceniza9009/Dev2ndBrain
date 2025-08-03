@@ -22,3 +22,4 @@ backend/Dockerfile
 frontend/Dockerfile
 .env
 /.vs
+/node_modules
