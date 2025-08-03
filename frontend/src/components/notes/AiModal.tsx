@@ -12,9 +12,12 @@ interface AiModalProps {
 const AiModal: React.FC<AiModalProps> = ({ isOpen, onClose, noteContent, onInsertText }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState('');
+  // NEW: State for a custom prompt from the user
+  const [customPrompt, setCustomPrompt] = useState('');
 
   if (!isOpen) return null;
 
+  // MODIFIED: This function now handles both predefined and custom prompts
   const handlePromptClick = async (prompt: string, isActionPlanPrompt: boolean) => {
     setIsLoading(true);
     setResponse('');
@@ -47,11 +50,19 @@ const AiModal: React.FC<AiModalProps> = ({ isOpen, onClose, noteContent, onInser
     }
   };
 
+  // NEW: Handle running a custom prompt
+  const handleCustomPrompt = () => {
+    if (customPrompt.trim()) {
+      handlePromptClick(customPrompt.trim(), false);
+    }
+  };
+
   const handleInsert = () => {
     onInsertText(`\n\n---\n**✨ AI Assistant:**\n${response}`);
     onClose();
   };
 
+  // NEW: Added a new button for a new feature
   const promptButtons = [
     { label: 'Summarize', prompt: 'Summarize the following note into key bullet points.', isActionPlan: false },
     { label: 'Find Action Items', prompt: 'Extract any potential action items or to-do tasks from the following note.', isActionPlan: true },
@@ -76,9 +87,30 @@ const AiModal: React.FC<AiModalProps> = ({ isOpen, onClose, noteContent, onInser
             </button>
           ))}
         </div>
+        
+        {/* NEW: Custom prompt input field */}
+        <div className="mt-4">
+            <h3 className="text-md font-bold text-gray-900 dark:text-white mb-2">Or, ask a custom question:</h3>
+            <div className="flex space-x-2">
+                <input
+                    type="text"
+                    placeholder="Enter your custom prompt here..."
+                    value={customPrompt}
+                    onChange={(e) => setCustomPrompt(e.target.value)}
+                    className="flex-grow p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
+                />
+                <button
+                    onClick={handleCustomPrompt}
+                    disabled={isLoading || !customPrompt.trim()}
+                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-500"
+                >
+                    Run
+                </button>
+            </div>
+        </div>
 
-        <div className="w-full p-4 h-64 overflow-y-auto bg-gray-100 dark:bg-gray-700 rounded-lg whitespace-pre-wrap">
-          {isLoading ? 'Thinking...' : (response || 'Select a prompt to begin.')}
+        <div className="w-full p-4 h-64 overflow-y-auto bg-gray-100 dark:bg-gray-700 rounded-lg whitespace-pre-wrap mt-4">
+          {isLoading ? 'Thinking...' : (response || 'Select a prompt or enter a custom one to begin.')}
         </div>
 
         <div className="flex justify-end space-x-2 mt-4">

@@ -5,6 +5,7 @@ import Editor from '@monaco-editor/react';
 import { useAppStore } from '../../stores/useAppStore';
 import ConsoleOutput from './ConsoleOutput';
 import { openCodeRunnerWindow } from './CodeRunner';
+import SnippetAiModal from './SnippetAiModal'; // NEW: Import the snippet AI modal
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
 
@@ -17,6 +18,8 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const [userInputs, setUserInputs] = useState('');
   const [showCSharpModal, setShowCSharpModal] = useState(false);
+  // NEW: State for the Snippet AI modal
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false); 
 
   useEffect(() => {
     setEditedSnippet(snippet);
@@ -83,6 +86,7 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
     return <div className="p-8 text-gray-500 dark:text-gray-400">Select a snippet from the list or create a new one.</div>;
   }
 
+  // MODIFIED: This is the new, correct code for the editing view
   if (isEditing) {
     return (
       <div className="p-6 space-y-4">
@@ -139,6 +143,7 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           />
         </div>
         <div className="flex space-x-2">
+          {/* This button calls the handleSave function, resolving the warning */}
           <button onClick={handleSave} className="px-4 py-2 bg-teal-600 text-white rounded-lg">
             Save
           </button>
@@ -177,6 +182,13 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           </div>
         </div>
         <div className="flex space-x-2 flex-shrink-0">
+          {/* NEW: Button to open the AI modal */}
+          <button
+              onClick={() => setIsAiModalOpen(true)}
+              className="px-4 py-2 text-sm bg-indigo-600 rounded-lg text-white"
+          >
+              Ask AI ✨
+          </button>
           {isRunnableWeb && (
             <button
               onClick={handlePopout}
@@ -288,6 +300,12 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           )}
         </div>
       </div>
+      {/* NEW: Render the new SnippetAiModal */}
+      <SnippetAiModal
+          isOpen={isAiModalOpen}
+          onClose={() => setIsAiModalOpen(false)}
+          snippet={snippet}
+      />
     </div>
   );
 };

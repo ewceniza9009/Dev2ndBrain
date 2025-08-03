@@ -9,12 +9,24 @@ namespace Dev2ndBrain.Controllers
     {
         public string Prompt { get; set; }
         public string Content { get; set; }
-        public bool IsMultiStep { get; set; } 
+        public bool IsMultiStep { get; set; }
     }
-    
+
     public class MultiStepAiRequest
     {
         public string Content { get; set; }
+    }
+
+    public class CodeAiRequest
+    {
+        public string Code { get; set; }
+        public string Language { get; set; }
+    }
+
+    public class DraftAiRequest
+    {
+        public string Title { get; set; }
+        public string Context { get; set; }
     }
 
     [ApiController]
@@ -29,7 +41,7 @@ namespace Dev2ndBrain.Controllers
             _httpClientFactory = httpClientFactory;
             _configuration = configuration;
         }
-        
+
         [HttpPost("prompt")]
         public async Task<IActionResult> GetCompletion([FromBody] AiRequest request)
         {
@@ -79,7 +91,7 @@ namespace Dev2ndBrain.Controllers
                 return StatusCode(500, new { message = $"An internal error occurred: {ex.Message}" });
             }
         }
-        
+
         [HttpPost("action-plan")]
         public async Task<IActionResult> GetActionPlan([FromBody] MultiStepAiRequest request)
         {
@@ -95,7 +107,7 @@ namespace Dev2ndBrain.Controllers
             var actionItemsPrompt = $"Please extract and list all potential action items or to-do tasks from the following note. Format the response as a simple markdown bulleted list.\n\n---\n{request.Content}\n---";
             var actionItemsPayload = new { contents = new[] { new { parts = new[] { new { text = actionItemsPrompt } } } } };
             var actionItemsResponse = await client.PostAsync(apiUrl, new StringContent(JsonSerializer.Serialize(actionItemsPayload), Encoding.UTF8, "application/json"));
-            
+
             if (!actionItemsResponse.IsSuccessStatusCode)
             {
                 return StatusCode((int)actionItemsResponse.StatusCode, new { message = "Error getting action items from AI." });
@@ -136,6 +148,33 @@ namespace Dev2ndBrain.Controllers
             }
 
             return Ok(new { completion = combinedResponse.ToString() });
+        }
+
+        // Endpoint to explain a code snippet
+        [HttpPost("code-explain")]
+        public async Task<IActionResult> ExplainCode([FromBody] CodeAiRequest request)
+        {
+            var prompt = $"Explain the following {request.Language} code snippet step-by-step:\n\n---\n{request.Code}\n---";
+            var aiRequest = new AiRequest { Prompt = prompt, Content = "" };
+            return await GetCompletion(aiRequest);
+        }
+
+        // Endpoint to get refactoring suggestions
+        [HttpPost("code-refactor")]
+        public async Task<IActionResult> RefactorCode([FromBody] CodeAiRequest request)
+        {
+            var prompt = $"Analyze the following {request.Language} code and provide suggestions for refactoring it to be more performant, readable, and follow best practices. Provide the refactored code block as well:\n\n---\n{request.Code}\n---";
+            var aiRequest = new AiRequest { Prompt = prompt, Content = "" };
+            return await GetCompletion(aiRequest);
+        }
+
+        // Endpoint to generate a draft of a note
+        [HttpPost("draft-note")]
+        public async Task<IActionResult> DraftNote([FromBody] DraftAiRequest request)
+        {
+            var prompt = $"Expand the following bullet points into a detailed markdown note. The title is '{request.Title}'. The context is:\n\n---\n{request.Context}\n---";
+            var aiRequest = new AiRequest { Prompt = prompt, Content = "" };
+            return await GetCompletion(aiRequest);
         }
     }
 }
