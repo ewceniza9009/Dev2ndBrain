@@ -2,7 +2,6 @@ import { create } from 'zustand';
 import { db } from '../services/db';
 import type { Deck, Flashcard } from '../types';
 
-// SM-2 Spaced Repetition Algorithm Logic
 const sm2 = (card: Flashcard, quality: number): Partial<Flashcard> => {
     if (quality < 3) {
         return { repetitions: 0, interval: 1, nextReview: new Date(Date.now() + 24 * 60 * 60 * 1000) };
@@ -60,9 +59,6 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
     },
 
     deleteDeck: async (deckId: number) => {
-        if (!window.confirm("Are you sure you want to delete this deck and all its cards? This action cannot be undone.")) {
-            return;
-        }
         await db.transaction('rw', db.decks, db.flashcards, async () => {
             await db.flashcards.where('deckId').equals(deckId).delete();
             await db.decks.delete(deckId);

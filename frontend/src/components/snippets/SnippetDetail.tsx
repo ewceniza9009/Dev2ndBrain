@@ -5,6 +5,7 @@ import Editor from '@monaco-editor/react';
 import { useAppStore } from '../../stores/useAppStore';
 import ConsoleOutput from './ConsoleOutput';
 import CodeRunner from './CodeRunner';
+import ConfirmationModal from '../ConfirmationModal'; // Import the new modal
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
 
@@ -16,6 +17,7 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
   const [consoleOutput, setConsoleOutput] = useState('');
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const [showSandbox, setShowSandbox] = useState(false);
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); // New state for confirmation modal
 
   useEffect(() => {
     setEditedSnippet(snippet);
@@ -40,8 +42,13 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
   };
 
   const handleDelete = () => {
-    if (snippet && window.confirm(`Are you sure you want to delete "${snippet.title}"?`)) {
+    setIsConfirmModalOpen(true); // Open the custom confirmation modal
+  };
+
+  const handleConfirmDelete = () => {
+    if (snippet) {
       deleteSnippet(snippet.id!);
+      setIsConfirmModalOpen(false); // Close the modal after deletion
     }
   };
 
@@ -178,7 +185,7 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
             />
           </div>
           {snippet.language === 'csharp' && (
-             <ConsoleOutput output={consoleOutput} isLoading={isCodeRunning} />
+              <ConsoleOutput output={consoleOutput} isLoading={isCodeRunning} />
           )}
         </div>
         
@@ -188,6 +195,15 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           </div>
         )}
       </div>
+
+      {/* New Confirmation Modal for snippet deletion */}
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmDelete}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${snippet.title}"? This action cannot be undone.`}
+      />
     </div>
   );
 };
