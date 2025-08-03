@@ -1,19 +1,18 @@
 using Dev2ndBrain.Data;
 using Dev2ndBrain.Repositories;
 using Dev2ndBrain.Services;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using System;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 
 builder.Services.AddControllers();
-
 builder.Services.AddHttpClient();
-
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddHttpClient<GitHubService>();
 builder.Services.AddSingleton<GitHubService>();
 builder.Services.AddScoped<SyncRepository>();
@@ -24,7 +23,6 @@ if (string.IsNullOrEmpty(frontendOrigin))
 {
     throw new InvalidOperationException("FrontendOrigin is not configured in appsettings.json");
 }
-
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Dev2ndBrainFrontend", policy =>
@@ -46,8 +44,10 @@ if (app.Environment.IsDevelopment())
     }
 }
 
-app.UseRouting();
 app.UseCors("Dev2ndBrainFrontend");
+app.UseRouting();
 app.UseAuthorization();
+
 app.MapControllers();
+
 app.Run();
