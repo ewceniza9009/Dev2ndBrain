@@ -14,7 +14,7 @@ Organize notes 📝, code snippets 💻, and flashcards 📚 — all in one eleg
 | 📚 **Smart Flashcards** | Learn effectively using spaced-repetition via the **SM-2 algorithm**. |
 | 🤖 **AI Assistant** | Let **Google Gemini** summarize notes, extract action items, or brainstorm ideas. |
 | 🔍 **Command Palette** | Press `Ctrl + K` to quickly navigate, search, and execute actions. |
-| 🌐 **Knowledge Graph** | Explore a dynamic D3.js graph with **hierarchical tag filters**. |
+| 🌐 **Knowledge Graph** | Explore a dynamic react-flow graph with **hierarchical tag filters**. |
 | ✂️ **Web Clipper** | Instantly clip text from any webpage into a new note via browser extension. |
 | 💾 **Local-First Storage** | All data is stored on-device using **IndexedDB**, enabling offline use and privacy. |
 
@@ -24,7 +24,7 @@ Organize notes 📝, code snippets 💻, and flashcards 📚 — all in one eleg
 
 | Layer | Technologies |
 |-------|--------------|
-| **Frontend** | React · TypeScript · Vite · Tailwind CSS · Monaco Editor · Zustand · D3.js · Dexie.js |
+| **Frontend** | React · TypeScript · Vite · Tailwind CSS · Monaco Editor · Zustand · react-flow · Dexie.js |
 | **Backend** | ASP.NET Core · Entity Framework Core · Octokit.NET · Google Gemini API |
 | **Browser Extension** | JavaScript · WebExtensions API |
 
