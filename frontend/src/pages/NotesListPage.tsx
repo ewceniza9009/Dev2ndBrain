@@ -1,7 +1,5 @@
-// frontend/src/pages/NotesListPage.tsx
-
 import React, { useEffect, useState, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useNoteStore } from '../stores/useNoteStore';
 import NoteList from '../components/notes/NoteList';
 import NoteDetailView from '../components/notes/NoteDetailView';
@@ -14,7 +12,8 @@ const NotesListPage: React.FC = () => {
   const [sortOption, setSortOption] = useState<'updatedAt' | 'title'>('updatedAt');
   const [isNewNoteModalOpen, setIsNewNoteModalOpen] = useState(false);
   const location = useLocation();
-  const isFromGraph = location.state?.isFromGraph || false;
+  const navigate = useNavigate();
+  const [isFromGraph, setIsFromGraph] = useState(false); // NEW: Local state for the flag
 
   useEffect(() => {
     fetchNotes();
@@ -22,13 +21,21 @@ const NotesListPage: React.FC = () => {
   }, [fetchNotes, fetchTemplates]);
 
   useEffect(() => {
-    if (location.state?.selectedId && location.state.selectedId !== selectedNoteId) {
+    // Check for a selectedId from navigation state
+    if (location.state?.selectedId) {
       setSelectedNoteId(location.state.selectedId);
-    } else if (!selectedNoteId && notes.length > 0) {
+      // NEW: Read the flag and update local state before clearing the navigation state
+      setIsFromGraph(location.state.isFromGraph || false);
+      // Clean up the state to prevent it from sticking
+      navigate(location.pathname, { replace: true });
+    } 
+    // If no note is selected and we have notes, select the first one
+    else if (!selectedNoteId && notes.length > 0) {
       const sortedNotes = [...notes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
       setSelectedNoteId(sortedNotes[0].id!);
+      setIsFromGraph(false); // Reset the flag
     }
-  }, [notes, selectedNoteId, location.state]);
+  }, [notes, selectedNoteId, location.state, navigate]);
 
   const sortedNotes = useMemo(() => {
     const sorted = [...notes].sort((a, b) => {

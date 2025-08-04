@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useSnippetStore } from '../stores/useSnippetStore';
 import SnippetList from '../components/snippets/SnippetList';
 import SnippetDetail from '../components/snippets/SnippetDetail';
@@ -8,6 +8,7 @@ const SnippetsPage: React.FC = () => {
   const { snippets, fetchSnippets, addSnippet } = useSnippetStore();
   const [selectedSnippetId, setSelectedSnippetId] = useState<number | null>(null);
   const location = useLocation();
+  const navigate = useNavigate(); // Import useNavigate
 
   useEffect(() => {
     fetchSnippets();
@@ -17,24 +18,26 @@ const SnippetsPage: React.FC = () => {
     // Check for an ID passed from the search bar
     if (location.state?.selectedId) {
       setSelectedSnippetId(location.state.selectedId);
+      // MODIFIED: Clear the navigation state to prevent bug
+      navigate(location.pathname, { replace: true });
     }
-    // Otherwise, select the first snippet
+    // Otherwise, select the first snippet if none is selected
     else if (!selectedSnippetId && snippets.length > 0) {
       setSelectedSnippetId(snippets[0].id!);
     }
-  }, [snippets, selectedSnippetId, location.state]);
+  }, [snippets, selectedSnippetId, location.state, navigate]); // MODIFIED: Add navigate to dependencies
   
   const handleNewSnippet = async () => {
     await addSnippet({
-        title: "New Snippet",
-        language: "plaintext",
-        code: "",
-        tags: []
+      title: "New Snippet",
+      language: "plaintext",
+      code: "",
+      tags: []
     });
     const newSnippets = useSnippetStore.getState().snippets;
     const newSnippet = newSnippets[newSnippets.length - 1];
     if (newSnippet) {
-        setSelectedSnippetId(newSnippet.id!);
+      setSelectedSnippetId(newSnippet.id!);
     }
   }
 

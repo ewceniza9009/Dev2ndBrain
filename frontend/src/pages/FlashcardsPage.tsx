@@ -4,8 +4,9 @@ import FlashcardPlayer from '../components/flashcards/FlashcardPlayer';
 import DeckView from '../components/flashcards/DeckView';
 import DeckList from '../components/flashcards/DeckList';
 import ConfirmationModal from '../components/ConfirmationModal';
-import NewDeckModal from '../components/NewDeckModal'; 
+import NewDeckModal from '../components/NewDeckModal';
 import type { Flashcard } from '../types';
+import { useLocation, useNavigate } from 'react-router-dom'; // NEW: Import hooks
 
 const FlashcardsPage: React.FC = () => {
   const { decks, allCards, fetchDecks, fetchAllCards, addDeck, deleteDeck } = useFlashcardStore();
@@ -13,7 +14,9 @@ const FlashcardsPage: React.FC = () => {
   const [view, setView] = useState<'list' | 'review'>('list');
   const [reviewMode, setReviewMode] = useState<'due' | 'all'>('due');
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [isNewDeckModalOpen, setIsNewDeckModalOpen] = useState(false); 
+  const [isNewDeckModalOpen, setIsNewDeckModalOpen] = useState(false);
+  const location = useLocation(); // NEW
+  const navigate = useNavigate(); // NEW
 
   useEffect(() => {
     fetchDecks();
@@ -21,13 +24,18 @@ const FlashcardsPage: React.FC = () => {
   }, [fetchDecks, fetchAllCards]);
 
   useEffect(() => {
-    if (selectedDeckId && !decks.find(d => d.id === selectedDeckId)) {
-      setSelectedDeckId(decks.length > 0 ? decks[0].id! : null);
+    // NEW: Check for a selected deck ID from navigation state
+    if (location.state?.selectedDeckId) {
+        setSelectedDeckId(location.state.selectedDeckId);
+        navigate(location.pathname, { replace: true }); // Clear state
     }
-    else if (!selectedDeckId && decks.length > 0) {
+    // Existing logic for selecting a deck
+    else if (selectedDeckId && !decks.find(d => d.id === selectedDeckId)) {
+      setSelectedDeckId(decks.length > 0 ? decks[0].id! : null);
+    } else if (!selectedDeckId && decks.length > 0) {
       setSelectedDeckId(decks[0].id!);
     }
-  }, [decks, selectedDeckId]);
+  }, [decks, selectedDeckId, location.state]);
 
   const cardCounts = useMemo(() => {
     return allCards.reduce((acc: { [key: number]: number }, card: Flashcard) => {
@@ -46,7 +54,7 @@ const FlashcardsPage: React.FC = () => {
       const newDecks = useFlashcardStore.getState().decks;
       setSelectedDeckId(newDecks[newDecks.length - 1].id!);
     }
-    setIsNewDeckModalOpen(false); 
+    setIsNewDeckModalOpen(false);
   };
 
   const handleDeleteDeck = () => {
@@ -121,7 +129,6 @@ const FlashcardsPage: React.FC = () => {
         message={`Are you sure you want to delete the deck "${selectedDeck?.name}"? This action cannot be undone.`}
       />
 
-      {/* Render the new modal */}
       <NewDeckModal
         isOpen={isNewDeckModalOpen}
         onClose={() => setIsNewDeckModalOpen(false)}

@@ -71,11 +71,12 @@ const NoteList: React.FC<NoteListProps> = ({
             <React.Fragment key={tag}>
               <h2
                 onClick={() => toggleCollapse(tag)}
-                className="flex justify-between items-center px-4 py-2 text-sm font-bold text-gray-500 dark:text-gray-400 sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+                className="flex justify-between items-center px-4 py-2 text-sm font-bold text-gray-500 dark:text-gray-400 sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 min-w-0 truncate"
               >
-                <span>{tag.charAt(0).toUpperCase() + tag.slice(1)}</span>
+                <span className="min-w-0 truncate">{tag.charAt(0).toUpperCase() + tag.slice(1)}</span>
                 <ChevronRightIcon className={`h-5 w-5 transform transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`} />
               </h2>
+              {/* MODIFIED: This conditional check ensures the notes are only rendered when the tag is not collapsed */}
               {!isCollapsed && notesInGroup.map((note) => (
                 <li
                   key={note.id}

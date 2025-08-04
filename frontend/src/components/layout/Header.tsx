@@ -1,5 +1,3 @@
-// frontend/src/components/layout/Header.tsx
-
 import React from 'react';
 import { useAuthStore, type AuthState } from '../../stores/useAuthStore';
 import GitHubLoginButton from '../auth/GitHubLoginButton';
@@ -16,9 +14,9 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar, isSidebarCollapsed }) 
   const isAuthenticated = useAuthStore((state: AuthState) => state.isAuthenticated);
 
   return (
-    <header className="z-10 py-4 bg-white dark:bg-gray-800 shadow-md">
+    // MODIFIED: Add z-50 to the header to force it on top of all other content
+    <header className="z-50 py-4 bg-white dark:bg-gray-800 shadow-md">
       <div className="flex items-center h-full px-6 mx-auto">
-        {/* NEW: Collapse/expand button for desktop */}
         <button
           onClick={onToggleSidebar}
           className="p-2 text-gray-500 focus:outline-none focus:text-gray-600 hidden md:block"
