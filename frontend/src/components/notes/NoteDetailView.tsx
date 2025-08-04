@@ -1,3 +1,5 @@
+// frontend/src/components/notes/NoteDetailView.tsx
+
 import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { useNoteStore } from '../../stores/useNoteStore';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
@@ -7,7 +9,7 @@ import TagInput from './TagInput';
 import type { Note, Deck } from '../../types';
 import { debounce } from 'lodash-es';
 import Toast from '../Toast';
-import ConfirmationModal from '../ConfirmationModal'; 
+import ConfirmationModal from '../ConfirmationModal';
 
 const SelectDeckModal: React.FC<{
   isOpen: boolean;
@@ -42,9 +44,10 @@ const SelectDeckModal: React.FC<{
 
 interface NoteDetailViewProps {
   note: Note | null;
+  isFromGraph?: boolean;
 }
 
-const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
+const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note, isFromGraph }) => {
   const [isEditing, setIsEditing] = useState(() => {
     const savedState = localStorage.getItem('isEditing');
     return savedState !== null ? JSON.parse(savedState) : true;
@@ -58,7 +61,7 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
   const [editorContent, setEditorContent] = useState(note?.content || '');
 
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false); 
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('isEditing', JSON.stringify(isEditing));
@@ -159,7 +162,7 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note }) => {
         {isEditing ? (
           <NoteEditor note={note} editorRef={editorRef} />
         ) : (
-          <NoteViewer note={note} />
+          <NoteViewer note={note} fromGraph={isFromGraph} />
         )}
       </div>
 

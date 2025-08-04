@@ -1,18 +1,23 @@
+// frontend/src/stores/useAppStore.ts
+
 import { create } from 'zustand';
 
 type Theme = 'light' | 'dark';
 
 interface AppState {
   theme: Theme;
-  isCommandPaletteOpen: boolean; 
+  isCommandPaletteOpen: boolean;
+  isSidebarCollapsed: boolean; // NEW: State for sidebar
   initTheme: () => void;
   toggleTheme: () => void;
-  toggleCommandPalette: () => void; 
+  toggleCommandPalette: () => void;
+  toggleSidebar: () => void; // NEW: Function to toggle sidebar
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  theme: 'dark', 
-  isCommandPaletteOpen: false, 
+  theme: 'dark',
+  isCommandPaletteOpen: false,
+  isSidebarCollapsed: false, // NEW: Initial state is not collapsed
 
   initTheme: () => {
     const savedTheme = localStorage.getItem('theme') as Theme | null;
@@ -42,8 +47,11 @@ export const useAppStore = create<AppState>((set, get) => ({
     }
   },
 
-  
   toggleCommandPalette: () => {
     set(state => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen }));
+  },
+
+  toggleSidebar: () => {
+    set(state => ({ isSidebarCollapsed: !state.isSidebarCollapsed }));
   },
 }));

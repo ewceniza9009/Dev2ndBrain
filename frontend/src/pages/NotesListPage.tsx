@@ -1,21 +1,24 @@
+// frontend/src/pages/NotesListPage.tsx
+
 import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useNoteStore } from '../stores/useNoteStore';
 import NoteList from '../components/notes/NoteList';
 import NoteDetailView from '../components/notes/NoteDetailView';
-import NewNoteModal from '../components/notes/NewNoteModal'; 
+import NewNoteModal from '../components/notes/NewNoteModal';
 import type { Note, Template } from '../types';
 
 const NotesListPage: React.FC = () => {
   const { notes, templates, fetchNotes, fetchTemplates, addNote } = useNoteStore();
   const [selectedNoteId, setSelectedNoteId] = useState<number | null>(null);
   const [sortOption, setSortOption] = useState<'updatedAt' | 'title'>('updatedAt');
-  const [isNewNoteModalOpen, setIsNewNoteModalOpen] = useState(false); 
+  const [isNewNoteModalOpen, setIsNewNoteModalOpen] = useState(false);
   const location = useLocation();
+  const isFromGraph = location.state?.isFromGraph || false;
 
   useEffect(() => {
     fetchNotes();
-    fetchTemplates(); 
+    fetchTemplates();
   }, [fetchNotes, fetchTemplates]);
 
   useEffect(() => {
@@ -38,7 +41,7 @@ const NotesListPage: React.FC = () => {
   }, [notes, sortOption]);
 
   const handleNewNote = async (template?: Template) => {
-    setIsNewNoteModalOpen(false); 
+    setIsNewNoteModalOpen(false);
     const newNote = await addNote({
       title: template ? template.title : 'Untitled Note',
       content: template ? template.content : '# New Note',
@@ -73,7 +76,7 @@ const NotesListPage: React.FC = () => {
               </div>
             </div>
             <button
-              onClick={() => setIsNewNoteModalOpen(true)} 
+              onClick={() => setIsNewNoteModalOpen(true)}
               className="px-3 py-1 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700"
             >
               New
@@ -87,7 +90,7 @@ const NotesListPage: React.FC = () => {
           />
         </div>
         <div className="w-2/3">
-          <NoteDetailView note={selectedNote} />
+          <NoteDetailView note={selectedNote} isFromGraph={isFromGraph} />
         </div>
       </div>
       <NewNoteModal

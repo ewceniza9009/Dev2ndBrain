@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Note } from '../../types';
-import { ChevronRightIcon } from '@heroicons/react/20/solid'; 
+import { ChevronRightIcon } from '@heroicons/react/20/solid';
 
 interface NoteListProps {
   notes: Note[];

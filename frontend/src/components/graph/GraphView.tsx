@@ -12,12 +12,12 @@ import ReactFlow, {
 } from 'reactflow';
 import type { Node, Edge } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../stores/useAppStore';
 import { useNoteStore } from '../../stores/useNoteStore';
 import type { Note } from '../../types';
 
 import CustomNode from './CustomNode';
+import NotePreviewModal from './NotePreviewModal';
 
 const nodeTypes = {
   custom: CustomNode,
@@ -36,13 +36,10 @@ const getStyleForLevel = (level: number) => {
   return levelStyles.get(level)!;
 };
 
-// FIX: This function now accepts both the filtered 'visibleNotes' and 'allNotes'
-// to correctly build the graph based on the active filters.
 const getBaseElements = (visibleNotes: Note[], allNotes: Note[], theme: 'light' | 'dark') => {
   const allNoteMap = new Map<string, Note>(allNotes.map(note => [note.uuid, note]));
   const visibleNoteIds = new Set(visibleNotes.map(n => n.uuid));
 
-  // Build topology from ALL notes to understand the full graph structure
   const { childToParents, parentToChildren } = allNotes.reduce(
     (acc, note) => {
       const matches = note.content.match(/\[\[(.*?)\]\]/g) || [];
@@ -57,7 +54,6 @@ const getBaseElements = (visibleNotes: Note[], allNotes: Note[], theme: 'light' 
     }, { childToParents: new Map<string, string[]>(), parentToChildren: new Map<string, string[]>() }
   );
 
-  // Calculate hierarchy levels from ALL notes
   const nodeLevels = new Map<string, number>();
   const roots = allNotes.filter(n => !childToParents.has(n.uuid));
   const queue: { uuid: string; level: number }[] = roots.map(r => ({ uuid: r.uuid, level: 0 }));
@@ -77,7 +73,6 @@ const getBaseElements = (visibleNotes: Note[], allNotes: Note[], theme: 'light' 
     });
   }
 
-  // Create nodes using only the filtered 'visibleNotes'
   const baseNodes: Node[] = visibleNotes.map(note => {
     const level = nodeLevels.get(note.uuid) ?? 0;
     const style = getStyleForLevel(level);
@@ -99,13 +94,12 @@ const getBaseElements = (visibleNotes: Note[], allNotes: Note[], theme: 'light' 
     };
   });
 
-  // Create edges only if BOTH the source and target nodes are visible
   const baseEdges: Edge[] = [];
   visibleNotes.forEach(sourceNote => {
     const children = parentToChildren.get(sourceNote.uuid) || [];
     children.forEach(targetUuid => {
       const targetNote = allNoteMap.get(targetUuid);
-      if (targetNote && visibleNoteIds.has(targetUuid)) { // Check if target is also visible
+      if (targetNote && visibleNoteIds.has(targetUuid)) {
         const sourcePos = { x: sourceNote.x ?? 0, y: sourceNote.y ?? 0 };
         const targetPos = { x: targetNote.x ?? 0, y: targetNote.y ?? 0 };
         const dx = targetPos.x - sourcePos.x;
@@ -132,16 +126,16 @@ const getBaseElements = (visibleNotes: Note[], allNotes: Note[], theme: 'light' 
   return { baseNodes, baseEdges, childToParents, parentToChildren };
 };
 
-// FIX: This component now accepts the 'notes' prop again, which is the filtered list.
 const FlowComponent: React.FC<{ notes: Note[] }> = ({ notes: visibleNotes }) => {
   const allNotesFromStore = useNoteStore(state => state.notes);
   const theme = useAppStore(state => state.theme);
-  const navigate = useNavigate();
+
   const { updateNodePosition } = useNoteStore();
 
   const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [previewNote, setPreviewNote] = useState<Note | null>(null);
 
-  // FIX: The main memo hook now depends on 'visibleNotes' to re-calculate when filters change.
   const { baseNodes, baseEdges, childToParents, parentToChildren } = useMemo(
     () => getBaseElements(visibleNotes, allNotesFromStore, theme),
     [visibleNotes, allNotesFromStore, theme]
@@ -214,14 +208,18 @@ const FlowComponent: React.FC<{ notes: Note[] }> = ({ notes: visibleNotes }) => 
   const handleNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
     const target = event.target as HTMLElement;
     if (target.closest('.expand-collapse-button')) {
-      const clickedNode = allNotesFromStore.find(n => n.uuid === node.id);
-      if (clickedNode) {
-        updateNodePosition(clickedNode.id!, clickedNode.x!, clickedNode.y!, !clickedNode.isCollapsed);
+      const clickedNote = allNotesFromStore.find(n => n.uuid === node.id);
+      if (clickedNote) {
+        updateNodePosition(clickedNote.id!, clickedNote.x!, clickedNote.y!, !clickedNote.isCollapsed);
       }
     } else {
-      navigate(`/notes`, { state: { selectedId: node.data.noteId } });
+        const clickedNote = allNotesFromStore.find(n => n.uuid === node.id);
+        if (clickedNote) {
+            setPreviewNote(clickedNote);
+            setIsModalOpen(true);
+        }
     }
-  }, [navigate, updateNodePosition, allNotesFromStore]);
+  }, [updateNodePosition, allNotesFromStore]);
   
   const handleNodeDragStop = useCallback((_: React.MouseEvent, node: Node) => {
     updateNodePosition(node.data.noteId, node.position.x, node.position.y);
@@ -245,6 +243,7 @@ const FlowComponent: React.FC<{ notes: Note[] }> = ({ notes: visibleNotes }) => 
         <Controls />
         <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
+      <NotePreviewModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} note={previewNote} />
     </div>
   );
 };
