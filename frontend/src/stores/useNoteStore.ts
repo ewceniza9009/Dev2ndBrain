@@ -7,7 +7,7 @@ interface NoteState {
   notes: Note[];
   templates: Template[];
   isLoading: boolean;
-  getUniqueTags: () => string[]; // New selector function
+  getUniqueTags: () => string[];
   fetchNotes: () => Promise<void>;
   fetchTemplates: () => Promise<void>;
   addTemplate: (template: Omit<Template, 'id' | 'createdAt'>) => Promise<void>;
@@ -16,7 +16,8 @@ interface NoteState {
   getNoteById: (id: number) => Note | undefined;
   addNote: (newNote: Omit<Note, 'id' | 'createdAt' | 'updatedAt' | 'uuid' | 'linkedNoteIds'>) => Promise<Note>;
   updateNote: (id: number, updatedContent: Partial<Note>) => Promise<void>;
-  updateNodePosition: (id: number, x: number, y: number) => Promise<void>;
+  // FIX: Corrected the function signature to allow null for fx and fy.
+  updateNodePosition: (id: number, x: number, y: number, isCollapsed?: boolean, fx?: number | null, fy?: number | null) => Promise<void>;
   deleteNote: (id: number) => Promise<void>;
 }
 
@@ -95,13 +96,26 @@ export const useNoteStore = create<NoteState>((set, get) => ({
     }
   },
 
-  // FIX: This function now correctly saves the fixed positions (fx, fy) to the database.
-  updateNodePosition: async (id, x, y) => {
-    // The force-directed graph uses `fx` and `fy` to fix a node's position.
-    // We should save these values as well so the position persists.
-    await db.notes.update(id, { x, y, fx: x, fy: y });
+  updateNodePosition: async (id, x, y, isCollapsed, fx, fy) => {
+    const updateData: Partial<Note> = { x, y };
+    if (isCollapsed !== undefined) {
+      updateData.isCollapsed = isCollapsed;
+    }
+    if (fx !== undefined) {
+      updateData.fx = fx;
+    }
+    if (fy !== undefined) {
+      updateData.fy = fy;
+    }
+
+    await db.notes.update(id, updateData);
+    
     set((state) => ({
-      notes: state.notes.map((note) => (note.id === id ? { ...note, x, y, fx: x, fy: y } : note)),
+      notes: state.notes.map((note) =>
+        note.id === id
+          ? { ...note, ...updateData }
+          : note
+      ),
     }));
   },
 

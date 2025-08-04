@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^1.1.5",
     "@heroicons/react": "^2.2.0",
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/typography": "^0.5.16",
@@ -24,6 +25,7 @@
     "react-markdown": "^10.1.0",
     "react-router-dom": "^7.7.1",
     "react-syntax-highlighter": "^15.6.1",
+    "reactflow": "^11.11.4",
     "remark-gfm": "^4.0.1",
     "unist-util-visit": "^5.0.0",
     "uuid": "^11.1.0",

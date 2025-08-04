@@ -17,10 +17,12 @@ export interface Note {
   linkedNoteIds: string[];
   iconType?: typeof IconType[keyof typeof IconType];
   iconColor?: typeof IconColor[keyof typeof IconColor];
+    isCollapsed?: boolean;
   x?: number;
   y?: number;
-  fx?: number;
-  fy?: number;
+  // FIX: Allow fx and fy to be null to handle un-pinning nodes.
+  fx?: number | null;
+  fy?: number | null;
   createdAt: Date;
   updatedAt: Date;
 }
