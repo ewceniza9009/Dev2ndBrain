@@ -7,7 +7,8 @@ import ConsoleOutput from './ConsoleOutput';
 import { openCodeRunnerWindow } from './CodeRunner';
 import SnippetAiModal from './SnippetAiModal';
 import { 
-  PencilSquareIcon, TrashIcon, CloudArrowUpIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, PlayIcon, SparklesIcon, XMarkIcon
+  PencilSquareIcon, TrashIcon, CloudArrowUpIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, PlayIcon, SparklesIcon, XMarkIcon,
+  CheckIcon
 } from '@heroicons/react/20/solid';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
@@ -112,14 +113,23 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
               className="mt-1 w-full p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white"
             >
               <option value="javascript">JavaScript</option>
-              <option value="html">HTML</option>
-              <option value="csharp">C#</option>
               <option value="typescript">TypeScript</option>
               <option value="python">Python</option>
+              <option value="java">Java</option>
+              <option value="csharp">C#</option>
+              <option value="go">Go</option>
+              <option value="rust">Rust</option>
+              <option value="php">PHP</option>
+              <option value="ruby">Ruby</option>
+              <option value="html">HTML</option>
               <option value="css">CSS</option>
+              <option value="sql">SQL</option>
               <option value="json">JSON</option>
+              <option value="yaml">YAML</option>
               <option value="markdown">Markdown</option>
+              <option value="shell">Shell</option>
               <option value="plaintext">Plain Text</option>
+
             </select>
           </div>
           <div>
@@ -135,7 +145,7 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
             />
           </div>
         </div>
-        <div className="h-96 border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
+        <div className="h-[60vh] border border-gray-300 dark:border-gray-600 rounded-md overflow-hidden">
           <Editor
             language={editedSnippet.language}
             value={editedSnippet.code}
@@ -144,15 +154,17 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           />
         </div>
         <div className="flex space-x-2">
-          <button onClick={handleSave} className="bg-teal-600 text-white rounded-lg px-4 py-2 hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200">
-            Save
-          </button>
-          <button
-            onClick={() => setIsEditing(false)}
-            className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200"
-          >
-            Cancel
-          </button>
+          <button onClick={handleSave} className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200">
+                <CheckIcon className="h-5 w-5" />
+                <span>Save</span>
+            </button>
+            <button
+                onClick={() => setIsEditing(false)}
+                className="flex items-center space-x-1 bg-gray-500 text-white rounded-lg px-4 py-2 text-sm hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200"
+            >
+                <XMarkIcon className="h-5 w-5" />
+                <span>Cancel</span>
+            </button>
         </div>
       </div>
     );

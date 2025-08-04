@@ -164,6 +164,13 @@ const FlashcardsPage: React.FC = () => {
                   ) : (
                       <>
                           <button 
+                              onClick={() => { setReviewMode('all'); setView('review'); }} 
+                              className="flex items-center space-x-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                              <PlayCircleIcon className="h-5 w-5" />
+                              <span>Review All Cards</span>
+                            </button>
+                          <button 
                             onClick={() => { setReviewMode('due'); setView('review'); }} 
                             className="flex items-center space-x-2 bg-purple-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-purple-700 shadow-md hover:shadow-lg transition-all duration-200"
                           >
@@ -182,16 +189,7 @@ const FlashcardsPage: React.FC = () => {
               </div>
             </div>
             
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">
-                <div className="flex items-center space-x-4 mb-6">
-                    <button 
-                      onClick={() => { setReviewMode('all'); setView('review'); }} 
-                      className="flex items-center space-x-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
-                    >
-                      <PlayCircleIcon className="h-5 w-5" />
-                      <span>Review All Cards</span>
-                    </button>
-                </div>
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">                
                 <DeckView deck={selectedDeck} />
             </div>
           </div>

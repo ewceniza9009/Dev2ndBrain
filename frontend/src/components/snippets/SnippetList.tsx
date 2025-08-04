@@ -132,14 +132,14 @@ const SnippetList: React.FC<SnippetListProps> = ({
     >
       <button
         onClick={() => onSelectSnippet(snippet.id!)}
-        className={`w-full text-left p-4 border-l-4 ${
+        className={`w-full text-left p-2 border-l-4 ${
           selectedSnippetId === snippet.id
-            ? 'bg-gray-200 dark:bg-gray-700 border-teal-500'
-            : 'border-transparent hover:bg-gray-200 dark:hover:bg-gray-700'
+            ? 'bg-gray-200 pl-6 dark:bg-gray-700 border-teal-500'
+            : 'border-transparent pl-5 hover:bg-gray-200 dark:hover:bg-gray-700'
         }`}
       >
         <h3 className="font-semibold text-gray-900 dark:text-white truncate">{snippet.title}</h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400">{snippet.language}</p>
+        <p className="text-sm text-gray-500 dark:text-gray-400">{snippet.createdAt.toLocaleString()}</p>
       </button>
     </li>
   );
@@ -203,7 +203,7 @@ const SnippetList: React.FC<SnippetListProps> = ({
                   <React.Fragment key={tag}>
                     <h3
                       onClick={() => toggleTagCollapse(language, tag)}
-                      className="flex justify-between items-center pl-6 pr-4 py-1 text-xs font-semibold text-gray-400 dark:text-gray-500 sticky top-10 bg-gray-100 dark:bg-gray-800 z-10 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+                      className="flex justify-between items-center pl-5 pr-5 py-1 text-sm font-semibold text-gray-400 dark:text-gray-500 sticky top-10 bg-gray-100 dark:bg-gray-800 z-10 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       <span>{tag.charAt(0).toUpperCase() + tag.slice(1)}</span>
                       <ChevronRightIcon className={`h-4 w-4 transform transition-transform duration-200 ${isTagCollapsed ? '' : 'rotate-90'}`} />
