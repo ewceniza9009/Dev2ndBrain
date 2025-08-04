@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { Snippet } from '../../types';
-
+import { XMarkIcon } from '@heroicons/react/20/solid';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
 
 interface SnippetAiModalProps {
@@ -57,14 +57,14 @@ const SnippetAiModal: React.FC<SnippetAiModalProps> = ({ isOpen, onClose, snippe
                     <button
                         onClick={() => handlePromptClick('explain')}
                         disabled={isLoading}
-                        className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-500"
+                        className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-gray-500"
                     >
                         Explain Code
                     </button>
                     <button
                         onClick={() => handlePromptClick('refactor')}
                         disabled={isLoading}
-                        className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 disabled:bg-gray-500"
+                        className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-gray-500"
                     >
                         Refactor Code
                     </button>
@@ -75,8 +75,9 @@ const SnippetAiModal: React.FC<SnippetAiModalProps> = ({ isOpen, onClose, snippe
                 </div>
 
                 <div className="flex justify-end space-x-2 mt-4">
-                    <button onClick={onClose} className="px-4 py-2 bg-gray-500 text-white rounded-lg">
-                        Close
+                    <button onClick={onClose} className="flex items-center space-x-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200">
+                      <XMarkIcon className="h-5 w-5" />
+                      <span>Close</span>
                     </button>
                 </div>
             </div>

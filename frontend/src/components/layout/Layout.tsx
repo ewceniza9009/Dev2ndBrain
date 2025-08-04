@@ -1,5 +1,3 @@
-// frontend/src/components/layout/Layout.tsx
-
 import React, { useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import Header from './Header';
@@ -30,9 +28,8 @@ const Layout: React.FC = () => {
         <Sidebar />
       </div>
       <div className="flex flex-col flex-1 w-full overflow-hidden">
-        {/* MODIFIED: Pass the state and function as props */}
         <Header onToggleSidebar={toggleSidebar} isSidebarCollapsed={isSidebarCollapsed} />
-        <main className="h-full overflow-y-auto bg-white dark:bg-gray-900">
+        <main className="h-full overflow-y-auto bg-gray-50 dark:bg-gray-900">
           <Outlet />
         </main>
       </div>

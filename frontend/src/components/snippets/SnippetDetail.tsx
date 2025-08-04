@@ -5,7 +5,10 @@ import Editor from '@monaco-editor/react';
 import { useAppStore } from '../../stores/useAppStore';
 import ConsoleOutput from './ConsoleOutput';
 import { openCodeRunnerWindow } from './CodeRunner';
-import SnippetAiModal from './SnippetAiModal'; // NEW: Import the snippet AI modal
+import SnippetAiModal from './SnippetAiModal';
+import { 
+  PencilSquareIcon, TrashIcon, CloudArrowUpIcon, ArrowDownTrayIcon, ArrowUpTrayIcon, PlayIcon, SparklesIcon, XMarkIcon
+} from '@heroicons/react/20/solid';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
 
@@ -18,8 +21,7 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
   const [isCodeRunning, setIsCodeRunning] = useState(false);
   const [userInputs, setUserInputs] = useState('');
   const [showCSharpModal, setShowCSharpModal] = useState(false);
-  // NEW: State for the Snippet AI modal
-  const [isAiModalOpen, setIsAiModalOpen] = useState(false); 
+  const [isAiModalOpen, setIsAiModalOpen] = useState(false);
 
   useEffect(() => {
     setEditedSnippet(snippet);
@@ -56,7 +58,7 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
     if (!snippet) return;
     setIsCodeRunning(true);
     setConsoleOutput('');
-    setShowCSharpModal(true); // Show the modal
+    setShowCSharpModal(true);
     try {
       const inputs = userInputs.split('\n').map((input) => input.trim()).filter(Boolean);
       const response = await fetch(`${API_BASE_URL}/api/execute/csharp`, {
@@ -86,7 +88,6 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
     return <div className="p-8 text-gray-500 dark:text-gray-400">Select a snippet from the list or create a new one.</div>;
   }
 
-  // MODIFIED: This is the new, correct code for the editing view
   if (isEditing) {
     return (
       <div className="p-6 space-y-4">
@@ -143,13 +144,12 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           />
         </div>
         <div className="flex space-x-2">
-          {/* This button calls the handleSave function, resolving the warning */}
-          <button onClick={handleSave} className="px-4 py-2 bg-teal-600 text-white rounded-lg">
+          <button onClick={handleSave} className="bg-teal-600 text-white rounded-lg px-4 py-2 hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200">
             Save
           </button>
           <button
             onClick={() => setIsEditing(false)}
-            className="px-4 py-2 bg-gray-500 dark:bg-gray-600 text-white rounded-lg"
+            className="bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200"
           >
             Cancel
           </button>
@@ -182,27 +182,29 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           </div>
         </div>
         <div className="flex space-x-2 flex-shrink-0">
-          {/* NEW: Button to open the AI modal */}
           <button
               onClick={() => setIsAiModalOpen(true)}
-              className="px-4 py-2 text-sm bg-indigo-600 rounded-lg text-white"
+              className="flex items-center space-x-1 bg-indigo-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-indigo-700 shadow-md hover:shadow-lg transition-all duration-200"
           >
-              Ask AI ✨
+              <SparklesIcon className="h-5 w-5" />
+              <span>Ask AI</span>
           </button>
           {isRunnableWeb && (
             <button
               onClick={handlePopout}
-              className="px-4 py-2 text-sm bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+              className="flex items-center space-x-1 bg-cyan-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-cyan-700 shadow-md hover:shadow-lg transition-all duration-200"
             >
-              ▶ Popout Web
+              <PlayIcon className="h-5 w-5" />
+              <span>Popout Web</span>
             </button>
           )}
           {snippet.language === 'csharp' && (
             <button
               onClick={handleRunCSharp}
-              className="px-4 py-2 text-sm bg-cyan-600 text-white rounded-lg hover:bg-cyan-700"
+              className="flex items-center space-x-1 bg-cyan-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-cyan-700 shadow-md hover:shadow-lg transition-all duration-200"
             >
-              ▶ Run C#
+              <PlayIcon className="h-5 w-5" />
+              <span>Run C#</span>
             </button>
           )}
           {snippet.gistId ? (
@@ -211,39 +213,44 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
                 href={`https://gist.github.com/${snippet.gistId}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="px-3 py-2 text-sm bg-gray-700 text-white rounded-lg hover:bg-black"
+                className="flex items-center space-x-1 bg-gray-700 text-white rounded-lg px-3 py-2 text-sm hover:bg-black shadow-md hover:shadow-lg transition-all duration-200"
                 title="View on Gist"
               >
-                🔗
+                <span>🔗</span>
               </a>
               <button
                 onClick={() => pullFromGist(snippet.id!)}
-                className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center space-x-1 bg-blue-600 text-white rounded-lg px-3 py-2 text-sm hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
                 title="Pull from Gist"
               >
-                ↓ Pull
+                <ArrowDownTrayIcon className="h-5 w-5" />
+                <span>Pull</span>
               </button>
               <button
                 onClick={() => pushToGist(snippet.id!)}
-                className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex items-center space-x-1 bg-green-600 text-white rounded-lg px-3 py-2 text-sm hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-200"
                 title="Push to Gist"
               >
-                ↑ Push
+                <ArrowUpTrayIcon className="h-5 w-5" />
+                <span>Push</span>
               </button>
             </>
           ) : (
             <button
               onClick={() => syncSnippetToGist(snippet.id!)}
-              className="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg"
+              className="flex items-center space-x-1 bg-gray-500 text-white rounded-lg px-4 py-2 text-sm hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200"
             >
-              Sync to Gist
+              <CloudArrowUpIcon className="h-5 w-5" />
+              <span>Sync to Gist</span>
             </button>
           )}
-          <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-gray-600 text-white rounded-lg">
-            Edit
+          <button onClick={() => setIsEditing(true)} className="flex items-center space-x-1 bg-gray-600 text-white rounded-lg px-4 py-2 hover:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200">
+            <PencilSquareIcon className="h-5 w-5" />
+            <span>Edit</span>
           </button>
-          <button onClick={handleDelete} className="px-4 py-2 bg-red-600 text-white rounded-lg">
-            Delete
+          <button onClick={handleDelete} className="flex items-center space-x-1 bg-red-600 text-white rounded-lg px-4 py-2 hover:bg-red-700 shadow-md hover:shadow-lg transition-all duration-200">
+            <TrashIcon className="h-5 w-5" />
+            <span>Delete</span>
           </button>
         </div>
       </div>
@@ -259,7 +266,6 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
               options={{ readOnly: true, minimap: { enabled: false } }}
             />
           </div>
-          {/* This is the modal container */}
           {showCSharpModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75">
               <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-11/12 md:w-1/2 relative">
@@ -284,15 +290,17 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
                   <button
                     onClick={handleRunCSharp}
                     disabled={isCodeRunning}
-                    className="px-4 py-2 text-sm bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:bg-gray-500"
+                    className="flex items-center space-x-1 bg-cyan-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-cyan-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-gray-500"
                   >
-                    {isCodeRunning ? 'Running...' : '▶ Run Again'}
+                    <PlayIcon className="h-5 w-5" />
+                    <span>{isCodeRunning ? 'Running...' : 'Run Again'}</span>
                   </button>
                   <button
                     onClick={() => setShowCSharpModal(false)}
-                    className="px-4 py-2 text-sm bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+                    className="flex items-center space-x-1 bg-gray-500 text-white rounded-lg px-4 py-2 text-sm hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200"
                   >
-                    Close
+                    <XMarkIcon className="h-5 w-5" />
+                    <span>Close</span>
                   </button>
                 </div>
               </div>
@@ -300,7 +308,6 @@ const SnippetDetail: React.FC<{ snippet: Snippet | null }> = ({ snippet }) => {
           )}
         </div>
       </div>
-      {/* NEW: Render the new SnippetAiModal */}
       <SnippetAiModal
           isOpen={isAiModalOpen}
           onClose={() => setIsAiModalOpen(false)}

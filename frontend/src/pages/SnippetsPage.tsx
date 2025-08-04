@@ -3,39 +3,35 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useSnippetStore } from '../stores/useSnippetStore';
 import SnippetList from '../components/snippets/SnippetList';
 import SnippetDetail from '../components/snippets/SnippetDetail';
+import { PlusIcon } from '@heroicons/react/20/solid';
 
 const SnippetsPage: React.FC = () => {
   const { snippets, fetchSnippets, addSnippet } = useSnippetStore();
   const [selectedSnippetId, setSelectedSnippetId] = useState<number | null>(null);
   const location = useLocation();
-  const navigate = useNavigate(); // Import useNavigate
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchSnippets();
   }, [fetchSnippets]);
 
   useEffect(() => {
-    // Check for an ID passed from the search bar
     if (location.state?.selectedId) {
       setSelectedSnippetId(location.state.selectedId);
-      // MODIFIED: Clear the navigation state to prevent bug
       navigate(location.pathname, { replace: true });
     }
-    // Otherwise, select the first snippet if none is selected
     else if (!selectedSnippetId && snippets.length > 0) {
       setSelectedSnippetId(snippets[0].id!);
     }
-  }, [snippets, selectedSnippetId, location.state, navigate]); // MODIFIED: Add navigate to dependencies
+  }, [snippets, selectedSnippetId, location.state, navigate]);
   
   const handleNewSnippet = async () => {
-    await addSnippet({
+    const newSnippet = await addSnippet({
       title: "New Snippet",
       language: "plaintext",
       code: "",
       tags: []
     });
-    const newSnippets = useSnippetStore.getState().snippets;
-    const newSnippet = newSnippets[newSnippets.length - 1];
     if (newSnippet) {
       setSelectedSnippetId(newSnippet.id!);
     }
@@ -46,6 +42,16 @@ const SnippetsPage: React.FC = () => {
   return (
     <div className="flex h-full">
       <div className="w-1/3 border-r border-gray-700">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Snippets</h2>
+            <button
+                onClick={handleNewSnippet}
+                className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
+            >
+                <PlusIcon className="h-4 w-4" />
+                <span>New</span>
+            </button>
+        </div>
         <SnippetList
           snippets={snippets}
           selectedSnippetId={selectedSnippetId}

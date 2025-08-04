@@ -14,19 +14,9 @@ const DeckList: React.FC<DeckListProps> = ({
   cardCounts,
   selectedDeckId,
   onSelectDeck,
-  onNewDeck,
 }) => {
   return (
     <div className="bg-gray-100 dark:bg-gray-800 h-full flex flex-col">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Decks</h2>
-        <button
-          onClick={onNewDeck}
-          className="px-3 py-1 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700"
-        >
-          New
-        </button>
-      </div>
       <ul className="flex-grow overflow-y-auto">
         {decks.map((deck) => (
           <li key={deck.id}>

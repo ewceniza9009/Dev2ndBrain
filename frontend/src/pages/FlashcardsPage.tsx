@@ -6,7 +6,8 @@ import DeckList from '../components/flashcards/DeckList';
 import ConfirmationModal from '../components/ConfirmationModal';
 import NewDeckModal from '../components/NewDeckModal';
 import type { Flashcard } from '../types';
-import { useLocation, useNavigate } from 'react-router-dom'; // NEW: Import hooks
+import { useLocation, useNavigate } from 'react-router-dom';
+import { PlusIcon, TrashIcon, PlayCircleIcon } from '@heroicons/react/20/solid';
 
 const FlashcardsPage: React.FC = () => {
   const { decks, allCards, fetchDecks, fetchAllCards, addDeck, deleteDeck } = useFlashcardStore();
@@ -15,8 +16,8 @@ const FlashcardsPage: React.FC = () => {
   const [reviewMode, setReviewMode] = useState<'due' | 'all'>('due');
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isNewDeckModalOpen, setIsNewDeckModalOpen] = useState(false);
-  const location = useLocation(); // NEW
-  const navigate = useNavigate(); // NEW
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchDecks();
@@ -24,18 +25,16 @@ const FlashcardsPage: React.FC = () => {
   }, [fetchDecks, fetchAllCards]);
 
   useEffect(() => {
-    // NEW: Check for a selected deck ID from navigation state
     if (location.state?.selectedDeckId) {
         setSelectedDeckId(location.state.selectedDeckId);
-        navigate(location.pathname, { replace: true }); // Clear state
+        navigate(location.pathname, { replace: true });
     }
-    // Existing logic for selecting a deck
     else if (selectedDeckId && !decks.find(d => d.id === selectedDeckId)) {
       setSelectedDeckId(decks.length > 0 ? decks[0].id! : null);
     } else if (!selectedDeckId && decks.length > 0) {
       setSelectedDeckId(decks[0].id!);
     }
-  }, [decks, selectedDeckId, location.state]);
+  }, [decks, selectedDeckId, location.state, navigate]);
 
   const cardCounts = useMemo(() => {
     return allCards.reduce((acc: { [key: number]: number }, card: Flashcard) => {
@@ -85,6 +84,16 @@ const FlashcardsPage: React.FC = () => {
   return (
     <div className="flex h-full">
       <div className="w-1/3 border-r border-gray-200 dark:border-gray-700">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Decks</h2>
+            <button
+                onClick={handleNewDeckClick}
+                className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
+            >
+                <PlusIcon className="h-4 w-4" />
+                <span>New</span>
+            </button>
+        </div>
         <DeckList
           decks={decks}
           cardCounts={cardCounts}
@@ -100,15 +109,27 @@ const FlashcardsPage: React.FC = () => {
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center space-x-4">
                 <h2 className="text-3xl text-gray-900 dark:text-white font-bold">{selectedDeck.name}</h2>
-                <button onClick={() => { setReviewMode('all'); setView('review'); }} className="px-4 py-2 text-sm bg-blue-600 rounded-lg text-white">
-                  Review All
+                <button 
+                  onClick={() => { setReviewMode('all'); setView('review'); }} 
+                  className="flex items-center space-x-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <PlayCircleIcon className="h-5 w-5" />
+                  <span>Review All</span>
                 </button>
-                <button onClick={() => { setReviewMode('due'); setView('review'); }} className="px-4 py-2 text-sm bg-purple-600 rounded-lg text-white">
-                  Review Due
+                <button 
+                  onClick={() => { setReviewMode('due'); setView('review'); }} 
+                  className="flex items-center space-x-1 bg-purple-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-purple-700 shadow-md hover:shadow-lg transition-all duration-200"
+                >
+                  <PlayCircleIcon className="h-5 w-5" />
+                  <span>Review Due</span>
                 </button>
               </div>
-              <button onClick={handleDeleteDeck} className="px-4 py-2 text-sm bg-red-600 rounded-lg text-white">
-                Delete Deck
+              <button 
+                onClick={handleDeleteDeck} 
+                className="flex items-center space-x-1 bg-red-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-red-700 shadow-md hover:shadow-lg transition-all duration-200"
+              >
+                <TrashIcon className="h-5 w-5" />
+                <span>Delete Deck</span>
               </button>
             </div>
             

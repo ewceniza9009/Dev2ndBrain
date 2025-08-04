@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { XMarkIcon } from '@heroicons/react/20/solid';
 
 interface NewDeckModalProps {
   isOpen: boolean;
@@ -38,10 +39,17 @@ const NewDeckModal: React.FC<NewDeckModalProps> = ({ isOpen, onClose, onConfirm 
           autoFocus
         />
         <div className="flex justify-end space-x-4">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-300 dark:bg-gray-700 rounded-lg text-gray-800 dark:text-gray-200 hover:bg-gray-400 dark:hover:bg-gray-600">
-            Cancel
+          <button 
+            onClick={onClose} 
+            className="flex items-center space-x-1 bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200"
+          >
+            <XMarkIcon className="h-5 w-5" />
+            <span>Cancel</span>
           </button>
-          <button onClick={handleConfirm} className="px-4 py-2 bg-teal-600 rounded-lg text-white hover:bg-teal-700">
+          <button 
+            onClick={handleConfirm} 
+            className="bg-teal-600 text-white rounded-lg px-4 py-2 hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
+          >
             OK
           </button>
         </div>

@@ -5,6 +5,7 @@ import NoteList from '../components/notes/NoteList';
 import NoteDetailView from '../components/notes/NoteDetailView';
 import NewNoteModal from '../components/notes/NewNoteModal';
 import type { Note, Template } from '../types';
+import { PlusIcon } from '@heroicons/react/20/solid';
 
 const NotesListPage: React.FC = () => {
   const { notes, templates, fetchNotes, fetchTemplates, addNote } = useNoteStore();
@@ -13,7 +14,7 @@ const NotesListPage: React.FC = () => {
   const [isNewNoteModalOpen, setIsNewNoteModalOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const [isFromGraph, setIsFromGraph] = useState(false); // NEW: Local state for the flag
+  const [isFromGraph, setIsFromGraph] = useState(false);
 
   useEffect(() => {
     fetchNotes();
@@ -21,19 +22,15 @@ const NotesListPage: React.FC = () => {
   }, [fetchNotes, fetchTemplates]);
 
   useEffect(() => {
-    // Check for a selectedId from navigation state
     if (location.state?.selectedId) {
       setSelectedNoteId(location.state.selectedId);
-      // NEW: Read the flag and update local state before clearing the navigation state
       setIsFromGraph(location.state.isFromGraph || false);
-      // Clean up the state to prevent it from sticking
       navigate(location.pathname, { replace: true });
     } 
-    // If no note is selected and we have notes, select the first one
     else if (!selectedNoteId && notes.length > 0) {
       const sortedNotes = [...notes].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
       setSelectedNoteId(sortedNotes[0].id!);
-      setIsFromGraph(false); // Reset the flag
+      setIsFromGraph(false);
     }
   }, [notes, selectedNoteId, location.state, navigate]);
 
@@ -84,9 +81,10 @@ const NotesListPage: React.FC = () => {
             </div>
             <button
               onClick={() => setIsNewNoteModalOpen(true)}
-              className="px-3 py-1 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700"
+              className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
             >
-              New
+              <PlusIcon className="h-4 w-4" />
+              <span>New</span>
             </button>
           </div>
           <NoteList

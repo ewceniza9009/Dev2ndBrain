@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { useAuthStore, type AuthState } from '../stores/useAuthStore';
 import GitHubLoginButton from '../components/auth/GitHubLoginButton';
 import { syncService } from '../services/syncService';
-import TemplateManager from '../components/settings/TemplateManager'; 
+import TemplateManager from '../components/settings/TemplateManager';
+import { 
+  ArrowLeftOnRectangleIcon, CloudArrowUpIcon, CloudArrowDownIcon 
+} from '@heroicons/react/20/solid';
 
 const SettingsPage: React.FC = () => {
   const isAuthenticated = useAuthStore((state: AuthState) => state.isAuthenticated);
@@ -50,31 +53,29 @@ const SettingsPage: React.FC = () => {
     <div className="p-4">
       <h1 className="text-2xl font-semibold text-gray-700 dark:text-gray-200">Settings</h1>
 
-      {/* Note Templates Section */}
       <TemplateManager />
 
-      {/* GitHub Sync Section */}
       <div className="mt-6 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
         <h2 className="text-xl font-medium text-gray-700 dark:text-gray-200">GitHub Sync</h2>
         {isAuthenticated && user ? (
           <div className="mt-2">
-            <p>Logged in as: <span className="font-bold">{user.name || user.login}</span></p>
+            <p className="text-gray-600 dark:text-gray-400">Logged in as: <span className="font-bold">{user.name || user.login}</span></p>
             <button
               onClick={logout}
-              className="mt-4 px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-red-600 border border-transparent rounded-lg active:bg-red-600 hover:bg-red-700 focus:outline-none focus:shadow-outline-red"
+              className="mt-4 flex items-center space-x-2 bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-red-700 shadow-md hover:shadow-lg transition-all duration-200"
             >
-              Logout from GitHub
+              <ArrowLeftOnRectangleIcon className="h-5 w-5" />
+              <span>Logout from GitHub</span>
             </button>
           </div>
         ) : (
           <div className="mt-2">
-            <p className="mb-4">You are not logged in. Connect your GitHub account to sync snippets as Gists.</p>
+            <p className="mb-4 text-gray-600 dark:text-gray-400">You are not logged in. Connect your GitHub account to sync snippets as Gists.</p>
             <GitHubLoginButton />
           </div>
         )}
       </div>
 
-      {/* Backend Sync Section */}
       <div className="mt-6 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800">
         <h2 className="text-xl font-medium text-gray-700 dark:text-gray-200">Backend Backup</h2>
         {isAuthenticated ? (
@@ -87,16 +88,18 @@ const SettingsPage: React.FC = () => {
               <button
                 onClick={handlePush}
                 disabled={isPushing}
-                className="px-4 py-2 font-medium leading-5 text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg active:bg-blue-600 hover:bg-blue-700 focus:outline-none focus:shadow-outline-blue disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center space-x-2 bg-blue-600 text-white rounded-lg px-4 py-2 font-medium hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isPushing ? 'Pushing...' : 'Push Local Data'}
+                <CloudArrowUpIcon className="h-5 w-5" />
+                <span>{isPushing ? 'Pushing...' : 'Push Local Data'}</span>
               </button>
               <button
                 onClick={handlePull}
                 disabled={isPulling}
-                className="px-4 py-2 font-medium leading-5 text-white transition-colors duration-150 bg-gray-600 border border-transparent rounded-lg active:bg-gray-600 hover:bg-gray-700 focus:outline-none focus:shadow-outline-gray disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center justify-center space-x-2 bg-gray-600 text-white rounded-lg px-4 py-2 font-medium hover:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {isPulling ? 'Pulling...' : 'Pull from Backend'}
+                <CloudArrowDownIcon className="h-5 w-5" />
+                <span>{isPulling ? 'Pulling...' : 'Pull from Backend'}</span>
               </button>
             </div>
             {pushMessage && (

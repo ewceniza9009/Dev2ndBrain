@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { Snippet } from '../../types';
 import { useSnippetStore } from '../../stores/useSnippetStore';
 import { useAuthStore } from '../../stores/useAuthStore';
-import { ChevronRightIcon } from '@heroicons/react/20/solid'; // Import the new icon
+import { ChevronRightIcon, PlusIcon, ArrowDownOnSquareStackIcon } from '@heroicons/react/20/solid';
 
 interface SnippetListProps {
   snippets: Snippet[];
@@ -11,7 +11,6 @@ interface SnippetListProps {
   onNewSnippet: () => void;
 }
 
-// Function to group snippets by language and then by tags
 const groupSnippets = (snippets: Snippet[]) => {
   const grouped: { [language: string]: { [tag: string]: Snippet[] } } = {};
   const fallbackLanguage = 'Other';
@@ -75,7 +74,8 @@ const SnippetList: React.FC<SnippetListProps> = ({
     if (selectedSnippetId && snippetRefs.current[selectedSnippetId]) {
       snippetRefs.current[selectedSnippetId]?.scrollIntoView({
         behavior: 'smooth',
-        block: 'center',
+        // FIX: Changed 'center' to 'nearest' to prevent scrolling if the item is already visible.
+        block: 'nearest',
       });
     }
   }, [selectedSnippetId]);
@@ -104,16 +104,18 @@ const SnippetList: React.FC<SnippetListProps> = ({
       <div className="p-4 border-b border-gray-200 dark:border-gray-700 space-y-2">
         <button
           onClick={onNewSnippet}
-          className="w-full px-4 py-2 text-sm font-semibold text-white bg-teal-600 rounded-lg hover:bg-teal-700"
+          className="w-full flex items-center justify-center space-x-2 bg-teal-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
         >
-          New Snippet
+          <PlusIcon className="h-5 w-5" />
+          <span>New Snippet</span>
         </button>
         {isAuthenticated && (
           <button
             onClick={importFromGists}
-            className="w-full px-4 py-2 text-sm font-semibold text-white bg-gray-600 rounded-lg hover:bg-gray-700"
+            className="w-full flex items-center justify-center space-x-2 bg-gray-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-gray-700 shadow-md hover:shadow-lg transition-all duration-200"
           >
-            Import from Gists
+            <ArrowDownOnSquareStackIcon className="h-5 w-5" />
+            <span>Import from Gists</span>
           </button>
         )}
       </div>

@@ -51,7 +51,7 @@ const NoteList: React.FC<NoteListProps> = ({
     if (selectedNoteId && noteRefs.current[selectedNoteId]) {
       noteRefs.current[selectedNoteId]?.scrollIntoView({
         behavior: 'smooth',
-        block: 'center',
+        block: 'nearest',
       });
     }
   }, [selectedNoteId]);
