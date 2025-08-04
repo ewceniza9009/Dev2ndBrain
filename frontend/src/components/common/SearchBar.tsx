@@ -72,7 +72,7 @@ const SearchBar: React.FC = () => {
         type="text"
         value={query}
         onChange={handleSearch}
-        placeholder="Search notes and snippets..."
+        placeholder="Search notes, snippets and decks..."
         className="w-full px-4 py-2 text-gray-800 dark:text-gray-300 bg-gray-200 dark:bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
       />
       {results.length > 0 && (

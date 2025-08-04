@@ -1,6 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Note } from '../../types';
-import { ChevronRightIcon } from '@heroicons/react/20/solid';
+import {
+  ChevronRightIcon,
+  ArrowsPointingInIcon,
+  ArrowsPointingOutIcon,
+} from '@heroicons/react/20/solid';
+
+const COLLAPSED_TAGS_STORAGE_KEY = 'noteApp.collapsedTags';
 
 interface NoteListProps {
   notes: Note[];
@@ -11,7 +17,7 @@ interface NoteListProps {
 
 const groupNotesByTag = (notes: Note[]) => {
   const grouped: { [tag: string]: Note[] } = {
-    'Notes without Tags': []
+    'Notes without Tags': [],
   };
 
   notes.forEach(note => {
@@ -36,11 +42,33 @@ const NoteList: React.FC<NoteListProps> = ({
   onSelectNote,
 }) => {
   const groupedNotes = groupNotesByTag(notes);
-  const sortedTags = Object.keys(groupedNotes).sort();
+  const sortedTags = Object.keys(groupedNotes).filter(tag => groupedNotes[tag].length > 0);
 
-  const [collapsedTags, setCollapsedTags] = useState<string[]>([]);
+  const [collapsedTags, setCollapsedTags] = useState<string[]>(() => {
+    const saved = localStorage.getItem(COLLAPSED_TAGS_STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return [];
+  });
+
   const noteRefs = useRef<{ [key: number]: HTMLLIElement | null }>({});
 
+  useEffect(() => {
+    localStorage.setItem(COLLAPSED_TAGS_STORAGE_KEY, JSON.stringify(collapsedTags));
+  }, [collapsedTags]);
+
+  // This logic remains the same
+  const allAreCollapsed = sortedTags.length > 0 && collapsedTags.length === sortedTags.length;
+
+  const toggleAll = () => {
+    if (allAreCollapsed) {
+      setCollapsedTags([]); // Expand all
+    } else {
+      setCollapsedTags(sortedTags); // Collapse all
+    }
+  };
+  
   const toggleCollapse = (tag: string) => {
     setCollapsedTags(prev =>
       prev.includes(tag) ? prev.filter(t => t !== tag) : [...prev, tag]
@@ -58,13 +86,23 @@ const NoteList: React.FC<NoteListProps> = ({
 
   return (
     <div className="bg-gray-100 dark:bg-gray-800 h-full flex flex-col">
+      <div className="p-2 flex items-center justify-start border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={toggleAll}
+          className="flex items-center px-2 py-1 text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+        >
+          <span className="mr-1">Expand/Collapse</span>
+          {allAreCollapsed ? (
+            <ArrowsPointingOutIcon className="h-4 w-4" />
+          ) : (
+            <ArrowsPointingInIcon className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+
       <ul className="flex-grow overflow-y-auto">
         {sortedTags.map((tag) => {
           const notesInGroup = groupedNotes[tag];
-          if (notesInGroup.length === 0) {
-            return null;
-          }
-
           const isCollapsed = collapsedTags.includes(tag);
 
           return (
@@ -76,11 +114,10 @@ const NoteList: React.FC<NoteListProps> = ({
                 <span className="min-w-0 truncate">{tag.charAt(0).toUpperCase() + tag.slice(1)}</span>
                 <ChevronRightIcon className={`h-5 w-5 transform transition-transform duration-200 ${isCollapsed ? '' : 'rotate-90'}`} />
               </h2>
-              {/* MODIFIED: This conditional check ensures the notes are only rendered when the tag is not collapsed */}
               {!isCollapsed && notesInGroup.map((note) => (
                 <li
                   key={note.id}
-                  ref={el => noteRefs.current[note.id!] = el}
+                  ref={el => (noteRefs.current[note.id!] = el)}
                 >
                   <button
                     onClick={() => onSelectNote(note.id!)}

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { db } from '../services/db';
+import { searchService } from '../services/searchService';
 import type { Deck, Flashcard } from '../types';
 
 const sm2 = (card: Flashcard, quality: number): Partial<Flashcard> => {
@@ -27,6 +28,7 @@ interface FlashcardState {
     fetchAllCards: () => Promise<void>;
     addDeck: (name: string) => Promise<Deck | undefined>;
     deleteDeck: (deckId: number) => Promise<void>;
+    updateDeck: (deckId: number, name: string) => Promise<void>;
     getDeckById: (id: number) => Deck | undefined;
     fetchCardsByDeck: (deckId: number) => Promise<void>;
     addCard: (cardData: Omit<Flashcard, 'id' | 'nextReview' | 'easeFactor' | 'repetitions' | 'interval'>) => Promise<void>;
@@ -135,5 +137,24 @@ export const useFlashcardStore = create<FlashcardState>((set, get) => ({
             get().fetchAllCards();
             get().fetchCardsByDeck(deckId);
         }
+    },
+
+    updateDeck: async (deckId: number, name: string) => {
+        // 1. Update the deck in the database
+        await db.decks.update(deckId, { name });
+
+        const updatedDeck = await db.decks.get(deckId);
+
+        // 2. Update the search index with the new name
+        if (updatedDeck) {
+            searchService.add(updatedDeck, 'flashcard');
+        }
+
+        // 3. Update the state for immediate UI feedback
+        set(state => ({
+            decks: state.decks.map(deck =>
+            deck.id === deckId ? { ...deck, name } : deck
+        ),
+        }));
     },
 }));

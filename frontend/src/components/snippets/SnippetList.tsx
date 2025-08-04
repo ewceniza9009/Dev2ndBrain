@@ -2,7 +2,17 @@ import React, { useState, useRef, useEffect } from 'react';
 import type { Snippet } from '../../types';
 import { useSnippetStore } from '../../stores/useSnippetStore';
 import { useAuthStore } from '../../stores/useAuthStore';
-import { ChevronRightIcon, PlusIcon, ArrowDownOnSquareStackIcon } from '@heroicons/react/20/solid';
+import {
+  ChevronRightIcon,
+  PlusIcon,
+  ArrowDownOnSquareStackIcon,
+  ArrowsPointingInIcon,
+  ArrowsPointingOutIcon,
+} from '@heroicons/react/20/solid';
+
+const COLLAPSED_LANGS_STORAGE_KEY = 'snippetApp.collapsedLanguages';
+const COLLAPSED_TAGS_STORAGE_KEY = 'snippetApp.collapsedTags';
+
 
 interface SnippetListProps {
   snippets: Snippet[];
@@ -48,10 +58,56 @@ const SnippetList: React.FC<SnippetListProps> = ({
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const grouped = groupSnippets(snippets);
   const sortedLanguages = Object.keys(grouped).sort();
-
-  const [collapsedLanguages, setCollapsedLanguages] = useState<string[]>([]);
-  const [collapsedTags, setCollapsedTags] = useState<{ [lang: string]: string[] }>({});
   const snippetRefs = useRef<{ [key: number]: HTMLLIElement | null }>({});
+
+  // ✅ MODIFIED: Initialize state by reading from localStorage for both states
+  const [collapsedLanguages, setCollapsedLanguages] = useState<string[]>(() => {
+    const saved = localStorage.getItem(COLLAPSED_LANGS_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [collapsedTags, setCollapsedTags] = useState<{ [lang: string]: string[] }>(() => {
+    const saved = localStorage.getItem(COLLAPSED_TAGS_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  // ✅ NEW: useEffects to save state to localStorage on change
+  useEffect(() => {
+    localStorage.setItem(COLLAPSED_LANGS_STORAGE_KEY, JSON.stringify(collapsedLanguages));
+  }, [collapsedLanguages]);
+
+  useEffect(() => {
+    localStorage.setItem(COLLAPSED_TAGS_STORAGE_KEY, JSON.stringify(collapsedTags));
+  }, [collapsedTags]);
+
+
+  useEffect(() => {
+    if (selectedSnippetId && snippetRefs.current[selectedSnippetId]) {
+      snippetRefs.current[selectedSnippetId]?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+      });
+    }
+  }, [selectedSnippetId]);
+
+  // ✅ NEW: Logic for the master expand/collapse toggle
+  const allAreCollapsed = sortedLanguages.length > 0 && collapsedLanguages.length === sortedLanguages.length;
+
+  const toggleAll = () => {
+    if (allAreCollapsed) {
+      // Expand all languages and tags
+      setCollapsedLanguages([]);
+      setCollapsedTags({});
+    } else {
+      // Collapse all languages and tags
+      setCollapsedLanguages(sortedLanguages);
+      const allTagsCollapsed: { [lang: string]: string[] } = {};
+      sortedLanguages.forEach(lang => {
+        allTagsCollapsed[lang] = Object.keys(grouped[lang]);
+      });
+      setCollapsedTags(allTagsCollapsed);
+    }
+  };
 
   const toggleLanguageCollapse = (lang: string) => {
     setCollapsedLanguages(prev =>
@@ -61,24 +117,13 @@ const SnippetList: React.FC<SnippetListProps> = ({
 
   const toggleTagCollapse = (lang: string, tag: string) => {
     setCollapsedTags(prev => {
-      const newTags = { ...prev };
-      if (!newTags[lang]) {
-        newTags[lang] = [];
-      }
-      newTags[lang] = newTags[lang].includes(tag) ? newTags[lang].filter(t => t !== tag) : [...newTags[lang], tag];
-      return newTags;
+      const langTags = prev[lang] || [];
+      const newLangTags = langTags.includes(tag)
+        ? langTags.filter(t => t !== tag)
+        : [...langTags, tag];
+      return { ...prev, [lang]: newLangTags };
     });
   };
-
-  useEffect(() => {
-    if (selectedSnippetId && snippetRefs.current[selectedSnippetId]) {
-      snippetRefs.current[selectedSnippetId]?.scrollIntoView({
-        behavior: 'smooth',
-        // FIX: Changed 'center' to 'nearest' to prevent scrolling if the item is already visible.
-        block: 'nearest',
-      });
-    }
-  }, [selectedSnippetId]);
 
   const renderSnippetItem = (snippet: Snippet) => (
     <li
@@ -119,16 +164,32 @@ const SnippetList: React.FC<SnippetListProps> = ({
           </button>
         )}
       </div>
+
+      {/* ✅ NEW: The master expand/collapse control */}
+      <div className="px-4 py-2 flex items-center justify-start border-b border-gray-200 dark:border-gray-700">
+        <button
+          onClick={toggleAll}
+          className="flex items-center text-xs font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+        >
+          <span className="mr-1">Expand/Collapse</span>
+          {allAreCollapsed ? (
+            <ArrowsPointingOutIcon className="h-4 w-4" />
+          ) : (
+            <ArrowsPointingInIcon className="h-4 w-4" />
+          )}
+        </button>
+      </div>
+
       <ul className="flex-grow overflow-y-auto">
         {sortedLanguages.map(language => {
           const isLanguageCollapsed = collapsedLanguages.includes(language);
           const sortedTags = Object.keys(grouped[language]).sort();
-          
+
           return (
             <React.Fragment key={language}>
               <h2
                 onClick={() => toggleLanguageCollapse(language)}
-                className="flex justify-between items-center px-4 py-2 text-sm font-bold text-gray-500 dark:text-gray-400 sticky top-0 bg-gray-100 dark:bg-gray-800 z-10 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+                className="flex justify-between items-center px-4 py-2 text-sm font-bold text-gray-500 dark:text-gray-400 sticky top-0 bg-gray-100 dark:bg-gray-800 z-20 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
               >
                 <span>{language === 'Other' ? 'Other / No Language' : language}</span>
                 <ChevronRightIcon className={`h-5 w-5 transform transition-transform duration-200 ${isLanguageCollapsed ? '' : 'rotate-90'}`} />
@@ -142,7 +203,7 @@ const SnippetList: React.FC<SnippetListProps> = ({
                   <React.Fragment key={tag}>
                     <h3
                       onClick={() => toggleTagCollapse(language, tag)}
-                      className="flex justify-between items-center px-6 py-1 text-xs font-semibold text-gray-400 dark:text-gray-500 sticky top-8 bg-gray-100 dark:bg-gray-800 z-10 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
+                      className="flex justify-between items-center pl-6 pr-4 py-1 text-xs font-semibold text-gray-400 dark:text-gray-500 sticky top-10 bg-gray-100 dark:bg-gray-800 z-10 cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700"
                     >
                       <span>{tag.charAt(0).toUpperCase() + tag.slice(1)}</span>
                       <ChevronRightIcon className={`h-4 w-4 transform transition-transform duration-200 ${isTagCollapsed ? '' : 'rotate-90'}`} />
