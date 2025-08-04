@@ -13,6 +13,7 @@ namespace Dev2ndBrain.Models
         public List<string> LinkedNoteIds { get; set; } = new();
         public string? IconType { get; set; }
         public string? IconColor { get; set; }
+        public bool? IsCollapsed { get; set; }
         public double? X { get; set; }
         public double? Y { get; set; }
         public double? Fx { get; set; }
