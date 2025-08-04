@@ -57,7 +57,6 @@ const getNodesAndEdges = (visibleNotes: Note[], allNotes: Note[], theme: 'light'
   const notesToRender = visibleNotes.filter(note => !collapsedNoteUuids.has(note.uuid));
   const visibleNodeIds = new Set(notesToRender.map(n => n.uuid));
 
-  // FIX: Identify child nodes to render them smaller.
   const childIds = new Set<string>();
   notesToRender.forEach(sourceNote => {
     const matches = sourceNote.content.match(/\[\[(.*?)\]\]/g) || [];
@@ -72,7 +71,7 @@ const getNodesAndEdges = (visibleNotes: Note[], allNotes: Note[], theme: 'light'
   const nodes: Node[] = notesToRender.map(note => {
     const isCollapsed = allNoteMap.get(note.uuid)?.isCollapsed || false;
     const hasChildren = allNotes.some(n => n.content.includes(`[[${note.uuid}]]`));
-    const isChild = childIds.has(note.uuid); // Check if this node is a child
+    const isChild = childIds.has(note.uuid);
 
     return {
       id: note.uuid,
@@ -84,12 +83,9 @@ const getNodesAndEdges = (visibleNotes: Note[], allNotes: Note[], theme: 'light'
         hasChildren,
         iconColor: note.iconColor || IconColor.Primary,
         theme,
-        isChild, // Pass isChild status to the custom node
+        isChild,
       },
       position: { x: note.x ?? 0, y: note.y ?? 0 },
-      // FIX: Correctly apply fixed positions (fx, fy) to pin nodes.
-      // This tells React Flow to keep the node at this specific coordinate.
-      ...(note.fx != null && note.fy != null ? { fx: note.fx, fy: note.fy } : {}),
       draggable: true,
     };
   });
@@ -101,12 +97,44 @@ const getNodesAndEdges = (visibleNotes: Note[], allNotes: Note[], theme: 'light'
       const targetUuid = match.slice(2, -2);
       const targetNote = allNoteMap.get(targetUuid);
       if (targetNote && visibleNodeIds.has(targetNote.uuid)) {
+        
+        const sourcePos = { x: sourceNote.x ?? 0, y: sourceNote.y ?? 0 };
+        const targetPos = { x: targetNote.x ?? 0, y: targetNote.y ?? 0 };
+
+        const dx = targetPos.x - sourcePos.x;
+        const dy = targetPos.y - sourcePos.y;
+
+        let sourceHandle: string;
+        let targetHandle: string;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+          if (dx > 0) {
+            sourceHandle = 'right';
+            targetHandle = 'left';
+          } else {
+            sourceHandle = 'left';
+            targetHandle = 'right';
+          }
+        } else {
+          if (dy > 0) {
+            sourceHandle = 'bottom';
+            targetHandle = 'top';
+          } else {
+            sourceHandle = 'top';
+            targetHandle = 'bottom';
+          }
+        }
+        
         edges.push({
           id: `${sourceNote.uuid}-${targetUuid}`,
           source: sourceNote.uuid,
           target: targetUuid,
-          type: 'default',
+          type: 'smoothstep',
           animated: false,
+          sourceHandle,
+          targetHandle,
+          // NEW: This single line rounds the corners of the edges!
+          pathOptions: { borderRadius: 20 },
         });
       }
     });
@@ -149,9 +177,9 @@ const FlowComponent: React.FC<GraphViewProps> = ({ notes }) => {
   const handleNodeDragStop = useCallback(
     (_event: any, node: Node) => {
         if (!node.data) return;
-        // FIX: Update fx and fy to pin the node's position after dragging.
-        // We also pass null for isCollapsed to avoid accidentally changing it.
-        updateNodePosition(node.data.noteId, node.position.x, node.position.y, undefined, node.position.x, node.position.y);
+        // FIX: Persist the node's new x/y position after dragging.
+        // We no longer pass fx/fy, as this was causing the dragging issue.
+        updateNodePosition(node.data.noteId, node.position.x, node.position.y);
     },
     [updateNodePosition]
   );

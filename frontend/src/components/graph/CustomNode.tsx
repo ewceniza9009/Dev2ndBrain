@@ -1,32 +1,32 @@
 // frontend/src/components/graph/CustomNode.tsx
 
 import React, { memo } from 'react';
-import { Handle, Position } from 'reactflow';
-import { IconColor } from '../../types';
+import { Handle, Position, type NodeProps } from 'reactflow';
+import { type IconColor } from '../../types';
 
-interface CustomNodeProps {
-  data: {
-    label: string;
-    noteId: number;
-    isCollapsed: boolean;
-    hasChildren: boolean;
-    iconColor: typeof IconColor[keyof typeof IconColor];
-    theme: 'light' | 'dark';
-    isChild: boolean; // NEW: To identify if the node is a child
-  };
+interface NodeData {
+  label: string;
+  noteId: number;
+  isCollapsed: boolean;
+  hasChildren: boolean;
+  iconColor: typeof IconColor[keyof typeof IconColor];
+  theme: 'light' | 'dark';
+  isChild: boolean;
 }
 
-const CustomNode: React.FC<CustomNodeProps> = ({ data }) => {
+const CustomNode: React.FC<NodeProps<NodeData>> = ({ data }) => {
   const { label, isCollapsed, hasChildren, iconColor, theme, isChild } = data;
 
   const colors = {
-    background: theme === 'light' ? '#ffffff' : '#1f2937', // gray-800
-    text: theme === 'light' ? '#111827' : '#f9fafb', // gray-50
-    nodeBorder: theme === 'light' ? '#e5e7eb' : '#4b5563', // gray-600
+    background: theme === 'light' ? '#ffffff' : '#1f2937',
+    text: theme === 'light' ? '#111827' : '#f9fafb',
+    nodeBorder: theme === 'light' ? '#e5e7eb' : '#4b5563',
   };
 
-  // FIX: Apply a scale transform if the node is a child to make it smaller.
-  const scaleClass = isChild ? 'scale-75' : 'scale-100';
+  const scaleClass = isChild ? 'scale-100' : 'scale-75';
+  
+  // A simple style for our invisible handles
+  const handleStyle = { background: 'transparent', border: 'none' };
 
   return (
     <div
@@ -35,6 +35,20 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data }) => {
       } ${scaleClass}`}
       style={{ borderColor: colors.nodeBorder }}
     >
+      {/* NEW: We now have handles on all four sides, each with a unique ID.
+        This allows us to programmatically choose which one to connect to.
+      */}
+      <Handle type="source" position={Position.Top} id="top" style={handleStyle} />
+      <Handle type="source" position={Position.Right} id="right" style={handleStyle} />
+      <Handle type="source" position={Position.Bottom} id="bottom" style={handleStyle} />
+      <Handle type="source" position={Position.Left} id="left" style={handleStyle} />
+      <Handle type="target" position={Position.Top} id="top" style={handleStyle} />
+      <Handle type="target" position={Position.Right} id="right" style={handleStyle} />
+      <Handle type="target" position={Position.Bottom} id="bottom" style={handleStyle} />
+      <Handle type="target" position={Position.Left} id="left" style={handleStyle} />
+
+
+      {/* The rest of your node's visual structure is unchanged */}
       <div
         className="w-6 h-6 rounded-full flex items-center justify-center relative"
         style={{ backgroundColor: iconColor }}
@@ -56,8 +70,6 @@ const CustomNode: React.FC<CustomNodeProps> = ({ data }) => {
       >
         {label}
       </span>
-      <Handle type="target" position={Position.Left} style={{ opacity: 0 }} />
-      <Handle type="source" position={Position.Right} style={{ opacity: 0 }} />
     </div>
   );
 };
