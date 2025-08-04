@@ -68,7 +68,7 @@ const NotesListPage: React.FC = () => {
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value as 'updatedAt' | 'title')}
-                className="appearance-none p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 pr-8"
+                className="appearance-none p-0 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-teal-500 pr-8"
               >
                 <option value="updatedAt">Sort by Date</option>
                 <option value="title">Sort by Title</option>
