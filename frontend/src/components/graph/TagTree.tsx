@@ -1,6 +1,7 @@
 // frontend/src/components/graph/TagTree.tsx
 
 import React, { useState } from 'react';
+import clsx from 'clsx';
 
 // Defines the structure of our tag tree node
 interface TagTreeNode {
@@ -13,46 +14,90 @@ interface TagTreeProps {
   path: string;
   selectedTags: string[];
   onTagChange: (tag: string, isSelected: boolean) => void;
+  // New prop to manage the indentation level for guide lines
+  level?: number;
 }
 
-const TagTreeNodeComponent: React.FC<TagTreeProps> = ({ node, path, selectedTags, onTagChange }) => {
+const TagTreeNodeComponent: React.FC<TagTreeProps> = ({ node, path, selectedTags, onTagChange, level = 0 }) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const childPaths = Object.keys(node.children).sort();
   const hasChildren = childPaths.length > 0;
 
   const fullPath = path;
   const isSelected = selectedTags.includes(fullPath);
+  const isFolder = !node.isEndOfTag && hasChildren;
 
   const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onTagChange(fullPath, e.target.checked);
   };
 
-  return (
-    <div className="ml-4">
-      {/* FIX: Improved layout to correctly display both tags and folder-like parent tags */}
-      <div className="flex items-center my-1">
-        {hasChildren ? (
-          <button onClick={() => setIsExpanded(!isExpanded)} className="mr-1 text-xs w-5 flex-shrink-0">
-            {isExpanded ? '▼' : '▶'}
-          </button>
-        ) : (
-          <div className="w-5 mr-1 flex-shrink-0" /> // Placeholder for alignment
-        )}
+  // --- SVG Icons for a sharper UI ---
+  const ChevronIcon = (
+    <svg className={clsx("h-4 w-4 text-slate-500 transition-transform", isExpanded && "rotate-90")} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  );
 
+  const FolderIcon = (
+    <svg className="h-5 w-5 text-sky-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+    </svg>
+  );
+
+  const TagIcon = (
+    <svg className="h-5 w-5 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A2 2 0 013 8V5c0-1.1.9-2 2-2z" />
+    </svg>
+  );
+
+  return (
+    <div className="relative pl-5">
+      {/* This pseudo-element creates the vertical guide line */}
+      <div className="absolute left-0 top-0 h-full w-5">
+        <span className="absolute left-2.5 top-0 h-full w-px bg-slate-200 dark:bg-slate-700"></span>
+      </div>
+      
+      <div
+        className={clsx(
+          "relative flex items-center my-0.5 group rounded-md",
+          // Apply a background color on hover for better feedback
+          "hover:bg-slate-100 dark:hover:bg-slate-800"
+        )}
+      >
+        {/* Horizontal guide line connecting to the vertical one */}
+        <span className="absolute left-[-10px] top-1/2 h-px w-[10px] bg-slate-200 dark:bg-slate-700"></span>
+        
+        {/* Toggle Button & Icon */}
+        <div className="flex items-center gap-1 py-1 pr-2">
+          {hasChildren ? (
+            <button onClick={() => setIsExpanded(!isExpanded)}>{ChevronIcon}</button>
+          ) : (
+            <div className="w-4" /> // Placeholder for alignment
+          )}
+          
+          {isFolder ? FolderIcon : TagIcon}
+        </div>
+        
+        {/* Tag or Folder Name */}
         {node.isEndOfTag ? (
-          <label className="flex-grow flex items-center space-x-2 cursor-pointer">
+          <label className="flex-grow flex items-center space-x-2 cursor-pointer py-1">
             <input
               type="checkbox"
               checked={isSelected}
               onChange={handleCheckboxChange}
-              className="form-checkbox h-4 w-4 rounded text-teal-600 focus:ring-teal-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700"
+              className="form-checkbox h-4 w-4 rounded bg-white dark:bg-slate-900 border-slate-300 dark:border-slate-600 text-sky-600 focus:ring-sky-500"
             />
-            <span className="text-gray-700 dark:text-gray-300">{fullPath.split('/').pop()}</span>
+            <span className={clsx(
+              "text-sm",
+              isSelected ? "text-sky-600 dark:text-sky-400 font-medium" : "text-slate-700 dark:text-slate-300"
+            )}>
+              {fullPath.split('/').pop()}
+            </span>
           </label>
         ) : (
-          // This is an intermediate node (a "folder"), not a tag itself.
-          // We display its name and add margin to align it with the text of actual tags.
-          <span className="text-gray-500 dark:text-gray-400 ml-6">{fullPath.split('/').pop()}</span>
+          <span className="text-sm font-medium text-slate-500 dark:text-slate-400 py-1 cursor-pointer" onClick={() => setIsExpanded(!isExpanded)}>
+            {fullPath.split('/').pop()}
+          </span>
         )}
       </div>
 
@@ -65,6 +110,7 @@ const TagTreeNodeComponent: React.FC<TagTreeProps> = ({ node, path, selectedTags
               path={path ? `${path}/${child}` : child}
               selectedTags={selectedTags}
               onTagChange={onTagChange}
+              level={level + 1}
             />
           ))}
         </div>

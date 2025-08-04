@@ -1,31 +1,21 @@
 // frontend/src/components/graph/GraphView.tsx
 
-import React, { useEffect, useMemo, useCallback } from 'react';
+import React, { useEffect, useMemo, useCallback, useState } from 'react';
 import ReactFlow, {
   Controls,
   Background,
   MiniMap,
   useNodesState,
   useEdgesState,
-  useReactFlow,
   BackgroundVariant,
-  applyNodeChanges,
-  applyEdgeChanges,
   ReactFlowProvider,
 } from 'reactflow';
-
-import type {
-  Node,
-  OnNodesChange,
-  OnEdgesChange,
-} from 'reactflow';
-
+import type { Node, Edge } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../stores/useAppStore';
 import { useNoteStore } from '../../stores/useNoteStore';
 import type { Note } from '../../types';
-import { IconColor } from '../../types';
 
 import CustomNode from './CustomNode';
 
@@ -33,182 +23,223 @@ const nodeTypes = {
   custom: CustomNode,
 };
 
-const getNodesAndEdges = (visibleNotes: Note[], allNotes: Note[], theme: 'light' | 'dark') => {
-  const allNoteMap = new Map<string, Note>(allNotes.map(note => [note.uuid, note]));
+const HIERARCHY_COLORS = ['#34D399', '#60A5FA', '#FBBF24', '#F87171', '#A78BFA'];
+const HIERARCHY_SHAPES: ('pill' | 'rectangle')[] = ['pill', 'rectangle'];
+const levelStyles = new Map<number, { color: string; shape: 'pill' | 'rectangle' }>();
 
-  const getDescendants = (startNodeId: string, descendants = new Set<string>()) => {
-    const children = allNotes.filter(n => n.content.includes(`[[${startNodeId}]]`));
-    children.forEach(child => {
-      if (!descendants.has(child.uuid)) {
-        descendants.add(child.uuid);
-        getDescendants(child.uuid, descendants);
+const getStyleForLevel = (level: number) => {
+  if (!levelStyles.has(level)) {
+    const color = HIERARCHY_COLORS[level % HIERARCHY_COLORS.length];
+    const shape = HIERARCHY_SHAPES[level % HIERARCHY_SHAPES.length];
+    levelStyles.set(level, { color, shape });
+  }
+  return levelStyles.get(level)!;
+};
+
+// FIX: This function now accepts both the filtered 'visibleNotes' and 'allNotes'
+// to correctly build the graph based on the active filters.
+const getBaseElements = (visibleNotes: Note[], allNotes: Note[], theme: 'light' | 'dark') => {
+  const allNoteMap = new Map<string, Note>(allNotes.map(note => [note.uuid, note]));
+  const visibleNoteIds = new Set(visibleNotes.map(n => n.uuid));
+
+  // Build topology from ALL notes to understand the full graph structure
+  const { childToParents, parentToChildren } = allNotes.reduce(
+    (acc, note) => {
+      const matches = note.content.match(/\[\[(.*?)\]\]/g) || [];
+      matches.forEach(match => {
+        const targetUuid = match.slice(2, -2);
+        if (!acc.parentToChildren.has(note.uuid)) acc.parentToChildren.set(note.uuid, []);
+        acc.parentToChildren.get(note.uuid)!.push(targetUuid);
+        if (!acc.childToParents.has(targetUuid)) acc.childToParents.set(targetUuid, []);
+        acc.childToParents.get(targetUuid)!.push(note.uuid);
+      });
+      return acc;
+    }, { childToParents: new Map<string, string[]>(), parentToChildren: new Map<string, string[]>() }
+  );
+
+  // Calculate hierarchy levels from ALL notes
+  const nodeLevels = new Map<string, number>();
+  const roots = allNotes.filter(n => !childToParents.has(n.uuid));
+  const queue: { uuid: string; level: number }[] = roots.map(r => ({ uuid: r.uuid, level: 0 }));
+  const visited = new Set<string>(roots.map(r => r.uuid));
+  queue.forEach(({ uuid, level }) => nodeLevels.set(uuid, level));
+
+  let head = 0;
+  while (head < queue.length) {
+    const { uuid, level } = queue[head++];
+    const children = parentToChildren.get(uuid) || [];
+    children.forEach(childUuid => {
+      if (!visited.has(childUuid)) {
+        visited.add(childUuid);
+        nodeLevels.set(childUuid, level + 1);
+        queue.push({ uuid: childUuid, level: level + 1 });
       }
     });
-    return descendants;
-  };
-  
-  const collapsedNoteUuids = new Set<string>();
-  allNotes.forEach(note => {
-    if (note.isCollapsed) {
-      getDescendants(note.uuid).forEach(childId => collapsedNoteUuids.add(childId));
-    }
-  });
+  }
 
-  const notesToRender = visibleNotes.filter(note => !collapsedNoteUuids.has(note.uuid));
-  const visibleNodeIds = new Set(notesToRender.map(n => n.uuid));
-
-  const childIds = new Set<string>();
-  notesToRender.forEach(sourceNote => {
-    const matches = sourceNote.content.match(/\[\[(.*?)\]\]/g) || [];
-    matches.forEach(match => {
-        const targetUuid = match.slice(2, -2);
-        if (visibleNodeIds.has(targetUuid)) {
-            childIds.add(targetUuid);
-        }
-    });
-  });
-
-  const nodes: Node[] = notesToRender.map(note => {
-    const isCollapsed = allNoteMap.get(note.uuid)?.isCollapsed || false;
-    const hasChildren = allNotes.some(n => n.content.includes(`[[${note.uuid}]]`));
-    const isChild = childIds.has(note.uuid);
-
+  // Create nodes using only the filtered 'visibleNotes'
+  const baseNodes: Node[] = visibleNotes.map(note => {
+    const level = nodeLevels.get(note.uuid) ?? 0;
+    const style = getStyleForLevel(level);
     return {
       id: note.uuid,
       type: 'custom',
+      position: { x: note.x ?? 0, y: note.y ?? 0 },
       data: {
         label: note.title,
         noteId: note.id!,
-        isCollapsed,
-        hasChildren,
-        iconColor: note.iconColor || IconColor.Primary,
+        isCollapsed: note.isCollapsed,
+        hasChildren: childToParents.has(note.uuid),
+        isChild: childToParents.has(note.uuid),
         theme,
-        isChild,
+        shape: style.shape,
+        iconColor: style.color,
+        isDimmed: false,
       },
-      position: { x: note.x ?? 0, y: note.y ?? 0 },
-      draggable: true,
     };
   });
 
-  const edges: any[] = [];
-  notesToRender.forEach(sourceNote => {
-    const matches = sourceNote.content.match(/\[\[(.*?)\]\]/g) || [];
-    matches.forEach(match => {
-      const targetUuid = match.slice(2, -2);
+  // Create edges only if BOTH the source and target nodes are visible
+  const baseEdges: Edge[] = [];
+  visibleNotes.forEach(sourceNote => {
+    const children = parentToChildren.get(sourceNote.uuid) || [];
+    children.forEach(targetUuid => {
       const targetNote = allNoteMap.get(targetUuid);
-      if (targetNote && visibleNodeIds.has(targetNote.uuid)) {
-        
+      if (targetNote && visibleNoteIds.has(targetUuid)) { // Check if target is also visible
         const sourcePos = { x: sourceNote.x ?? 0, y: sourceNote.y ?? 0 };
         const targetPos = { x: targetNote.x ?? 0, y: targetNote.y ?? 0 };
-
         const dx = targetPos.x - sourcePos.x;
         const dy = targetPos.y - sourcePos.y;
-
-        let sourceHandle: string;
-        let targetHandle: string;
-
+        let sourceHandle: string, targetHandle: string;
         if (Math.abs(dx) > Math.abs(dy)) {
-          if (dx > 0) {
-            sourceHandle = 'right';
-            targetHandle = 'left';
-          } else {
-            sourceHandle = 'left';
-            targetHandle = 'right';
-          }
+          dx > 0 ? ([sourceHandle, targetHandle] = ['right', 'left']) : ([sourceHandle, targetHandle] = ['left', 'right']);
         } else {
-          if (dy > 0) {
-            sourceHandle = 'bottom';
-            targetHandle = 'top';
-          } else {
-            sourceHandle = 'top';
-            targetHandle = 'bottom';
-          }
+          dy > 0 ? ([sourceHandle, targetHandle] = ['bottom', 'top']) : ([sourceHandle, targetHandle] = ['top', 'bottom']);
         }
-        
-        edges.push({
+        baseEdges.push({
           id: `${sourceNote.uuid}-${targetUuid}`,
           source: sourceNote.uuid,
           target: targetUuid,
           type: 'smoothstep',
-          animated: false,
           sourceHandle,
           targetHandle,
-          // NEW: This single line rounds the corners of the edges!
           pathOptions: { borderRadius: 20 },
         });
       }
     });
   });
 
-  return { nodes, edges };
+  return { baseNodes, baseEdges, childToParents, parentToChildren };
 };
 
-interface GraphViewProps {
-  notes: Note[];
-}
-
-const FlowComponent: React.FC<GraphViewProps> = ({ notes }) => {
-  const { fitView } = useReactFlow();
-  const allNotesFromStore = useNoteStore((state) => state.notes);
-  const theme = useAppStore((state) => state.theme);
+// FIX: This component now accepts the 'notes' prop again, which is the filtered list.
+const FlowComponent: React.FC<{ notes: Note[] }> = ({ notes: visibleNotes }) => {
+  const allNotesFromStore = useNoteStore(state => state.notes);
+  const theme = useAppStore(state => state.theme);
   const navigate = useNavigate();
   const { updateNodePosition } = useNoteStore();
 
-  const { nodes: initialNodes, edges: initialEdges } = useMemo(() => getNodesAndEdges(notes, allNotesFromStore, theme), [notes, allNotesFromStore, theme]);
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null);
+
+  // FIX: The main memo hook now depends on 'visibleNotes' to re-calculate when filters change.
+  const { baseNodes, baseEdges, childToParents, parentToChildren } = useMemo(
+    () => getBaseElements(visibleNotes, allNotesFromStore, theme),
+    [visibleNotes, allNotesFromStore, theme]
+  );
   
-  const [nodesState, setNodes] = useNodesState(initialNodes);
-  const [edgesState, setEdges] = useEdgesState(initialEdges);
+  const getRelatives = useCallback((uuid: string, map: Map<string, string[]>, relatives = new Set<string>()): Set<string> => {
+    const connections = map.get(uuid) || [];
+    connections.forEach(connUuid => {
+      if (!relatives.has(connUuid)) {
+        relatives.add(connUuid);
+        getRelatives(connUuid, map, relatives);
+      }
+    });
+    return relatives;
+  }, []);
 
-  const onNodesChange: OnNodesChange = useCallback((changes) => setNodes((nds) => applyNodeChanges(changes, nds)), [setNodes]);
-  const onEdgesChange: OnEdgesChange = useCallback((changes) => setEdges((eds) => applyEdgeChanges(changes, eds)), [setEdges]);
+  const highlightedIds = useMemo(() => {
+    if (!hoveredNodeId) return new Set<string>();
+    const ancestors = getRelatives(hoveredNodeId, childToParents);
+    const descendants = getRelatives(hoveredNodeId, parentToChildren);
+    return new Set([hoveredNodeId, ...ancestors, ...descendants]);
+  }, [hoveredNodeId, childToParents, parentToChildren, getRelatives]);
+
+  const collapsedNoteUuids = useMemo(() => {
+    const collapsed = new Set<string>();
+    allNotesFromStore.forEach(note => {
+      if (note.isCollapsed) {
+        getRelatives(note.uuid, childToParents).forEach(id => collapsed.add(id));
+      }
+    });
+    return collapsed;
+  }, [allNotesFromStore, childToParents, getRelatives]);
+  
+  const finalNodes = useMemo(() => {
+    return baseNodes
+      .filter(node => !collapsedNoteUuids.has(node.id))
+      .map(node => ({
+        ...node,
+        data: {
+          ...node.data,
+          isDimmed: hoveredNodeId !== null && !highlightedIds.has(node.id),
+        },
+      }));
+  }, [baseNodes, collapsedNoteUuids, hoveredNodeId, highlightedIds]);
+
+  const finalEdges = useMemo(() => {
+    return baseEdges
+      .filter(edge => !collapsedNoteUuids.has(edge.source) && !collapsedNoteUuids.has(edge.target))
+      .map(edge => ({
+        ...edge,
+        hidden: collapsedNoteUuids.has(edge.source) || collapsedNoteUuids.has(edge.target),
+        style: {
+          stroke: theme === 'dark' ? '#4A5563' : '#CBD5E0',
+          strokeWidth: 2,
+          opacity: hoveredNodeId !== null && !(highlightedIds.has(edge.source) && highlightedIds.has(edge.target)) ? 0.1 : 0.7,
+          transition: 'opacity 0.3s ease-in-out',
+        },
+      }));
+  }, [baseEdges, collapsedNoteUuids, hoveredNodeId, highlightedIds, theme]);
+
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(finalNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(finalEdges);
 
   useEffect(() => {
-    const { nodes: newNodes, edges: newEdges } = getNodesAndEdges(notes, allNotesFromStore, theme);
-    setNodes(newNodes);
-    setEdges(newEdges);
-  }, [notes, allNotesFromStore, theme, setNodes, setEdges]);
-
-  useEffect(() => {
-    if (nodesState.length > 0) {
-      fitView();
+    setNodes(finalNodes);
+    setEdges(finalEdges);
+  }, [finalNodes, finalEdges, setNodes, setEdges]);
+  
+  const handleNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    const target = event.target as HTMLElement;
+    if (target.closest('.expand-collapse-button')) {
+      const clickedNode = allNotesFromStore.find(n => n.uuid === node.id);
+      if (clickedNode) {
+        updateNodePosition(clickedNode.id!, clickedNode.x!, clickedNode.y!, !clickedNode.isCollapsed);
+      }
+    } else {
+      navigate(`/notes`, { state: { selectedId: node.data.noteId } });
     }
-  }, [nodesState, fitView]);
-
-  const handleNodeDragStop = useCallback(
-    (_event: any, node: Node) => {
-        if (!node.data) return;
-        // FIX: Persist the node's new x/y position after dragging.
-        // We no longer pass fx/fy, as this was causing the dragging issue.
-        updateNodePosition(node.data.noteId, node.position.x, node.position.y);
-    },
-    [updateNodePosition]
-  );
-
-  const handleNodeClick = useCallback(
-    (event: any, node: Node) => {
-        if (!node.data) return;
-        const isCollapseButton = event.target?.closest('.expand-collapse-button');
-        if (isCollapseButton) {
-            updateNodePosition(node.data.noteId, node.position.x!, node.position.y!, !node.data.isCollapsed);
-        } else {
-            navigate(`/notes`, { state: { selectedId: node.data.noteId } });
-        }
-    },
-    [navigate, updateNodePosition]
-  );
+  }, [navigate, updateNodePosition, allNotesFromStore]);
+  
+  const handleNodeDragStop = useCallback((_: React.MouseEvent, node: Node) => {
+    updateNodePosition(node.data.noteId, node.position.x, node.position.y);
+  }, [updateNodePosition]);
 
   return (
     <div className="w-full h-full relative">
       <ReactFlow
-        nodes={nodesState}
-        edges={edgesState}
+        nodes={nodes}
+        edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeDragStop={handleNodeDragStop}
         onNodeClick={handleNodeClick}
+        onNodeMouseEnter={(_, node) => setHoveredNodeId(node.id)}
+        onNodeMouseLeave={() => setHoveredNodeId(null)}
         nodeTypes={nodeTypes}
         fitView
-        className={`react-flow-${theme}`}
       >
         <MiniMap />
         <Controls />
@@ -218,7 +249,7 @@ const FlowComponent: React.FC<GraphViewProps> = ({ notes }) => {
   );
 };
 
-const GraphViewWrapper: React.FC<GraphViewProps> = ({ notes }) => {
+const GraphViewWrapper: React.FC<{ notes: Note[] }> = ({ notes }) => {
   return (
     <ReactFlowProvider>
       <FlowComponent notes={notes} />
