@@ -83,7 +83,7 @@ const NotesListPage: React.FC = () => {
               </div>
               <button
                 onClick={() => setIsNewNoteModalOpen(true)}
-                className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg -mt-3 px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
+                className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg -mt-2 px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
               >
                 <PlusIcon className="h-4 w-4" />
                 <span>New</span>
