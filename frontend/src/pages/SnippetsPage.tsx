@@ -41,7 +41,7 @@ const SnippetsPage: React.FC = () => {
 
   return (
     <div className="flex h-full">
-      <div className="w-1/3 border-r border-gray-700">
+      <div className="w-1/4 border-gray-700">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Snippets</h2>
             <button
@@ -59,7 +59,7 @@ const SnippetsPage: React.FC = () => {
           onNewSnippet={handleNewSnippet}
         />
       </div>
-      <div className="w-2/3">
+      <div className="w-3/4">
         <SnippetDetail snippet={selectedSnippet} />
       </div>
     </div>

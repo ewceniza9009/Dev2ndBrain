@@ -61,7 +61,7 @@ const NotesListPage: React.FC = () => {
   return (
     <>
       <div className="flex h-full">
-        <div className="w-1/3 border-r border-gray-700">
+        <div className="w-1/4 border-gray-700">
           <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
           <h2 className="text-lg -mt-2.5 font-semibold text-gray-900 dark:text-white">All Notes</h2>
           <div className="flex items-center space-x-4">
@@ -106,7 +106,7 @@ const NotesListPage: React.FC = () => {
             onNewNote={() => setIsNewNoteModalOpen(true)}
           />
         </div>
-        <div className="w-2/3">
+        <div className="w-3/4">
           <NoteDetailView note={selectedNote} isFromGraph={isFromGraph} />
         </div>
       </div>

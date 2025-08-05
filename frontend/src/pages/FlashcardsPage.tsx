@@ -103,7 +103,7 @@ const FlashcardsPage: React.FC = () => {
 
   return (
     <div className="flex h-full">
-      <div className="w-1/3 border-r border-gray-200 dark:border-gray-700">
+      <div className="w-1/4 border-gray-200 dark:border-gray-700">
         <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Decks</h2>
             <button
@@ -123,7 +123,7 @@ const FlashcardsPage: React.FC = () => {
         />
       </div>
       
-      <div className="w-2/3 flex flex-col h-full overflow-y-auto">
+      <div className="w-3/4 flex flex-col h-full overflow-y-auto">
         {selectedDeck ? (
           <div className="p-6">
             <div className="flex justify-between items-center mb-6">
