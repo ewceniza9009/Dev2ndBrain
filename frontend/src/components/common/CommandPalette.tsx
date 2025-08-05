@@ -7,9 +7,9 @@ import { useFlashcardStore } from '../../stores/useFlashcardStore';
 import { searchService } from '../../services/searchService';
 import type { SearchResult } from 'minisearch';
 import clsx from 'clsx';
-import { 
-  PlusIcon, CodeBracketSquareIcon, RectangleStackIcon, BookOpenIcon,
-  Squares2X2Icon, ShareIcon, Cog8ToothIcon
+import { 
+  PlusIcon, CodeBracketSquareIcon, RectangleStackIcon, BookOpenIcon,
+  Squares2X2Icon, ShareIcon, Cog8ToothIcon, FolderOpenIcon
 } from '@heroicons/react/20/solid';
 
 interface Command {
@@ -22,7 +22,7 @@ interface Command {
 }
 
 const CommandPalette: React.FC = () => {
-  const { isCommandPaletteOpen, toggleCommandPalette } = useAppStore();
+  const { isCommandPaletteOpen, toggleCommandPalette, tabs, setActiveTab } = useAppStore();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
@@ -43,7 +43,7 @@ const CommandPalette: React.FC = () => {
     if (newSnippet?.id) navigate('/snippets', { state: { selectedId: newSnippet.id } });
     toggleCommandPalette();
   }, [addSnippet, navigate, toggleCommandPalette]);
-  
+  
   const handleCreateDeck = useCallback(async () => {
     const name = prompt("Enter new deck name:");
     if (name) {
@@ -77,8 +77,22 @@ const CommandPalette: React.FC = () => {
     if (!query) return coreCommands;
     return coreCommands.filter(cmd => cmd.title.toLowerCase().includes(query.toLowerCase()));
   }, [query, coreCommands]);
-  
+  
   const allResults: Command[] = useMemo(() => {
+    const tabResults: Command[] = query ? tabs
+      .filter(tab => tab.title.toLowerCase().includes(query.toLowerCase()))
+      .map(tab => ({
+        id: `tab-${tab.id}`,
+        type: 'search',
+        title: tab.title,
+        category: 'Open Tab',
+        action: () => {
+          setActiveTab(tab.id);
+          toggleCommandPalette();
+        },
+        icon: <FolderOpenIcon className="h-5 w-5" />,
+      })) : [];
+
     const searchItems: Command[] = searchResults.slice(0, 10).map(result => {
         const [type, id] = result.id.split('-');
         const numericId = parseInt(id, 10);
@@ -94,9 +108,8 @@ const CommandPalette: React.FC = () => {
             icon: type === 'note' ? <BookOpenIcon className="h-5 w-5" /> : <CodeBracketSquareIcon className="h-5 w-5" />,
         };
     });
-    return [...filteredCommands, ...searchItems];
-  }, [filteredCommands, searchResults, navigate, toggleCommandPalette]);
-
+    return [...tabResults, ...filteredCommands, ...searchItems];
+  }, [filteredCommands, searchResults, navigate, toggleCommandPalette, tabs, setActiveTab, query]);
 
   useEffect(() => {
     if (isCommandPaletteOpen) {
@@ -109,21 +122,15 @@ const CommandPalette: React.FC = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isCommandPaletteOpen) return;
-
       if (e.key === 'ArrowDown') {
         e.preventDefault();
-        setActiveIndex(prev => (prev + 1) % allResults.length);
+        setActiveIndex(prev => (prev + 1) % (allResults.length || 1));
       } else if (e.key === 'ArrowUp') {
         e.preventDefault();
-        setActiveIndex(prev => (prev - 1 + allResults.length) % allResults.length);
-      } else if (e.key === 'Enter') {
+        setActiveIndex(prev => (prev - 1 + allResults.length) % (allResults.length || 1));
+      } else if (e.key === 'Enter' && allResults.length > 0) {
         e.preventDefault();
-        if (allResults.length > 0) {
-            const selectedResult = allResults[activeIndex];
-            if (selectedResult) {
-                selectedResult.action();
-            }
-        }
+        allResults[activeIndex]?.action();
       } else if (e.key === 'Escape') {
         toggleCommandPalette();
       }
