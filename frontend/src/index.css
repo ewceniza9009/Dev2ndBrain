@@ -24,3 +24,23 @@
   border-radius: 10px;
   border: 3px solid #374151;
 }
+
+mark{
+    background-color: #fef08a;
+    color: #713f12;
+    padding: 2px 0;
+    border-radius: 3px;
+}
+
+.dark mark {
+    background-color: #ca8a04;
+    color: #fffbeb;
+}
+
+mark.active-match {
+    background-color: #fb923c;
+}
+
+.dark mark.active-match {
+    background-color: #f97316; 
+}

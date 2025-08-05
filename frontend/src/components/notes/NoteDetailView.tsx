@@ -8,7 +8,7 @@ import type { Note, Deck } from '../../types';
 import { debounce } from 'lodash-es';
 import Toast from '../Toast';
 import ConfirmationModal from '../ConfirmationModal';
-import { PencilSquareIcon, BookOpenIcon, PlusCircleIcon, TrashIcon } from '@heroicons/react/20/solid'; // NEW: Import icons
+import { PencilSquareIcon, BookOpenIcon, PlusCircleIcon, TrashIcon } from '@heroicons/react/20/solid';
 
 const SelectDeckModal: React.FC<{
   isOpen: boolean;
@@ -120,7 +120,7 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note, isFromGraph }) =>
   }
 
   return (
-    <div className="flex flex-col h-full p-6">
+    <div className="flex flex-col p-6">
       <div className="flex justify-between items-center mb-2">
         <input
           type="text"
@@ -165,12 +165,12 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note, isFromGraph }) =>
           </button>
         </div>
       </div>
-      
+      
       <div className="mb-4">
         <TagInput tags={note.tags} onTagsChange={handleTagsChange} />
       </div>
 
-      <div className="flex-grow pt-2 h-full">
+      <div className="flex-grow pt-2">
         {isEditing ? (
           <NoteEditor note={note} editorRef={editorRef} />
         ) : (
@@ -185,7 +185,7 @@ const NoteDetailView: React.FC<NoteDetailViewProps> = ({ note, isFromGraph }) =>
         decks={decks}
         noteContent={editorContent}
       />
-      
+      
       <ConfirmationModal
         isOpen={isConfirmModalOpen}
         onClose={() => setIsConfirmModalOpen(false)}
