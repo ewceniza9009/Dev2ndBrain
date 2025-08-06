@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppStore } from '../../stores/useAppStore';
 import { useNoteStore } from '../../stores/useNoteStore';
@@ -7,6 +7,7 @@ import { useFlashcardStore } from '../../stores/useFlashcardStore';
 import { searchService } from '../../services/searchService';
 import type { SearchResult } from 'minisearch';
 import clsx from 'clsx';
+import { debounce } from 'lodash-es';
 import {
   PlusIcon, CodeBracketSquareIcon, RectangleStackIcon, BookOpenIcon,
   Squares2X2Icon, ShareIcon, Cog8ToothIcon, FolderOpenIcon
@@ -19,6 +20,7 @@ interface Command {
   category: string;
   action: () => void;
   icon: JSX.Element;
+  tags?: string[];
 }
 
 const CommandPalette: React.FC = () => {
@@ -31,6 +33,9 @@ const CommandPalette: React.FC = () => {
   const { addNote } = useNoteStore();
   const { addSnippet } = useSnippetStore();
   const { addDeck } = useFlashcardStore();
+
+  // NEW: Ref to hold the list container for scrolling
+  const listRef = useRef<HTMLUListElement>(null);
 
   const handleCreateNote = useCallback(async () => {
     const newNote = await addNote({ title: 'Untitled Note', content: '', tags: [] });
@@ -54,24 +59,28 @@ const CommandPalette: React.FC = () => {
   }, [addDeck, navigate, toggleCommandPalette]);
 
   const coreCommands: Command[] = useMemo(() => [
-    { id: 'nav-dashboard', type: 'navigation', title: 'Go to Dashboard', category: 'Navigation', action: () => navigate('/'), icon: <Squares2X2Icon className="h-5 w-5" /> },
-    { id: 'nav-notes', type: 'navigation', title: 'Go to Notes', category: 'Navigation', action: () => navigate('/notes'), icon: <BookOpenIcon className="h-5 w-5" /> },
-    { id: 'nav-snippets', type: 'navigation', title: 'Go to Snippets', category: 'Navigation', action: () => navigate('/snippets'), icon: <CodeBracketSquareIcon className="h-5 w-5" /> },
-    { id: 'nav-flashcards', type: 'navigation', title: 'Go to Flashcards', category: 'Navigation', action: () => navigate('/flashcards'), icon: <RectangleStackIcon className="h-5 w-5" /> },
-    { id: 'nav-graph', type: 'navigation', title: 'Go to Graph', category: 'Navigation', action: () => navigate('/graph'), icon: <ShareIcon className="h-5 w-5" /> },
-    { id: 'nav-settings', type: 'navigation', title: 'Go to Settings', category: 'Navigation', action: () => navigate('/settings'), icon: <Cog8ToothIcon className="h-5 w-5" /> },
+    { id: 'nav-dashboard', type: 'navigation', title: 'Go to Dashboard', category: 'Navigation', action: () => { navigate('/'); toggleCommandPalette(); }, icon: <Squares2X2Icon className="h-5 w-5" /> },
+    { id: 'nav-notes', type: 'navigation', title: 'Go to Notes', category: 'Navigation', action: () => { navigate('/notes'); toggleCommandPalette(); }, icon: <BookOpenIcon className="h-5 w-5" /> },
+    { id: 'nav-snippets', type: 'navigation', title: 'Go to Snippets', category: 'Navigation', action: () => { navigate('/snippets'); toggleCommandPalette(); }, icon: <CodeBracketSquareIcon className="h-5 w-5" /> },
+    { id: 'nav-flashcards', type: 'navigation', title: 'Go to Flashcards', category: 'Navigation', action: () => { navigate('/flashcards'); toggleCommandPalette(); }, icon: <RectangleStackIcon className="h-5 w-5" /> },
+    { id: 'nav-graph', type: 'navigation', title: 'Go to Graph', category: 'Navigation', action: () => { navigate('/graph'); toggleCommandPalette(); }, icon: <ShareIcon className="h-5 w-5" /> },
+    { id: 'nav-settings', type: 'navigation', title: 'Go to Settings', category: 'Navigation', action: () => { navigate('/settings'); toggleCommandPalette(); }, icon: <Cog8ToothIcon className="h-5 w-5" /> },
     { id: 'action-create-note', type: 'action', title: 'Create New Note', category: 'Actions', action: handleCreateNote, icon: <PlusIcon className="h-5 w-5" /> },
     { id: 'action-create-snippet', type: 'action', title: 'Create New Snippet', category: 'Actions', action: handleCreateSnippet, icon: <PlusIcon className="h-5 w-5" /> },
     { id: 'action-create-deck', type: 'action', title: 'Create New Deck', category: 'Actions', action: handleCreateDeck, icon: <PlusIcon className="h-5 w-5" /> },
-  ], [navigate, handleCreateNote, handleCreateSnippet, handleCreateDeck]);
+  ], [navigate, handleCreateNote, handleCreateSnippet, handleCreateDeck, toggleCommandPalette]);
 
-  useEffect(() => {
-    if (query.length > 1) {
-      setSearchResults(searchService.search(query));
+  const debouncedSearch = useMemo(() => debounce((searchQuery: string) => {
+    if (searchQuery.length > 1) {
+      setSearchResults(searchService.search(searchQuery));
     } else {
       setSearchResults([]);
     }
-  }, [query]);
+  }, 300), []);
+
+  useEffect(() => {
+    debouncedSearch(query);
+  }, [query, debouncedSearch]);
 
   const filteredCommands = useMemo(() => {
     if (!query) return coreCommands;
@@ -106,13 +115,13 @@ const CommandPalette: React.FC = () => {
             category = 'Notes';
             icon = <BookOpenIcon className="h-5 w-5" />;
             path = '/notes';
-            navigationState = { state: { selectedId: numericId } };
+            navigationState = { state: { selectedId: numericId, expandedTag: result.tags?.[0] } };
             break;
           case 'snippet':
             category = 'Snippets';
             icon = <CodeBracketSquareIcon className="h-5 w-5" />;
             path = '/snippets';
-            navigationState = { state: { selectedId: numericId } };
+            navigationState = { state: { selectedId: numericId, expandedTags: result.tags } };
             break;
           default: // flashcard
             category = 'Flashcards';
@@ -133,6 +142,7 @@ const CommandPalette: React.FC = () => {
                 toggleCommandPalette();
             },
             icon,
+            tags: result.tags
         };
       });
     return [...tabResults, ...filteredCommands, ...searchItems];
@@ -146,6 +156,10 @@ const CommandPalette: React.FC = () => {
     }
   }, [isCommandPaletteOpen]);
 
+  const handleResultClick = (item: Command) => {
+    item.action();
+  };
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (!isCommandPaletteOpen) return;
@@ -157,14 +171,24 @@ const CommandPalette: React.FC = () => {
         setActiveIndex(prev => (prev - 1 + allResults.length) % (allResults.length || 1));
       } else if (e.key === 'Enter' && allResults.length > 0) {
         e.preventDefault();
-        allResults[activeIndex]?.action();
+        handleResultClick(allResults[activeIndex]);
       } else if (e.key === 'Escape') {
         toggleCommandPalette();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isCommandPaletteOpen, allResults, activeIndex, toggleCommandPalette]);
+  }, [isCommandPaletteOpen, allResults, activeIndex, toggleCommandPalette, navigate]);
+  
+  // NEW: Effect to scroll to active item
+  useEffect(() => {
+    if (listRef.current && activeIndex >= 0) {
+      const activeElement = listRef.current.children[activeIndex] as HTMLElement;
+      if (activeElement) {
+        activeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+  }, [activeIndex]);
 
   if (!isCommandPaletteOpen) return null;
 
@@ -182,12 +206,12 @@ const CommandPalette: React.FC = () => {
             />
         </div>
         <hr className="border-gray-200 dark:border-gray-700"/>
-        <ul className="max-h-96 overflow-y-auto p-2">
+        <ul ref={listRef} className="max-h-96 overflow-y-auto p-2">
           {allResults.length > 0 ? (
             allResults.map((item, index) => (
               <li
                 key={item.id}
-                onClick={item.action}
+                onClick={() => handleResultClick(item)}
                 className={clsx(
                   "p-3 flex justify-between items-center rounded-lg cursor-pointer transition-colors duration-150",
                   { 'bg-teal-600 text-white': index === activeIndex },

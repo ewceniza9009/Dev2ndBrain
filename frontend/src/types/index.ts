@@ -54,6 +54,14 @@ export interface Deck {
   createdAt: Date;
 }
 
+export interface AiReview {
+  id?: number;
+  deckId: number;
+  deckName: string;
+  feedback: string;
+  timestamp: Date;
+}
+
 export interface Template {
   id?: number;
   title: string;

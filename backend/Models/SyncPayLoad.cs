@@ -53,6 +53,15 @@ namespace Dev2ndBrain.Models
         public int Interval { get; set; }
     }
 
+    public class AiReviewDto
+    {
+        public int? Id { get; set; }
+        public int DeckId { get; set; }
+        public string DeckName { get; set; } = string.Empty;
+        public string Feedback { get; set; } = string.Empty;
+        public DateTime Timestamp { get; set; }
+    }
+
     public class TemplateDto
     {
         public int? Id { get; set; }
@@ -67,6 +76,7 @@ namespace Dev2ndBrain.Models
         public List<SnippetDto> Snippets { get; set; } = new();
         public List<DeckDto> Decks { get; set; } = new();
         public List<FlashcardDto> Flashcards { get; set; } = new();
+        public List<AiReviewDto> AiReviews { get; set; } = new();
         public List<TemplateDto> Templates { get; set; } = new();
     }
 }

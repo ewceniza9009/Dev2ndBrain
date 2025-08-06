@@ -101,10 +101,28 @@ namespace Dev2ndBrain.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task SaveAiReviewsAsync(List<AiReviewDto> aiReviews)
+        {
+            foreach (var review in aiReviews)
+            {
+                var existingReview = await _context.AiReviews.FindAsync(review.Id);
+                if (existingReview == null)
+                {
+                    _context.AiReviews.Add(review);
+                }
+                else
+                {
+                    _context.Entry(existingReview).CurrentValues.SetValues(review);
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<NoteDto>> GetNotesAsync() => await _context.Notes.ToListAsync();
         public async Task<List<SnippetDto>> GetSnippetsAsync() => await _context.Snippets.ToListAsync();
         public async Task<List<DeckDto>> GetDecksAsync() => await _context.Decks.ToListAsync();
         public async Task<List<FlashcardDto>> GetFlashcardsAsync() => await _context.Flashcards.ToListAsync();
         public async Task<List<TemplateDto>> GetTemplatesAsync() => await _context.Templates.ToListAsync();
+        public async Task<List<AiReviewDto>> GetAiReviewsAsync() => await _context.AiReviews.ToListAsync();
     }
 }

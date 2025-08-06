@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import type { Snippet } from '../../types';
-import { XMarkIcon } from '@heroicons/react/20/solid';
+import { CodeBracketIcon, HandRaisedIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import ReactMarkdown from 'react-markdown'; 
+
 const API_BASE_URL = window.electronAPI
-  ? 'https://localhost:7150' // In Electron, talk directly to the backend
-  : import.meta.env.VITE_API_BASE_URL; // For web/Docker, use the .env file
+    ? 'https://localhost:7150'
+    : import.meta.env.VITE_API_BASE_URL;
 
 interface SnippetAiModalProps {
     isOpen: boolean;
@@ -52,28 +54,38 @@ const SnippetAiModal: React.FC<SnippetAiModalProps> = ({ isOpen, onClose, snippe
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl p-6" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-6xl p-6" onClick={e => e.stopPropagation()}>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">AI Assistant for Snippet: {snippet.title}</h2>
                 
                 <div className="grid grid-cols-2 gap-2 mb-4">
                     <button
                         onClick={() => handlePromptClick('explain')}
                         disabled={isLoading}
-                        className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-gray-500"
+                        className="p-3 flex items-center justify-center bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-gray-500"
                     >
-                        Explain Code
+                        <HandRaisedIcon className='h-5 w-5 mx-2'/>
+                        Explain Code                        
                     </button>
                     <button
                         onClick={() => handlePromptClick('refactor')}
                         disabled={isLoading}
-                        className="p-3 bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-gray-500"
+                        className="p-3 flex items-center justify-center bg-teal-600 text-white rounded-lg hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200 disabled:bg-gray-500"
                     >
+                        <CodeBracketIcon className='h-5 w-5 mx-2'/>
                         Refactor Code
                     </button>
                 </div>
 
-                <div className="w-full p-4 h-64 overflow-y-auto bg-gray-100 dark:bg-gray-700 rounded-lg whitespace-pre-wrap">
-                    {isLoading ? 'Thinking...' : (response || 'Select a prompt to analyze this snippet.')}
+                <div className="w-full p-4 h-64 overflow-y-auto bg-gray-100 dark:bg-gray-700 rounded-lg">
+                    {isLoading ? (
+                        <p className="text-gray-600 dark:text-gray-400">Thinking...</p>
+                    ) : response ? (
+                        <article className="prose dark:prose-invert prose-sm max-w-none text-gray-900 dark:text-gray-200">
+                            <ReactMarkdown>{response}</ReactMarkdown>
+                        </article>
+                    ) : (
+                        <p className="text-gray-600 dark:text-gray-400">Select a prompt to analyze this snippet.</p>
+                    )}
                 </div>
 
                 <div className="flex justify-end space-x-2 mt-4">

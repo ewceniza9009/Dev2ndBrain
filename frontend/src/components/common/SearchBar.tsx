@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { searchService } from '../../services/searchService';
 import type { SearchResult } from 'minisearch';
 import clsx from 'clsx';
 import { useAppStore } from '../../stores/useAppStore';
+import { debounce } from 'lodash-es';
 
 // A new interface to represent the combined search results
 interface CombinedSearchResult extends Partial<SearchResult> {
@@ -12,6 +13,7 @@ interface CombinedSearchResult extends Partial<SearchResult> {
   type: 'note' | 'snippet' | 'flashcard' | 'open-tab';
   deckId?: number;
   tabId?: string;
+  tags?: string[];
 }
 
 const SearchBar: React.FC = () => {
@@ -21,14 +23,11 @@ const SearchBar: React.FC = () => {
   const navigate = useNavigate();
   const { tabs, setActiveTab } = useAppStore();
 
-  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newQuery = e.target.value;
-    setQuery(newQuery);
-
-    if (newQuery.length > 1) {
-      const searchResults = searchService.search(newQuery);
+  const debouncedSearch = useMemo(() => debounce((searchQuery: string) => {
+    if (searchQuery.length > 1) {
+      const searchResults = searchService.search(searchQuery);
       const tabResults: CombinedSearchResult[] = tabs
-        .filter(tab => tab.title.toLowerCase().includes(newQuery.toLowerCase()))
+        .filter(tab => tab.title.toLowerCase().includes(searchQuery.toLowerCase()))
         .map(tab => ({
           id: `tab-${tab.id}`,
           title: tab.title,
@@ -51,6 +50,12 @@ const SearchBar: React.FC = () => {
       setResults([]);
       setActiveIndex(-1);
     }
+  }, 300), [tabs]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newQuery = e.target.value;
+    setQuery(newQuery);
+    debouncedSearch(newQuery);
   };
 
   const handleResultClick = (result: CombinedSearchResult) => {
@@ -62,9 +67,17 @@ const SearchBar: React.FC = () => {
       const numericId = parseInt(id, 10);
 
       if (type === 'note') {
-        navigate('/notes', { state: { selectedId: numericId } });
+        const state: { selectedId: number; expandedTag?: string } = { selectedId: numericId };
+        if (result.tags && result.tags.length > 0) {
+          state.expandedTag = result.tags[0]; // Pass the first tag to expand
+        }
+        navigate('/notes', { state });
       } else if (type === 'snippet') {
-        navigate('/snippets', { state: { selectedId: numericId } });
+        const state: { selectedId: number; expandedTags?: string[] } = { selectedId: numericId };
+        if (result.tags && result.tags.length > 0) {
+          state.expandedTags = result.tags; // Pass all tags to expand
+        }
+        navigate('/snippets', { state });
       } else if (type === 'flashcard') {
         navigate('/flashcards', { state: { selectedDeckId: result.deckId } });
       }

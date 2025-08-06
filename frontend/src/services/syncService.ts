@@ -1,26 +1,33 @@
 import { db } from './db';
 import { useAuthStore } from '../stores/useAuthStore';
 import { searchService } from './searchService';
-import type { Deck, Flashcard, Note, Snippet } from '../types';
+import type { Deck, Flashcard, Note, Snippet, AiReview } from '../types';
 
 const API_BASE_URL = window.electronAPI
   ? 'https://localhost:7150' // In Electron, talk directly to the backend
   : import.meta.env.VITE_API_BASE_URL; // For web/Docker, use the .env file
 
-const repopulateDb = async (data: { notes: Note[], snippets: Snippet[], decks: Deck[], flashcards: Flashcard[] }) => {
-  await db.transaction('rw', db.notes, db.snippets, db.decks, db.flashcards, async () => {
-    // Clear all local tables
+const repopulateDb = async (data: { notes: Note[], snippets: Snippet[], decks: Deck[], flashcards: Flashcard[], aiReviews: AiReview[]}) => {
+  await db.transaction('rw', [
+    db.notes,
+    db.snippets,
+    db.decks,
+    db.flashcards,
+    db.aiReviews,
+  ], async () => {
     await db.notes.clear();
     await db.snippets.clear();
     await db.decks.clear();
     await db.flashcards.clear();
+    await db.aiReviews.clear();
 
-    // Add the fetched data back into the tables
     await db.notes.bulkAdd(data.notes);
     await db.snippets.bulkAdd(data.snippets);
     await db.decks.bulkAdd(data.decks);
     await db.flashcards.bulkAdd(data.flashcards);
+    await db.aiReviews.bulkAdd(data.aiReviews);
   });
+  
   await searchService.initialize();
 };
 
@@ -36,6 +43,7 @@ export const syncService = {
       snippets: await db.snippets.toArray(),
       decks: await db.decks.toArray(),
       flashcards: await db.flashcards.toArray(),
+      aiReviews: await db.aiReviews.toArray(),
     };
     
     console.log("Pushing local data to backend...");
