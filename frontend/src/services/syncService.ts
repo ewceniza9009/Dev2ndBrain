@@ -3,7 +3,9 @@ import { useAuthStore } from '../stores/useAuthStore';
 import { searchService } from './searchService';
 import type { Deck, Flashcard, Note, Snippet } from '../types';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
+const API_BASE_URL = window.electronAPI
+  ? 'https://localhost:7150' // In Electron, talk directly to the backend
+  : import.meta.env.VITE_API_BASE_URL; // For web/Docker, use the .env file
 
 const repopulateDb = async (data: { notes: Note[], snippets: Snippet[], decks: Deck[], flashcards: Flashcard[] }) => {
   await db.transaction('rw', db.notes, db.snippets, db.decks, db.flashcards, async () => {

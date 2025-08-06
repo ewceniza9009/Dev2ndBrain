@@ -1,7 +1,9 @@
 import { useAuthStore } from "../stores/useAuthStore";
 import type { Snippet } from "../types";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
+const API_BASE_URL = window.electronAPI
+  ? 'https://localhost:7150' // In Electron, talk directly to the backend
+  : import.meta.env.VITE_API_BASE_URL; // For web/Docker, use the .env file
 
 async function getAuthToken(): Promise<string | null> {
     return useAuthStore.getState().getDecryptedToken();

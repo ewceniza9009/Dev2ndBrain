@@ -13,7 +13,9 @@ import { 
     ChevronLeftIcon 
 } from '@heroicons/react/20/solid';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7150';
+const API_BASE_URL = window.electronAPI
+  ? 'https://localhost:7150' // In Electron, talk directly to the backend
+  : import.meta.env.VITE_API_BASE_URL; // For web/Docker, use the .env file
 
 const AiReviewModal: React.FC<{ isOpen: boolean; onClose: () => void; feedback: string | null }> = ({ isOpen, onClose, feedback }) => {
     if (!isOpen) return null;

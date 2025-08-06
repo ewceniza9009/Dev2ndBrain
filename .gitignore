@@ -22,9 +22,17 @@ backend.*
 
 #frontend
 frontend/Dockerfile
-frontend/.env
+frontend/.env.development
+frontend/.env.electron
+
+# Electron Desktop App
+electron/node_modules/
+electron/build/
+electron/dist/
 
 #root
 /.vs
 .env
+docker-compose.backup.yaml
 docker-compose.yaml
+Dockerfile
