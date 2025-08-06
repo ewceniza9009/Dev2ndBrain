@@ -50,4 +50,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.MapGet("/hi", () => "Hi");
+
 app.Run();

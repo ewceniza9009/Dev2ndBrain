@@ -19,7 +19,6 @@ frontend/Dockerfile
 frontend/.env
 
 #root
-.env
 /.vs
+.env
 docker-compose.yaml
-/backend/.vs/backend/DesignTimeBuild/.dtbcache.v2
