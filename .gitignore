@@ -22,3 +22,8 @@ frontend/.env
 /.vs
 .env
 docker-compose.yaml
+/backend/obj/backend.csproj.nuget.dgspec.json
+/backend/obj/backend.csproj.nuget.g.props
+/backend/obj/backend.csproj.nuget.g.targets
+/backend/obj/project.assets.json
+/backend/obj/project.nuget.cache
