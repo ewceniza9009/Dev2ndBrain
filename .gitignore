@@ -2,24 +2,24 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/backend/appsettings.json
+#backend
 /backend/obj/
 /backend/bin/
-/backend/.vs/backend/
-/backend/.vs/backend/v17/.futdcache.v2
+/backend/.vs/
 /backend/.cr/
 /backend/Architecture.md
-frontend/.env
-backend/.vs/backend/DesignTimeBuild/.dtbcache.v2
-backend/.vs/ProjectEvaluation/backend.metadata.v9.bin
-backend/.vs/ProjectEvaluation/backend.projects.v9.bin
-backend/.vs/ProjectEvaluation/backend.strings.v9.bin
 /backend/dev2ndbrain.db
 /backend/dev2ndbrain.db-shm
 /backend/dev2ndbrain.db-wal
-docker-compose.yaml
-backend/Dockerfile
+/backend/appsettings.json
+/backend/Dockerfile
+
+#frontend
 frontend/Dockerfile
+frontend/.env
+
+#root
 .env
 /.vs
-/node_modules
+docker-compose.yaml
+/backend/.vs/backend/DesignTimeBuild/.dtbcache.v2
