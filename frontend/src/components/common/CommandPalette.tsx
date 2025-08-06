@@ -7,7 +7,7 @@ import { useFlashcardStore } from '../../stores/useFlashcardStore';
 import { searchService } from '../../services/searchService';
 import type { SearchResult } from 'minisearch';
 import clsx from 'clsx';
-import { 
+import {
   PlusIcon, CodeBracketSquareIcon, RectangleStackIcon, BookOpenIcon,
   Squares2X2Icon, ShareIcon, Cog8ToothIcon, FolderOpenIcon
 } from '@heroicons/react/20/solid';
@@ -93,21 +93,48 @@ const CommandPalette: React.FC = () => {
         icon: <FolderOpenIcon className="h-5 w-5" />,
       })) : [];
 
-    const searchItems: Command[] = searchResults.slice(0, 10).map(result => {
-        const [type, id] = result.id.split('-');
-        const numericId = parseInt(id, 10);
+    const searchItems: Command[] = searchResults.slice(0, 10).map((result) => {
+        const type = result.type as 'note' | 'snippet' | 'flashcard';
+        const numericId = parseInt(result.id.split('-')[1], 10);
+        let category: string;
+        let icon: JSX.Element;
+        let path: string;
+        let navigationState: object;
+
+        switch (type) {
+          case 'note':
+            category = 'Notes';
+            icon = <BookOpenIcon className="h-5 w-5" />;
+            path = '/notes';
+            navigationState = { state: { selectedId: numericId } };
+            break;
+          case 'snippet':
+            category = 'Snippets';
+            icon = <CodeBracketSquareIcon className="h-5 w-5" />;
+            path = '/snippets';
+            navigationState = { state: { selectedId: numericId } };
+            break;
+          default: // flashcard
+            category = 'Flashcards';
+            icon = <RectangleStackIcon className="h-5 w-5" />;
+            path = '/flashcards';
+            navigationState = { state: { selectedDeckId: result.deckId } };
+            break;
+        }
+
         return {
             id: result.id,
             type: 'search',
             title: result.title,
-            category: type === 'note' ? 'Notes' : 'Snippets',
+            category,
             action: () => {
-                navigate(type === 'note' ? '/notes' : '/snippets', { state: { selectedId: numericId } });
+                setActiveTab(null);
+                navigate(path, navigationState);
                 toggleCommandPalette();
             },
-            icon: type === 'note' ? <BookOpenIcon className="h-5 w-5" /> : <CodeBracketSquareIcon className="h-5 w-5" />,
+            icon,
         };
-    });
+      });
     return [...tabResults, ...filteredCommands, ...searchItems];
   }, [filteredCommands, searchResults, navigate, toggleCommandPalette, tabs, setActiveTab, query]);
 

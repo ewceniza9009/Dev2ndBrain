@@ -17,7 +17,7 @@
 *.cache
 *.csproj.*
 *staticwebassets.*
-*backend.*
+backend.*
 *.NETCoreApp.*
 
 #frontend

@@ -1,4 +1,4 @@
-import React, { useCallback, useState} from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { useNoteStore } from '../../stores/useNoteStore';
 import type { Note } from '../../types';
@@ -23,31 +23,40 @@ interface ImageLinkPayload {
 const NoteEditor: React.FC<NoteEditorProps> = ({ note, editorRef }) => {
   const updateNote = useNoteStore((state) => state.updateNote);
   const theme = useAppStore((state) => state.theme);
+  const [content, setContent] = useState(note.content);
   const [isLinkModalOpen, setLinkModalOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [isImageModalOpen, setIsImageModalOpen] = useState(false);
+
+  // This ensures the editor's content updates if the note prop changes
+  useEffect(() => {
+    setContent(note.content);
+  }, [note]);
 
   const handleEditorDidMount = (editor: any) => {
     editorRef.current = editor;
   };
 
   const debouncedUpdate = useCallback(
-    debounce((id: number, content: string) => {
-      updateNote(id, { content });
-    }, 2000),
+    debounce((id: number, newContent: string) => {
+      updateNote(id, { content: newContent });
+    }, 1000),
     [updateNote]
   );
 
   const handleEditorChange = (value: string | undefined) => {
-    if (value !== undefined && note.id) {
-      debouncedUpdate(note.id, value);
+    if (value !== undefined) {
+      setContent(value); // Update local state immediately for a responsive UI
+      if (note.id) {
+        debouncedUpdate(note.id, value);
+      }
     }
   };
 
   const handleInsertText = (textToInsert: string) => {
     const editor = editorRef.current;
     if (!editor) return;
-    
+    
     editor.executeEdits('', [{
       range: editor.getSelection(),
       text: textToInsert,
@@ -60,8 +69,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, editorRef }) => {
     handleInsertText(linkText);
     setLinkModalOpen(false);
   };
-  
-  // UPDATED: This handler now builds an HTML <img> tag if dimensions are provided.
+  
   const handleAddImageLink = (payload: ImageLinkPayload) => {
     const { url, width, height } = payload;
     let textToInsert = '';
@@ -76,7 +84,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, editorRef }) => {
       // Otherwise, use the standard Markdown syntax
       textToInsert = `\n![Image from URL](${url})\n`;
     }
-    
+    
     handleInsertText(textToInsert);
     setIsImageModalOpen(false);
   };
@@ -111,9 +119,8 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, editorRef }) => {
         <Editor
           key={note.id}
           height="100%"
-          // ... rest of editor props
           defaultLanguage="markdown"
-          defaultValue={note.content}
+          value={content}
           theme={theme === 'light' ? 'vs' : 'vs-dark'}
           onMount={handleEditorDidMount}
           onChange={handleEditorChange}
@@ -129,7 +136,7 @@ const NoteEditor: React.FC<NoteEditorProps> = ({ note, editorRef }) => {
           }}
         />
       </div>
-      
+      
       <LinkModal
         isOpen={isLinkModalOpen}
         onClose={() => setLinkModalOpen(false)}

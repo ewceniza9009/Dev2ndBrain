@@ -57,6 +57,7 @@ const SearchBar: React.FC = () => {
     if (result.type === 'open-tab' && result.tabId) {
       setActiveTab(result.tabId);
     } else {
+      setActiveTab(null);
       const [type, id] = result.id.split('-');
       const numericId = parseInt(id, 10);
 
