@@ -29,6 +29,7 @@ frontend/.env.electron
 electron/node_modules/
 electron/build/
 electron/dist/
+electron/src/config.cjs
 
 #root
 /.vs
@@ -36,3 +37,5 @@ electron/dist/
 docker-compose.backup.yaml
 docker-compose.yaml
 Dockerfile
+.env.development
+.env.production

@@ -6,12 +6,14 @@
   "scripts": {
     "build:frontend": "cd ../frontend && npm install && npm run build:electron",
     "build:electron": "tsc",
-    "start": "npm run build:frontend && npm run build:electron && electron .",
-    "package": "npm run build:frontend && npm run build:electron && electron-builder"
+    "start": "npm run build:frontend && tsc && electron .",
+    "package": "npm run build:frontend && tsc && electron-builder"
   },
   "author": "Your Name",
   "license": "ISC",
-  "dependencies": {},
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  },
   "devDependencies": {
     "@types/node": "^20.14.2",
     "electron": "^31.0.2",

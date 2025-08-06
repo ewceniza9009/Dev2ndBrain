@@ -39,7 +39,7 @@ const NoteViewerSearch: React.FC<NoteViewerSearchProps> = ({
   };
 
   return (
-    <div className="absolute top-4 right-4 z-10 bg-white dark:bg-gray-700 shadow-lg rounded-lg p-2 flex items-center space-x-2 border border-gray-300 dark:border-gray-600">
+    <div className="fixed top-4 right-4 z-50 bg-white dark:bg-gray-700 shadow-lg rounded-lg p-2 flex items-center space-x-2 border border-gray-300 dark:border-gray-600">
       <input
         ref={inputRef}
         type="text"
