@@ -1,108 +1,138 @@
 import { create } from 'zustand';
 
+// Define the shape of our annotation data so the store knows about it
+interface CanvasItem {
+  id: string;
+  type: 'annotation' | 'shape';
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+  text?: string;
+  shape?: 'rectangle' | 'circle';
+  color?: string;
+}
+interface Edge {
+  start: string;
+  end: string;
+}
+export interface AnnotationState {
+  items: CanvasItem[];
+  edges: Edge[];
+}
+
 type Theme = 'light' | 'dark';
 
 export interface Tab {
-  id: string; // e.g., "note-1", "snippet-5", "graph-filter-react"
-  type: 'note' | 'snippet' | 'deck' | 'graph-filter'; // Added 'graph-filter'
-  entityId?: number; // Made optional as it doesn't apply to graph filters
-  title: string;
-  filterCriteria?: string; // New property to store the tag for filtering
+  id: string;
+  type: 'note' | 'snippet' | 'deck' | 'graph-filter';
+  entityId?: number;
+  title: string;
+  filterCriteria?: string;
+  annotationLayerState?: AnnotationState; // Added to store annotation data per-tab
 }
 
 interface AppState {
-  theme: Theme;
-  isCommandPaletteOpen: boolean;
-  isSidebarCollapsed: boolean;
-  tabs: Tab[];
-  activeTabId: string | null;
-  initTheme: () => void;
-  toggleTheme: () => void;
-  toggleCommandPalette: () => void;
-  toggleSidebar: () => void;
-  openTab: (tabInfo: Omit<Tab, 'id'>) => void;
-  closeTab: (tabId: string) => void;
-  setActiveTab: (tabId: string | null) => void;
+  theme: Theme;
+  isCommandPaletteOpen: boolean;
+  isSidebarCollapsed: boolean;
+  tabs: Tab[];
+  activeTabId: string | null;
+  initTheme: () => void;
+  toggleTheme: () => void;
+  toggleCommandPalette: () => void;
+  toggleSidebar: () => void;
+  openTab: (tabInfo: Omit<Tab, 'id'>) => void;
+  closeTab: (tabId: string) => void;
+  setActiveTab: (tabId: string | null) => void;
+  updateTabState: (tabId: string, newState: Partial<Tab>) => void; // Added to update a tab's state
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  theme: 'dark',
-  isCommandPaletteOpen: false,
-  isSidebarCollapsed: false,
-  tabs: [],
-  activeTabId: null,
+  theme: 'dark',
+  isCommandPaletteOpen: false,
+  isSidebarCollapsed: false,
+  tabs: [],
+  activeTabId: null,
 
-  initTheme: () => {
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-    set({ theme: initialTheme });
-    if (initialTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  },
+  initTheme: () => {
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
+    set({ theme: initialTheme });
+    if (initialTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  },
 
-  toggleTheme: () => {
-    const newTheme = get().theme === 'light' ? 'dark' : 'light';
-    set({ theme: newTheme });
-    localStorage.setItem('theme', newTheme);
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-  },
+  toggleTheme: () => {
+    const newTheme = get().theme === 'light' ? 'dark' : 'light';
+    set({ theme: newTheme });
+    localStorage.setItem('theme', newTheme);
+    if (newTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  },
 
-  toggleCommandPalette: () => {
-    set(state => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen }));
-  },
+  toggleCommandPalette: () => {
+    set(state => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen }));
+  },
 
-  toggleSidebar: () => {
-    set(state => ({ isSidebarCollapsed: !state.isSidebarCollapsed }));
-  },
+  toggleSidebar: () => {
+    set(state => ({ isSidebarCollapsed: !state.isSidebarCollapsed }));
+  },
 
-  setActiveTab: (tabId: string | null) => {
-    set({ activeTabId: tabId });
-  },
+  setActiveTab: (tabId: string | null) => {
+    set({ activeTabId: tabId });
+  },
 
-  openTab: (tabInfo: Omit<Tab, 'id'>) => {
-    // Generate a unique ID based on the tab type and its content identifier
+  openTab: (tabInfo: Omit<Tab, 'id'>) => {
     const newTabId = tabInfo.type === 'graph-filter'
-        ? `${tabInfo.type}-${tabInfo.filterCriteria}`
-        : `${tabInfo.type}-${tabInfo.entityId}`;
+      ? `${tabInfo.type}-${tabInfo.filterCriteria}`
+      : `${tabInfo.type}-${tabInfo.entityId}`;
 
-    const existingTab = get().tabs.find(t => t.id === newTabId);
+    const existingTab = get().tabs.find(t => t.id === newTabId);
 
-    if (existingTab) {
-      set({ activeTabId: existingTab.id });
-    } else {
-      const newTab: Tab = { ...tabInfo, id: newTabId };
-      set(state => ({
-        tabs: [...state.tabs, newTab],
-        activeTabId: newTab.id,
-      }));
-    }
-  },
+    if (existingTab) {
+      set({ activeTabId: existingTab.id });
+    } else {
+      const newTab: Tab = { ...tabInfo, id: newTabId };
+      set(state => ({
+        tabs: [...state.tabs, newTab],
+        activeTabId: newTab.id,
+      }));
+    }
+  },
 
-  closeTab: (tabId: string) => {
-    set(state => {
-      const tabIndex = state.tabs.findIndex(t => t.id === tabId);
-      if (tabIndex === -1) return {};
+  closeTab: (tabId: string) => {
+    set(state => {
+      const tabIndex = state.tabs.findIndex(t => t.id === tabId);
+      if (tabIndex === -1) return {};
 
-      const newTabs = state.tabs.filter(t => t.id !== tabId);
-      let newActiveTabId = state.activeTabId;
+      const newTabs = state.tabs.filter(t => t.id !== tabId);
+      let newActiveTabId = state.activeTabId;
 
-      if (state.activeTabId === tabId) {
-        if (newTabs.length === 0) {
-          newActiveTabId = null;
-        } else {
-          newActiveTabId = newTabs[Math.max(0, tabIndex - 1)].id;
-        }
-      }
+      if (state.activeTabId === tabId) {
+        if (newTabs.length === 0) {
+          newActiveTabId = null;
+        } else {
+          newActiveTabId = newTabs[Math.max(0, tabIndex - 1)].id;
+        }
+      }
 
-      return { tabs: newTabs, activeTabId: newActiveTabId };
-    });
-  },
+      return { tabs: newTabs, activeTabId: newActiveTabId };
+    });
+  },
+  
+  updateTabState: (tabId: string, newState: Partial<Tab>) => {
+    set(state => ({
+      tabs: state.tabs.map(tab =>
+        tab.id === tabId ? { ...tab, ...newState } : tab
+      )
+    }));
+  },
 }));
