@@ -12,15 +12,16 @@ class AppDatabase extends Dexie {
 
   constructor() {
     super('Dev2ndBrainDB');
-    // Increment version for migration
-    this.version(5).stores({  
-      notes: '++id, uuid, title, *tags, createdAt, updatedAt, iconType, iconColor, x, y, fx, fy',  
-      snippets: '++id, title, language, *tags, gistId',
-      flashcards: '++id, deckId, nextReview',
-      decks: '++id, name',
-      templates: '++id, title',
+    // VITAL CHANGE: Increment version number to apply schema changes
+    this.version(6).stores({  
+      // VITAL CHANGE: Add 'isDeleted' as an index to all relevant tables
+      notes: '++id, uuid, title, *tags, updatedAt, isDeleted', 
+      snippets: '++id, title, language, *tags, gistId, updatedAt, isDeleted',
+      flashcards: '++id, deckId, nextReview, isDeleted',
+      decks: '++id, name, isDeleted',
+      templates: '++id, title, isDeleted',
       settings: 'key',
-      aiReviews: '++id, deckId, timestamp', 
+      aiReviews: '++id, deckId, timestamp', 
     });
   }
 

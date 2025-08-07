@@ -20,6 +20,7 @@ namespace Dev2ndBrain.Models
         public double? Fy { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 
     public class SnippetDto
@@ -32,6 +33,7 @@ namespace Dev2ndBrain.Models
         public string? GistId { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 
     public class DeckDto
@@ -39,6 +41,8 @@ namespace Dev2ndBrain.Models
         public int? Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 
     public class FlashcardDto
@@ -51,6 +55,8 @@ namespace Dev2ndBrain.Models
         public double EaseFactor { get; set; }
         public int Repetitions { get; set; }
         public int Interval { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 
     public class AiReviewDto
@@ -68,6 +74,8 @@ namespace Dev2ndBrain.Models
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public bool? IsDeleted { get; set; }
     }
 
     public class SyncPayload

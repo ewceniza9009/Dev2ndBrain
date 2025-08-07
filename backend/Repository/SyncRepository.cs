@@ -17,16 +17,20 @@ namespace Dev2ndBrain.Repositories
         {
             foreach (var note in notes)
             {
-                // Check if the record already exists based on its Id
+                if (note.IsDeleted == true && note.Id.HasValue)
+                {
+                    var noteToDelete = await _context.Notes.FindAsync(note.Id.Value);
+                    if (noteToDelete != null) _context.Notes.Remove(noteToDelete);
+                    continue;
+                }
+
                 var existingNote = await _context.Notes.FindAsync(note.Id);
                 if (existingNote == null)
                 {
-                    // This is a new record, add it
                     _context.Notes.Add(note);
                 }
-                else
+                else if (note.UpdatedAt > existingNote.UpdatedAt)
                 {
-                    // This is an existing record, update its values
                     _context.Entry(existingNote).CurrentValues.SetValues(note);
                 }
             }
@@ -37,12 +41,18 @@ namespace Dev2ndBrain.Repositories
         {
             foreach (var snippet in snippets)
             {
+                if (snippet.IsDeleted == true && snippet.Id.HasValue)
+                {
+                    var snippetToDelete = await _context.Snippets.FindAsync(snippet.Id.Value);
+                    if (snippetToDelete != null) _context.Snippets.Remove(snippetToDelete);
+                    continue;
+                }
                 var existingSnippet = await _context.Snippets.FindAsync(snippet.Id);
                 if (existingSnippet == null)
                 {
                     _context.Snippets.Add(snippet);
                 }
-                else
+                else if (snippet.UpdatedAt > existingSnippet.UpdatedAt)
                 {
                     _context.Entry(existingSnippet).CurrentValues.SetValues(snippet);
                 }
@@ -54,12 +64,18 @@ namespace Dev2ndBrain.Repositories
         {
             foreach (var deck in decks)
             {
+                if (deck.IsDeleted == true && deck.Id.HasValue)
+                {
+                    var deckToDelete = await _context.Decks.FindAsync(deck.Id.Value);
+                    if (deckToDelete != null) _context.Decks.Remove(deckToDelete);
+                    continue;
+                }
                 var existingDeck = await _context.Decks.FindAsync(deck.Id);
                 if (existingDeck == null)
                 {
                     _context.Decks.Add(deck);
                 }
-                else
+                else if (deck.UpdatedAt > existingDeck.UpdatedAt)
                 {
                     _context.Entry(existingDeck).CurrentValues.SetValues(deck);
                 }
@@ -71,12 +87,18 @@ namespace Dev2ndBrain.Repositories
         {
             foreach (var flashcard in flashcards)
             {
+                if (flashcard.IsDeleted == true && flashcard.Id.HasValue)
+                {
+                    var flashcardToDelete = await _context.Flashcards.FindAsync(flashcard.Id.Value);
+                    if (flashcardToDelete != null) _context.Flashcards.Remove(flashcardToDelete);
+                    continue;
+                }
                 var existingFlashcard = await _context.Flashcards.FindAsync(flashcard.Id);
                 if (existingFlashcard == null)
                 {
                     _context.Flashcards.Add(flashcard);
                 }
-                else
+                else if (flashcard.UpdatedAt > existingFlashcard.UpdatedAt)
                 {
                     _context.Entry(existingFlashcard).CurrentValues.SetValues(flashcard);
                 }
@@ -88,12 +110,18 @@ namespace Dev2ndBrain.Repositories
         {
             foreach (var template in templates)
             {
+                if (template.IsDeleted == true && template.Id.HasValue)
+                {
+                    var templateToDelete = await _context.Templates.FindAsync(template.Id.Value);
+                    if (templateToDelete != null) _context.Templates.Remove(templateToDelete);
+                    continue;
+                }
                 var existingTemplate = await _context.Templates.FindAsync(template.Id);
                 if (existingTemplate == null)
                 {
                     _context.Templates.Add(template);
                 }
-                else
+                else if (template.UpdatedAt > existingTemplate.UpdatedAt)
                 {
                     _context.Entry(existingTemplate).CurrentValues.SetValues(template);
                 }
@@ -110,7 +138,7 @@ namespace Dev2ndBrain.Repositories
                 {
                     _context.AiReviews.Add(review);
                 }
-                else
+                else if (review.Timestamp > existingReview.Timestamp)
                 {
                     _context.Entry(existingReview).CurrentValues.SetValues(review);
                 }

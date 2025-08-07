@@ -24,6 +24,7 @@ export interface Note {
   fy?: number | null;
   createdAt: Date;
   updatedAt: Date;
+  isDeleted?: boolean;
 }
 
 export interface Snippet {
@@ -35,6 +36,7 @@ export interface Snippet {
   gistId?: string;
   createdAt: Date;
   updatedAt: Date;
+  isDeleted?: boolean;
 }
 
 export interface Flashcard {
@@ -46,12 +48,16 @@ export interface Flashcard {
   easeFactor: number;
   repetitions: number;
   interval: number;
+  updatedAt: Date;
+  isDeleted?: boolean;
 }
 
 export interface Deck {
   id?: number;
   name: string;
   createdAt: Date;
+  updatedAt: Date;
+  isDeleted?: boolean;
 }
 
 export interface AiReview {
@@ -67,6 +73,8 @@ export interface Template {
   title: string;
   content: string;
   createdAt: Date;
+  updatedAt: Date;
+  isDeleted?: boolean;
 }
 
 export interface GitHubUser {

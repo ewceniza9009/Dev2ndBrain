@@ -3,6 +3,7 @@ using System;
 using Dev2ndBrain.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace backend.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250807041010_AddUpdateTimestampsForSync")]
+    partial class AddUpdateTimestampsForSync
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.7");
@@ -51,9 +54,6 @@ namespace backend.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -83,9 +83,6 @@ namespace backend.Migrations
                         .HasColumnType("REAL");
 
                     b.Property<int>("Interval")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<bool?>("IsDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<DateTime>("NextReview")
@@ -134,9 +131,6 @@ namespace backend.Migrations
                     b.Property<bool?>("IsCollapsed")
                         .HasColumnType("INTEGER");
 
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("LinkedNoteIds")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -182,9 +176,6 @@ namespace backend.Migrations
                     b.Property<string>("GistId")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Language")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -217,9 +208,6 @@ namespace backend.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
-
-                    b.Property<bool?>("IsDeleted")
-                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Title")
                         .IsRequired()
