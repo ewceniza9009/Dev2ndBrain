@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useAppStore, AnnotationState } from '../../stores/useAppStore';
 import { useNoteStore } from '../../stores/useNoteStore';
 import { useSnippetStore } from '../../stores/useSnippetStore';

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAppStore } from '../../stores/useAppStore';
+import { useAppStore, Tab } from '../../stores/useAppStore';
 import { useNoteStore } from '../../stores/useNoteStore';
 import { useSnippetStore } from '../../stores/useSnippetStore';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
@@ -24,18 +24,18 @@ interface Command {
 }
 
 const CommandPalette: React.FC = () => {
-  const { isCommandPaletteOpen, toggleCommandPalette, tabs, setActiveTab } = useAppStore();
+  const { isCommandPaletteOpen, toggleCommandPalette, tabs, setActiveTab, openTab } = useAppStore();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
 
+  // NEW: Ref to hold the list container for scrolling
+  const listRef = useRef<HTMLUListElement>(null);
+
   const { addNote } = useNoteStore();
   const { addSnippet } = useSnippetStore();
   const { addDeck } = useFlashcardStore();
-
-  // NEW: Ref to hold the list container for scrolling
-  const listRef = useRef<HTMLUListElement>(null);
 
   const handleCreateNote = useCallback(async () => {
     const newNote = await addNote({ title: 'Untitled Note', content: '', tags: [] });
@@ -107,28 +107,26 @@ const CommandPalette: React.FC = () => {
         const numericId = parseInt(result.id.split('-')[1], 10);
         let category: string;
         let icon: JSX.Element;
-        let path: string;
-        let navigationState: object;
+        let tabInfo: Omit<Tab, 'id'>;
 
         switch (type) {
           case 'note':
             category = 'Notes';
             icon = <BookOpenIcon className="h-5 w-5" />;
-            path = '/notes';
-            navigationState = { state: { selectedId: numericId, expandedTag: result.tags?.[0] } };
+            tabInfo = { type: 'note', entityId: numericId, title: result.title };
             break;
           case 'snippet':
             category = 'Snippets';
             icon = <CodeBracketSquareIcon className="h-5 w-5" />;
-            path = '/snippets';
-            navigationState = { state: { selectedId: numericId, expandedTags: result.tags } };
+            tabInfo = { type: 'snippet', entityId: numericId, title: result.title };
             break;
-          default: // flashcard
+          case 'flashcard':
             category = 'Flashcards';
             icon = <RectangleStackIcon className="h-5 w-5" />;
-            path = '/flashcards';
-            navigationState = { state: { selectedDeckId: result.deckId } };
+            tabInfo = { type: 'deck', entityId: result.deckId, title: result.title };
             break;
+          default:
+            return null as any;
         }
 
         return {
@@ -137,16 +135,16 @@ const CommandPalette: React.FC = () => {
             title: result.title,
             category,
             action: () => {
-                setActiveTab(null);
-                navigate(path, navigationState);
+                // Use openTab to open the content in a new tab
+                openTab(tabInfo);
                 toggleCommandPalette();
             },
             icon,
             tags: result.tags
         };
       });
-    return [...tabResults, ...filteredCommands, ...searchItems];
-  }, [filteredCommands, searchResults, navigate, toggleCommandPalette, tabs, setActiveTab, query]);
+    return [...tabResults, ...filteredCommands, ...searchItems].filter(Boolean);
+  }, [filteredCommands, searchResults, toggleCommandPalette, tabs, openTab, query, setActiveTab]);
 
   useEffect(() => {
     if (isCommandPaletteOpen) {

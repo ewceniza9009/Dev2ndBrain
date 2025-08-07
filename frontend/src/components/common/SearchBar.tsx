@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { searchService } from '../../services/searchService';
 import type { SearchResult } from 'minisearch';
 import clsx from 'clsx';
-import { useAppStore } from '../../stores/useAppStore';
+import { useAppStore, Tab } from '../../stores/useAppStore';
 import { debounce } from 'lodash-es';
 
 // A new interface to represent the combined search results
@@ -20,8 +19,7 @@ const SearchBar: React.FC = () => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<CombinedSearchResult[]>([]);
   const [activeIndex, setActiveIndex] = useState(-1);
-  const navigate = useNavigate();
-  const { tabs, setActiveTab } = useAppStore();
+  const { tabs, setActiveTab, openTab } = useAppStore();
 
   const debouncedSearch = useMemo(() => debounce((searchQuery: string) => {
     if (searchQuery.length > 1) {
@@ -62,24 +60,20 @@ const SearchBar: React.FC = () => {
     if (result.type === 'open-tab' && result.tabId) {
       setActiveTab(result.tabId);
     } else {
-      setActiveTab(null);
       const [type, id] = result.id.split('-');
       const numericId = parseInt(id, 10);
 
+      let tabInfo: Omit<Tab, 'id'> | null = null;
       if (type === 'note') {
-        const state: { selectedId: number; expandedTag?: string } = { selectedId: numericId };
-        if (result.tags && result.tags.length > 0) {
-          state.expandedTag = result.tags[0]; // Pass the first tag to expand
-        }
-        navigate('/notes', { state });
+        tabInfo = { type: 'note', entityId: numericId, title: result.title || 'Untitled Note' };
       } else if (type === 'snippet') {
-        const state: { selectedId: number; expandedTags?: string[] } = { selectedId: numericId };
-        if (result.tags && result.tags.length > 0) {
-          state.expandedTags = result.tags; // Pass all tags to expand
-        }
-        navigate('/snippets', { state });
+        tabInfo = { type: 'snippet', entityId: numericId, title: result.title || 'Untitled Snippet' };
       } else if (type === 'flashcard') {
-        navigate('/flashcards', { state: { selectedDeckId: result.deckId } });
+        tabInfo = { type: 'deck', entityId: numericId, title: result.title || 'Untitled Deck' };
+      }
+      
+      if (tabInfo) {
+        openTab(tabInfo);
       }
     }
     setQuery('');
