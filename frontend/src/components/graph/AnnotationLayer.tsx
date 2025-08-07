@@ -16,7 +16,6 @@ import {
   BoltIcon,
   BugAntIcon,
   TableCellsIcon as AddRowIcon,
-  PlusCircleIcon as AddColumnIcon,
   CircleStackIcon,
   CodeBracketIcon,
   DevicePhoneMobileIcon,
@@ -45,6 +44,7 @@ import { useAppStore } from '../../stores/useAppStore';
 import { useAnnotationStore } from '../../stores/useAnnotationStore';
 import { nanoid } from 'nanoid';
 import type { CanvasItem, Edge } from '../../types';
+import { PlusCircleIcon } from '@heroicons/react/24/outline';
 
 // --- Context Menu Component ---
 interface ContextMenuProps {
@@ -98,7 +98,6 @@ const ContextMenu: React.FC<ContextMenuProps> = ({ id, x, y, onClose, onBringToF
     </div>
   );
 };
-
 
 // --- Sub-Components for Draggable Items ---
 interface DraggableItemProps {
@@ -240,9 +239,15 @@ const DraggableShape: React.FC<DraggableShapeProps> = ({ item, onRemove, onResiz
   );
 };
 
-interface DraggableTableProps extends DraggableItemProps {
+interface DraggableTableProps {
+  item: CanvasItem;
   onUpdateContent: (id: string, content: string[][]) => void;
-  onResize: (id: string, size: { width: number; height: number }) => void;
+  onRemove: (id: string) => void;
+  onResize: (id: string, size: { width: number; height: number; columnWidths?: number[]; rowHeights?: number[] }) => void;
+  startArrow: (id: string) => void;
+  endArrow: (id: string) => void;
+  onDragOrResize: (id: string, position: { x: number; y: number }, size: { width: number; height: number }) => void;
+  onContextMenu: (event: React.MouseEvent, id: string) => void;
 }
 
 const DraggableTable: React.FC<DraggableTableProps> = ({
@@ -257,29 +262,43 @@ const DraggableTable: React.FC<DraggableTableProps> = ({
 }) => {
   const nodeRef = useRef(null);
   
-  const [columnWidths, setColumnWidths] = useState<number[]>([]);
-  const [rowHeights, setRowHeights] = useState<number[]>([]);
+  const [columnWidths, setColumnWidths] = useState<number[]>(item.columnWidths ?? []);
+  const [rowHeights, setRowHeights] = useState<number[]>(item.rowHeights ?? []);
+  const startResize = useRef<{ startX: number, startY: number, index: number, type: 'col' | 'row', initialSize: number } | null>(null);
 
   useEffect(() => {
     if (item.content && item.content.length > 0) {
-      const initialWidths = Array(item.content[0].length).fill(100);
-      const initialHeights = Array(item.content.length).fill(40);
-      setColumnWidths(initialWidths);
-      setRowHeights(initialHeights);
+      if (!item.columnWidths || item.columnWidths.length === 0) {
+        setColumnWidths(Array(item.content[0].length).fill(100));
+      }
+      if (!item.rowHeights || item.rowHeights.length === 0) {
+        setRowHeights(Array(item.content.length).fill(40));
+      }
     }
-  }, [item.content]);
+  }, [item.content, item.columnWidths, item.rowHeights]);
 
   const handleCellChange = (rowIndex: number, colIndex: number, value: string) => {
-    const newContent = item.content!.map((row, rIdx) =>
+    const newContent = item.content?.map((row, rIdx) =>
       rIdx === rowIndex ? row.map((cell, cIdx) => (cIdx === colIndex ? value : cell)) : row
     );
-    onUpdateContent(item.id, newContent);
+    if (newContent) {
+      onUpdateContent(item.id, newContent);
+    }
   };
   
   const handleAddRow = () => {
     if (item.content && item.content.length > 0) {
       const newRow = Array(item.content[0].length).fill('');
       onUpdateContent(item.id, [...item.content, newRow]);
+      setRowHeights([...rowHeights, 40]);
+    }
+  };
+
+  const handleRemoveRow = (rowIndexToRemove: number) => {
+    if (item.content) {
+      const newContent = item.content.filter((_, rowIndex) => rowIndex !== rowIndexToRemove);
+      onUpdateContent(item.id, newContent);
+      setRowHeights(rowHeights.filter((_, index) => index !== rowIndexToRemove));
     }
   };
 
@@ -287,23 +306,25 @@ const DraggableTable: React.FC<DraggableTableProps> = ({
     if (item.content && item.content.length > 0) {
       const newContent = item.content.map(row => [...row, '']);
       onUpdateContent(item.id, newContent);
+      setColumnWidths([...columnWidths, 100]);
+    }
+  };
+  
+  const handleRemoveColumn = (colIndexToRemove: number) => {
+    if (item.content) {
+      const newContent = item.content.map(row => row.filter((_, colIndex) => colIndex !== colIndexToRemove));
+      onUpdateContent(item.id, newContent);
+      setColumnWidths(columnWidths.filter((_, index) => index !== colIndexToRemove));
     }
   };
 
-  const startResize = useRef<{ startX: number, startY: number, index: number, type: 'col' | 'row', initialSize: number } | null>(null);
-
-  const handleMouseDown = (e: React.MouseEvent, index: number, type: 'col' | 'row') => {
-    e.stopPropagation();
-    document.body.style.cursor = type === 'col' ? 'col-resize' : 'row-resize';
-    startResize.current = { 
-      startX: e.clientX, 
-      startY: e.clientY,
-      index, 
-      type,
-      initialSize: type === 'col' ? columnWidths[index] : rowHeights[index]
-    };
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
+  const saveLayout = () => {
+    onResize(item.id, {
+      width: item.width ?? 300,
+      height: item.height ?? 150,
+      columnWidths,
+      rowHeights,
+    });
   };
 
   const handleMouseMove = (e: MouseEvent) => {
@@ -329,17 +350,25 @@ const DraggableTable: React.FC<DraggableTableProps> = ({
   const handleMouseUp = () => {
     document.body.style.cursor = 'default';
     if (startResize.current) {
-        // Save final dimensions to parent component
-        const { type } = startResize.current;
-        if (type === 'col') {
-          // This would require a function to save the whole layout
-        } else {
-          // Same for rows
-        }
+      saveLayout();
     }
     startResize.current = null;
     document.removeEventListener('mousemove', handleMouseMove);
     document.removeEventListener('mouseup', handleMouseUp);
+  };
+
+  const handleMouseDown = (e: React.MouseEvent, index: number, type: 'col' | 'row') => {
+    e.stopPropagation();
+    document.body.style.cursor = type === 'col' ? 'col-resize' : 'row-resize';
+    startResize.current = { 
+      startX: e.clientX, 
+      startY: e.clientY,
+      index, 
+      type,
+      initialSize: type === 'col' ? columnWidths[index] : rowHeights[index]
+    };
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
   };
 
   return (
@@ -348,76 +377,85 @@ const DraggableTable: React.FC<DraggableTableProps> = ({
       handle=".drag-handle"
       defaultPosition={{ x: item.x, y: item.y }}
       bounds="parent"
-      onDrag={(_, data) => onDragOrResize(item.id, { x: data.x, y: data.y }, { width: item.width!, height: item.height! })}
+      onDrag={(_, data) => onDragOrResize(item.id, { x: data.x, y: data.y }, { width: item.width ?? 300, height: item.height ?? 150 })}
     >
       <div id={item.id} ref={nodeRef} className="absolute group pointer-events-auto" onClick={() => endArrow(item.id)} onContextMenu={(e) => onContextMenu(e, item.id)} style={{ zIndex: item.zIndex }}>
+        <div className="drag-handle absolute top-0 left-0 w-full h-8 cursor-grab bg-gray-300 dark:bg-gray-700 z-20 flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 rounded-t-md">
+          Drag here
+        </div>
         <ResizableBox
-          height={item.height || 150}
-          width={item.width || 300}
+          height={item.height ?? 150}
+          width={item.width ?? 300}
           onResizeStop={(_, data: ResizeCallbackData) => {
-            onResize(item.id, data.size);
+            onResize(item.id, { ...data.size, columnWidths, rowHeights });
             onDragOrResize(item.id, { x: item.x, y: item.y }, data.size);
           }}
-          className="shadow-xl bg-white dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600 rounded-md overflow-hidden"
+          className="shadow-xl bg-white dark:bg-gray-800 border-2 border-gray-400 dark:border-gray-600 rounded-b-md overflow-hidden"
           minConstraints={[150, 100]}
         >
-          <div className="drag-handle absolute top-0 left-0 w-full h-6 cursor-move bg-gray-200 dark:bg-gray-700" />
-          <table className="w-full h-full border-collapse">
-            <tbody>
-              {item.content?.map((row, rowIndex) => (
-                <tr key={rowIndex} style={{ height: rowHeights[rowIndex] }}>
-                  {row.map((cell, colIndex) => (
-                    <td key={colIndex} className="border border-gray-300 dark:border-gray-600 p-1 relative" style={{ width: columnWidths[colIndex] }}>
-                      <input
-                        type="text"
-                        value={cell}
-                        onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
-                        className="w-full h-full bg-transparent text-sm text-gray-900 dark:text-white border-none focus:outline-none"
-                      />
-                      {colIndex < row.length - 1 && (
-                        <div
-                          className="absolute top-0 right-0 w-2 h-full cursor-col-resize z-10"
-                          onMouseDown={(e) => handleMouseDown(e, colIndex, 'col')}
+          <div className="relative w-full h-full p-2" style={{ paddingTop: '2.5rem' }}>
+            <table className="w-full h-full border-collapse">
+              <tbody>
+                {item.content?.map((row, rowIndex) => (
+                  <tr key={rowIndex} style={{ height: rowHeights[rowIndex] }}>
+                    {row.map((cell, colIndex) => (
+                      <td key={colIndex} className="border border-gray-300 dark:border-gray-600 p-1 relative" style={{ width: columnWidths[colIndex] }}>
+                        <input
+                          type="text"
+                          value={cell}
+                          onChange={(e) => handleCellChange(rowIndex, colIndex, e.target.value)}
+                          className="w-full h-full bg-transparent text-sm text-gray-900 dark:text-white border-none focus:outline-none"
                         />
-                      )}
-                      {rowIndex < item.content!.length - 1 && (
-                        <div
-                          className="absolute bottom-0 left-0 w-full h-2 cursor-row-resize z-10"
-                          onMouseDown={(e) => handleMouseDown(e, rowIndex, 'row')}
-                        />
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(item.id);
-            }}
-            className="absolute top-0 right-0 p-0.5 bg-gray-300 dark:bg-gray-900 rounded-full text-black dark:text-white opacity-0 group-hover:opacity-100 transition-opacity -mt-2 -mr-2"
-            title="Delete item"
-          >
-            <XMarkIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              startArrow(item.id);
-            }}
-            className="absolute bottom-0 right-0 p-0.5 bg-gray-300 dark:bg-gray-900 rounded-full text-black dark:text-white opacity-0 group-hover:opacity-100 transition-opacity -mb-2 -mr-2"
-            title="Start connector"
-          >
-            <ShareIcon className="w-4 h-4" />
-          </button>
+                        {colIndex < (item.content?.[0]?.length ?? 0) - 1 && (
+                          <div
+                            className="absolute top-0 right-0 w-3 h-full cursor-col-resize z-30"
+                            onMouseDown={(e) => handleMouseDown(e, colIndex, 'col')}
+                          />
+                        )}
+                        {rowIndex < (item.content?.length ?? 0) - 1 && (
+                          <div
+                            className="absolute bottom-0 left-0 w-full h-3 cursor-row-resize z-30 -mb-1.5"
+                            onMouseDown={(e) => handleMouseDown(e, rowIndex, 'row')}
+                          />
+                        )}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </ResizableBox>
+        {/* Buttons are now inside the main draggable div, but outside the resizable box */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(item.id);
+          }}
+          className="absolute top-0 right-0 p-0.5 bg-gray-300 dark:bg-gray-900 rounded-full text-black dark:text-white opacity-0 group-hover:opacity-100 transition-opacity -mt-2 -mr-2 z-40"
+          title="Delete item"
+        >
+          <XMarkIcon className="w-4 h-4" />
+        </button>
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            startArrow(item.id);
+          }}
+          className="absolute bottom-0 right-0 p-0.5 bg-gray-300 dark:bg-gray-900 rounded-full text-black dark:text-white opacity-0 group-hover:opacity-100 transition-opacity -mb-2 -mr-2 z-40"
+          title="Start connector"
+        >
+          <ShareIcon className="w-4 h-4" />
+        </button>
+
+        {/* Control bar for adding/removing rows and columns */}
+        <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 flex space-x-2 p-2 rounded-full bg-gray-200 dark:bg-gray-700 opacity-0 group-hover:opacity-100 transition-opacity z-40">
           <button
             onClick={(e) => {
               e.stopPropagation();
               handleAddRow();
             }}
-            className="absolute bottom-0 left-0 p-0.5 bg-gray-300 dark:bg-gray-900 rounded-full text-black dark:text-white opacity-0 group-hover:opacity-100 transition-opacity -mb-2 -ml-2"
+            className="p-1 rounded-full bg-gray-300 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600"
             title="Add row"
           >
             <AddRowIcon className="w-4 h-4" />
@@ -427,12 +465,32 @@ const DraggableTable: React.FC<DraggableTableProps> = ({
               e.stopPropagation();
               handleAddColumn();
             }}
-            className="absolute bottom-0 left-1/2 p-0.5 bg-gray-300 dark:bg-gray-900 rounded-full text-black dark:text-white opacity-0 group-hover:opacity-100 transition-opacity -mb-2 -ml-2 transform -translate-x-1/2"
+            className="p-1 rounded-full bg-gray-300 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-400 dark:hover:bg-gray-600"
             title="Add column"
           >
-            <AddColumnIcon className="w-4 h-4" />
+            <PlusCircleIcon className="w-4 h-4" />
           </button>
-        </ResizableBox>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveRow(item.content!.length - 1);
+            }}
+            className="p-1 rounded-full bg-red-400 dark:bg-red-800 text-white hover:bg-red-500 dark:hover:bg-red-700"
+            title="Remove last row"
+          >
+            <XMarkIcon className="w-4 h-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRemoveColumn(item.content![0].length - 1);
+            }}
+            className="p-1 rounded-full bg-red-400 dark:bg-red-800 text-white hover:bg-red-500 dark:hover:bg-red-700"
+            title="Remove last column"
+          >
+            <XMarkIcon className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     </Draggable>
   );
@@ -526,7 +584,6 @@ const DraggableTextbox: React.FC<DraggableTextboxProps> = ({
           minConstraints={[50, 40]}
         >
           <div className="drag-handle absolute top-0 left-0 w-full h-full cursor-move p-2 flex items-center">
-            {/* VITAL CHANGE: Use textarea instead of input */}
             <textarea
               value={inputText}
               onChange={handleInputChange}
@@ -633,12 +690,12 @@ const AnnotationLayer: React.FC = () => {
   const handleContextMenu = (e: React.MouseEvent, id: string) => {
     e.preventDefault();
     if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setContextMenu({
-            id,
-            x: e.clientX - rect.left,
-            y: e.clientY - rect.top,
-        });
+      const rect = containerRef.current.getBoundingClientRect();
+      setContextMenu({
+        id,
+        x: e.clientX - rect.left,
+        y: e.clientY - rect.top,
+      });
     }
   };
 
@@ -665,6 +722,7 @@ const AnnotationLayer: React.FC = () => {
   const handleUpdateItem = (id: string, newProps: Partial<CanvasItem>) => {
     if (!filterCriteria) return;
     updateItem(filterCriteria, id, newProps);
+    updateXarrow();
   };
   
   const handleUpdateTableContent = (id: string, content: string[][]) => {
@@ -981,7 +1039,7 @@ const AnnotationLayer: React.FC = () => {
                   item={item}
                   onUpdateContent={handleUpdateTableContent} 
                   onRemove={handleRemoveItem}
-                  onResize={(id, size) => handleUpdateItem(id, { width: size.width, height: size.height })}
+                  onResize={(id, size) => handleUpdateItem(id, { width: size.width, height: size.height, columnWidths: size.columnWidths, rowHeights: size.rowHeights })}
                   onDragOrResize={handleItemDragOrResize}
                   startArrow={handleStartArrow}
                   endArrow={handleEndArrow}
@@ -1026,19 +1084,19 @@ const AnnotationLayer: React.FC = () => {
               labels={
                 isSelected
                   ? {
-                      middle: (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSwitchArrowDirection(edge);
-                          }}
-                          className="bg-white p-1 rounded-full shadow-md hover:bg-gray-200 pointer-events-auto"
-                          title="Switch arrow direction"
-                        >
-                          <ArrowsRightLeftIcon className="w-4 h-4 text-blue-600" />
-                        </button>
-                      ),
-                    }
+                    middle: (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleSwitchArrowDirection(edge);
+                        }}
+                        className="bg-white p-1 rounded-full shadow-md hover:bg-gray-200 pointer-events-auto"
+                        title="Switch arrow direction"
+                      >
+                        <ArrowsRightLeftIcon className="w-4 h-4 text-blue-600" />
+                      </button>
+                    ),
+                  }
                   : undefined
               }
             />

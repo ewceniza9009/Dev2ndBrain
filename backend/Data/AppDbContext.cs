@@ -25,8 +25,6 @@ namespace Dev2ndBrain.Data
             modelBuilder.Entity<TemplateDto>().HasKey(t => t.Id);
             modelBuilder.Entity<AiReviewDto>().HasKey(a => a.Id);
             modelBuilder.Entity<AnnotationRecordDto>().HasKey(a => a.FilterCriteria);
-
-            // VITAL CHANGE: Configure the AnnotationRecordDto.State property to be stored as a JSON string
             modelBuilder.Entity<AnnotationRecordDto>()
                 .Property(a => a.State)
                 .HasConversion(

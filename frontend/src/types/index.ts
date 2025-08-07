@@ -112,6 +112,8 @@ export interface CanvasItem {
   content?: string[][];
   tag: string;
   zIndex?: number;
+  columnWidths?: number[];
+  rowHeights?: number[];
 }
 
 export interface Edge {
