@@ -3,10 +3,11 @@ import { create } from 'zustand';
 type Theme = 'light' | 'dark';
 
 export interface Tab {
-  id: string; // e.g., "note-1", "snippet-5"
-  type: 'note' | 'snippet' | 'deck';
-  entityId: number;
+  id: string; // e.g., "note-1", "snippet-5", "graph-filter-react"
+  type: 'note' | 'snippet' | 'deck' | 'graph-filter'; // Added 'graph-filter'
+  entityId?: number; // Made optional as it doesn't apply to graph filters
   title: string;
+  filterCriteria?: string; // New property to store the tag for filtering
 }
 
 interface AppState {
@@ -67,7 +68,11 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
 
   openTab: (tabInfo: Omit<Tab, 'id'>) => {
-    const newTabId = `${tabInfo.type}-${tabInfo.entityId}`;
+    // Generate a unique ID based on the tab type and its content identifier
+    const newTabId = tabInfo.type === 'graph-filter'
+        ? `${tabInfo.type}-${tabInfo.filterCriteria}`
+        : `${tabInfo.type}-${tabInfo.entityId}`;
+
     const existingTab = get().tabs.find(t => t.id === newTabId);
 
     if (existingTab) {

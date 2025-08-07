@@ -8,6 +8,7 @@ import SnippetDetail from '../snippets/SnippetDetail';
 import DeckView from '../flashcards/DeckView';
 import FlashcardPlayer from '../flashcards/FlashcardPlayer';
 import ConfirmationModal from '../ConfirmationModal';
+import GraphView from '../graph/GraphView'; // Import GraphView
 import { TrashIcon, PlayCircleIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
 
 interface TabContentRendererProps {
@@ -18,15 +19,14 @@ const TabContentRenderer: React.FC<TabContentRendererProps> = ({ tabId }) => {
   const { tabs, closeTab } = useAppStore();
   const tab = tabs.find(t => t.id === tabId);
 
-  // State for deck view specifically
   const [view, setView] = useState<'list' | 'review'>('list');
   const [reviewMode, setReviewMode] = useState<'due' | 'all'>('due');
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [isEditingDeckName, setIsEditingDeckName] = useState(false);
   const [editedDeckName, setEditedDeckName] = useState('');
 
-  // Reactive hooks to get data
   const note = useNoteStore(state => tab?.type === 'note' ? state.notes.find(n => n.id === tab.entityId) : null);
+  const allNotes = useNoteStore(state => state.notes); // Fetch all notes for graph filtering
   const snippet = useSnippetStore(state => tab?.type === 'snippet' ? state.snippets.find(s => s.id === tab.entityId) : null);
   const deck = useFlashcardStore(state => tab?.type === 'deck' ? state.decks.find(d => d.id === tab.entityId) : null);
   const { deleteDeck, updateDeck } = useFlashcardStore();
@@ -35,7 +35,6 @@ const TabContentRenderer: React.FC<TabContentRendererProps> = ({ tabId }) => {
     return <div className="p-8 text-gray-500">Loading tab...</div>;
   }
 
-  // Handlers for deck actions within a tab
   const handleEditDeckName = () => {
     if (deck) {
       setIsEditingDeckName(true);
@@ -51,14 +50,14 @@ const TabContentRenderer: React.FC<TabContentRendererProps> = ({ tabId }) => {
   const handleConfirmDeleteDeck = () => {
     if (deck?.id) {
       deleteDeck(deck.id);
-      closeTab(tab.id); // Close the tab after deletion
+      closeTab(tab.id);
     }
   };
 
   switch (tab.type) {
     case 'note':
       return note ? <NoteDetailView note={note} /> : <div className="p-8 text-gray-500">Note not found...</div>;
-    
+    
     case 'snippet':
       return snippet ? <SnippetDetail snippet={snippet} /> : <div className="p-8 text-gray-500">Snippet not found...</div>;
 
@@ -111,7 +110,22 @@ const TabContentRenderer: React.FC<TabContentRendererProps> = ({ tabId }) => {
           <ConfirmationModal isOpen={isConfirmModalOpen} onClose={() => setIsConfirmModalOpen(false)} onConfirm={handleConfirmDeleteDeck} title="Confirm Deck Deletion" message={`Are you sure you want to delete the deck "${deck.name}"? This action cannot be undone.`} />
         </div>
       );
-    
+
+    case 'graph-filter': {
+        if (!tab.filterCriteria) {
+            return <div className="p-8 text-gray-500">Error: No filter criteria for this graph tab.</div>;
+        }
+        // Filter the notes based on the tag stored in the tab
+        const filteredNotes = allNotes.filter(note => note.tags.includes(tab.filterCriteria!));
+        
+        // Render a GraphView with only the filtered notes.
+        return (
+            <div className="h-full w-full">
+                <GraphView notes={filteredNotes} />
+            </div>
+        );
+    }
+    
     default:
       return <div className="p-8 text-gray-500">Unknown tab type.</div>;
   }
