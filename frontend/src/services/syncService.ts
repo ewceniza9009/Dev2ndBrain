@@ -1,7 +1,7 @@
 import { db } from './db';
 import { useAuthStore } from '../stores/useAuthStore';
 import { searchService } from './searchService';
-import type { Deck, Flashcard, Note, Snippet, AiReview, Template } from '../types';
+import type { Deck, Flashcard, Note, Snippet, AiReview, Template, AnnotationRecord } from '../types';
 
 const API_BASE_URL = window.electronAPI
   ? 'https://localhost:7150' // In Electron, talk directly to the backend
@@ -33,9 +33,10 @@ const repopulateDb = async (data: {
   flashcards: Flashcard[],
   aiReviews: AiReview[],
   templates: Template[],
+  annotations: AnnotationRecord[],
 }) => {
   await db.transaction('rw', [
-    db.notes, db.snippets, db.decks, db.flashcards, db.aiReviews, db.templates
+    db.notes, db.snippets, db.decks, db.flashcards, db.aiReviews, db.templates, db.annotations
   ], async () => {
     await db.notes.clear();
     await db.snippets.clear();
@@ -43,6 +44,7 @@ const repopulateDb = async (data: {
     await db.flashcards.clear();
     await db.aiReviews.clear();
     await db.templates.clear();
+    await db.annotations.clear();
 
     await db.notes.bulkAdd(data.notes);
     await db.snippets.bulkAdd(data.snippets);
@@ -50,21 +52,22 @@ const repopulateDb = async (data: {
     await db.flashcards.bulkAdd(data.flashcards);
     await db.aiReviews.bulkAdd(data.aiReviews);
     await db.templates.bulkAdd(data.templates);
+    await db.annotations.bulkAdd(data.annotations);
   });
   await searchService.initialize();
 };
 
 const cleanupLocalTombstones = async () => {
-  await db.transaction('rw', [
-    db.notes, db.snippets, db.decks, db.flashcards, db.templates
-  ], async () => {
-    await db.notes.where('isDeleted').equals(1).delete();
-    await db.snippets.where('isDeleted').equals(1).delete();
-    await db.decks.where('isDeleted').equals(1).delete();
-    await db.flashcards.where('isDeleted').equals(1).delete();
-    await db.templates.where('isDeleted').equals(1).delete();
-  });
-  console.log("Local tombstone cleanup complete.");
+  await db.transaction('rw', [
+    db.notes, db.snippets, db.decks, db.flashcards, db.templates
+  ], async () => {
+    await db.notes.where('isDeleted').equals(1).delete();
+    await db.snippets.where('isDeleted').equals(1).delete();
+    await db.decks.where('isDeleted').equals(1).delete();
+    await db.flashcards.where('isDeleted').equals(1).delete();
+    await db.templates.where('isDeleted').equals(1).delete();
+  });
+  console.log("Local tombstone cleanup complete.");
 };
 
 export const syncService = {
@@ -81,6 +84,7 @@ export const syncService = {
       flashcards: await db.flashcards.toArray(),
       aiReviews: await db.aiReviews.toArray(),
       templates: await db.templates.toArray(),
+      annotations: await db.annotations.toArray(),
     };
     
     console.log("Pushing local data (including deletions) to backend...");
@@ -93,8 +97,8 @@ export const syncService = {
       body: JSON.stringify(localData),
     });
 
-    // After a successful push, remove the tombstoned records from the local DB
-    await cleanupLocalTombstones();
+    // After a successful push, remove the tombstoned records from the local DB
+    await cleanupLocalTombstones();
 
     return await pushResponse.json();
   },

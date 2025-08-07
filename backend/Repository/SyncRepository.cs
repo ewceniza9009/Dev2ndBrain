@@ -1,6 +1,7 @@
 ﻿using Dev2ndBrain.Data;
 using Dev2ndBrain.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;        
 
 namespace Dev2ndBrain.Repositories
 {
@@ -146,11 +147,29 @@ namespace Dev2ndBrain.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task SaveAnnotationsAsync(List<AnnotationRecordDto> annotations)
+        {
+            foreach (var annotation in annotations)
+            {
+                var existingAnnotation = await _context.Annotations.FindAsync(annotation.FilterCriteria);
+                if (existingAnnotation == null)
+                {
+                    _context.Annotations.Add(annotation);
+                }
+                else
+                {
+                    _context.Entry(existingAnnotation).CurrentValues.SetValues(annotation);
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<NoteDto>> GetNotesAsync() => await _context.Notes.ToListAsync();
         public async Task<List<SnippetDto>> GetSnippetsAsync() => await _context.Snippets.ToListAsync();
         public async Task<List<DeckDto>> GetDecksAsync() => await _context.Decks.ToListAsync();
         public async Task<List<FlashcardDto>> GetFlashcardsAsync() => await _context.Flashcards.ToListAsync();
         public async Task<List<TemplateDto>> GetTemplatesAsync() => await _context.Templates.ToListAsync();
         public async Task<List<AiReviewDto>> GetAiReviewsAsync() => await _context.AiReviews.ToListAsync();
+        public async Task<List<AnnotationRecordDto>> GetAnnotationsAsync() => await _context.Annotations.ToListAsync();
     }
 }
