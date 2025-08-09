@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProjectStore } from '../stores/useProjectStore';
+import { useNoteStore } from '../stores/useNoteStore';
+import { useSnippetStore } from '../stores/useSnippetStore';
 import ProjectList from '../components/projects/ProjectList';
 import ProjectDetail from '../components/projects/ProjectDetail';
 import type { Project } from '../types';
@@ -8,23 +10,41 @@ import { PlusIcon } from '@heroicons/react/20/solid';
 
 const ProjectsPage: React.FC = () => {
     const { projects, fetchProjects, addProject } = useProjectStore();
+    const { fetchNotes } = useNoteStore();
+    const { fetchSnippets } = useSnippetStore();
     const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
     const location = useLocation();
     const navigate = useNavigate();
 
     useEffect(() => {
         fetchProjects();
-    }, [fetchProjects]);
+        fetchNotes();
+        fetchSnippets();
+    }, [fetchProjects, fetchNotes, fetchSnippets]);
 
+    // Effect to handle incoming navigation from other pages (like Dashboard)
     useEffect(() => {
-        if (location.state?.selectedId) {
-            setSelectedProjectId(location.state.selectedId);
+        const stateId = location.state?.selectedId;
+        if (stateId) {
+            setSelectedProjectId(stateId);
+            // Clear the state from history so a refresh doesn't bring it back
             navigate(location.pathname, { replace: true });
-        } else if (!selectedProjectId && projects.length > 0) {
-            const sortedProjects = [...projects].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-            setSelectedProjectId(sortedProjects[0].id!);
         }
-    }, [projects, selectedProjectId, location.state, navigate]);
+    }, [location.state, navigate]);
+
+    // Effect to set a default selection ONLY if needed
+    useEffect(() => {
+        if (!projects || projects.length === 0) return;
+
+        const selectionIsValid = selectedProjectId && projects.some(p => p.id === selectedProjectId);
+
+        // If there is no valid selection, set a default
+        if (!selectionIsValid) {
+            const sortedProjects = [...projects].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+            setSelectedProjectId(sortedProjects[0]?.id || null);
+        }
+    }, [projects, selectedProjectId]);
+
 
     const handleNewProject = async () => {
         const newProject = await addProject({

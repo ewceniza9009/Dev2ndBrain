@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useProjectStore } from '../../../stores/useProjectStore';
 import { useNoteStore } from '../../../stores/useNoteStore';
 import { useSnippetStore } from '../../../stores/useSnippetStore';
+import { useAppStore } from '../../../stores/useAppStore';
 import type { Project, ProjectResource } from '../../../types';
 import { PlusIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 
@@ -9,6 +10,7 @@ const ResourcesTab: React.FC<{ project: Project }> = ({ project }) => {
     const { updateProject } = useProjectStore();
     const { notes } = useNoteStore();
     const { snippets } = useSnippetStore();
+    const { openTab } = useAppStore();
     const [isAdding, setIsAdding] = useState(false);
     const [newResource, setNewResource] = useState<Omit<ProjectResource, 'id'>>({ type: 'Note', link: '', description: '' });
     const [searchTerm, setSearchTerm] = useState('');
@@ -23,6 +25,15 @@ const ResourcesTab: React.FC<{ project: Project }> = ({ project }) => {
             return snippets.find(s => s.id?.toString() === resource.link)?.title || 'Snippet not found';
         }
         return resource.link;
+    };
+    
+    const handleResourceClick = (resource: ProjectResource) => {
+        const title = getResourceTitle(resource);
+        if (resource.type === 'Note') {
+            openTab({ type: 'note', entityId: parseInt(resource.link, 10), title });
+        } else if (resource.type === 'Snippet') {
+            openTab({ type: 'snippet', entityId: parseInt(resource.link, 10), title });
+        }
     };
 
     const filteredResources = useMemo(() => {
@@ -142,7 +153,15 @@ const ResourcesTab: React.FC<{ project: Project }> = ({ project }) => {
                     <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                         {filteredResources.map((resource, index) => (
                             <tr key={resource.id || index}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{getResourceTitle(resource)}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    {resource.type === 'Note' || resource.type === 'Snippet' ? (
+                                        <button onClick={() => handleResourceClick(resource)} className="text-teal-600 dark:text-teal-400 hover:underline">
+                                            {getResourceTitle(resource)}
+                                        </button>
+                                    ) : (
+                                        <span className="text-gray-900 dark:text-white">{getResourceTitle(resource)}</span>
+                                    )}
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{resource.type}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-300">{resource.description}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
