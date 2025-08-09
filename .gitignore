@@ -12,6 +12,9 @@
 /backend/dev2ndbrain.db-shm
 /backend/dev2ndbrain.db-wal
 /backend/appsettings.json
+/backend/appsettings.Development.json
+/backend/appsettings.Deploy.json
+/backend/appsettings.Template.json
 /backend/Dockerfile
 *.nuget
 *.cache

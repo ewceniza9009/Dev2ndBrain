@@ -3,128 +3,407 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dev2ndBrain Help</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Dev2ndBrain Help & User Guide</title>
     <style>
+        :root {
+            --bg-color: #030712; /* Gray 950 */
+            --card-bg-color: #111827; /* Gray 900 */
+            --text-color: #D1D5DB; /* Gray 300 */
+            --heading-color: #FFFFFF;
+            --accent-color: #14B8A6; /* Teal 500 */
+            --accent-hover-color: #0D9488; /* Teal 600 */
+            --border-color: #374151; /* Gray 700 */
+            --code-bg-color: #4B5563; /* Gray 600 */
+            --warning-bg-color: rgba(239, 68, 68, 0.1);
+            --warning-border-color: #EF4444; /* Red 500 */
+            --warning-text-color: #F87171; /* Red 400 */
+            --info-bg-color: rgba(59, 130, 246, 0.1);
+            --info-border-color: #3B82F6; /* Blue 500 */
+        }
+
         body {
-            background-color: #f3f4f6; /* gray-100 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            margin: 0;
+            padding: 2rem;
         }
-        html.dark body {
-            background-color: #111827; /* gray-900 */
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding-left: 280px; /* Space for the fixed TOC */
         }
-        html.dark .feature-card {
-             background-color: #1f2937; /* gray-800 */
+
+        .toc {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+            width: 240px;
+            height: calc(100vh - 4rem);
+            overflow-y: auto;
+            border-right: 1px solid var(--border-color);
+            padding-right: 1rem;
         }
-        html.dark .step {
-            border-color: #374151; /* gray-700 */
+
+        .toc h3 {
+            border: none;
+            margin-top: 0;
+            color: var(--accent-color);
         }
+
+        .toc a {
+            display: block;
+            padding: 0.3rem 0;
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-left: 2px solid transparent;
+            padding-left: 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .toc a.level-2 { padding-left: 2rem; }
+
+        .toc a:hover {
+            color: var(--heading-color);
+            border-left-color: var(--accent-hover-color);
+        }
+
+        h1, h2, h3, h4 {
+            color: var(--heading-color);
+            line-height: 1.3;
+            margin-top: 2.5em;
+            margin-bottom: 1em;
+            padding-bottom: 0.5em;
+            scroll-margin-top: 2rem;
+        }
+
+        h2 { border-bottom: 1px solid var(--border-color); }
+
+        h1 { font-size: 2.8rem; margin-top: 0; }
+        h2 { font-size: 2.2rem; }
+        h3 { font-size: 1.6rem; }
+        h4 { font-size: 1.2rem; color: var(--accent-color); }
+
+        .heading-icon {
+            display: inline-block;
+            vertical-align: middle;
+            width: 1.2em;
+            height: 1.2em;
+            margin-right: 0.5rem;
+            color: var(--accent-color);
+        }
+
+        a {
+            color: var(--accent-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
         code {
-            background-color: #e5e7eb;
-            color: #be123c; /* rose-700 */
-            font-weight: 600;
+            background-color: var(--code-bg-color);
             padding: 0.2em 0.4em;
             margin: 0;
-            font-size: 85%;
+            font-size: 90%;
             border-radius: 6px;
+            font-family: "SF Mono", "Fira Code", "Fira Mono", "Roboto Mono", monospace;
         }
-        html.dark code {
-            background-color: #374151;
-            color: #f472b6; /* pink-400 */
+
+        pre {
+            background-color: var(--card-bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5em;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        ul, ol { padding-left: 2em; }
+        li { margin-bottom: 0.75em; }
+        strong { color: #FEF2F2; } /* Red 50 */
+
+        .card, .info-box, .warning-box {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 2em;
+            margin: 1.5em 0;
+            border: 1px solid var(--border-color);
+        }
+
+        .info-box {
+            border-left: 4px solid var(--info-border-color);
+            background-color: var(--info-bg-color);
+        }
+        
+        .warning-box {
+            border-left: 4px solid var(--warning-border-color);
+            background-color: var(--warning-bg-color);
+            color: var(--warning-text-color);
+        }
+
+        .warning-box strong { color: #FECACA; }
+
+        footer {
+            text-align: center;
+            margin-top: 4rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            color: #9CA3AF; /* Gray 400 */
         }
     </style>
 </head>
-<body class="antialiased text-gray-800 dark:text-gray-300">
-    <div class="h-screen overflow-y-auto">
-        <header class="p-8 pb-4">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dev2ndBrain Help Guide</h1>
-            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">By Erwin Wilson Ceniza</p>
+<body>
+
+    <nav class="toc">
+        <h3>Contents</h3>
+        <a href="#welcome">Welcome</a>
+        <a href="#setup">Installation & Setup</a>
+        <a href="#quick-tour">Quick Tour (Sample Data)</a>
+        <a href="#interface">The Interface</a>
+        <a href="#deep-dive">A Deep Dive into Pages</a>
+        <a href="#page-dashboard" class="level-2">Dashboard</a>
+        <a href="#page-notes" class="level-2">Notes</a>
+        <a href="#page-snippets" class="level-2">Snippets</a>
+        <a href="#page-projects" class="level-2">Projects</a>
+        <a href="#page-flashcards" class="level-2">Flashcards</a>
+        <a href="#page-graph" class="level-2">Graph View</a>
+        <a href="#page-settings" class="level-2">Settings</a>
+        <a href="#clipper">Web Clipper Extension</a>
+        <a href="#about">About & Credits</a>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1 id="welcome">
+                <svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M11.25 4.533A9.707 9.707 0 0 0 6 3a9.735 9.735 0 0 0-3.25.555.75.75 0 0 0-.5.707v1.586a.75.75 0 0 0 .29.585l.21.21a.75.75 0 0 0 .53.22h.004a.75.75 0 0 0 .53-.22L6 5.414l1.293 1.293a.75.75 0 0 0 1.06 0l.21-.21a.75.75 0 0 0 .29-.585V5.24a.75.75 0 0 0-.5-.707ZM12.75 4.533A9.707 9.707 0 0 1 18 3a9.735 9.735 0 0 1 3.25.555.75.75 0 0 1 .5.707v1.586a.75.75 0 0 1-.29.585l-.21.21a.75.75 0 0 1-1.06 0L18 5.414l-1.293 1.293a.75.75 0 0 1-1.06 0l-.21-.21a.75.75 0 0 1-.29-.585V5.24a.75.75 0 0 1 .5-.707Z"></path><path fill-rule="evenodd" d="M12 21a8.25 8.25 0 0 0 8.25-8.25c0-4.135-3.045-7.56-7.03-8.158a.75.75 0 0 0-.44 1.402A6.75 6.75 0 0 1 19.5 12.75a6.75 6.75 0 0 1-6.75 6.75A6.75 6.75 0 0 1 6 12.75c0-3.518 2.71-6.423 6.16-6.68a.75.75 0 0 0 .44-1.402C8.595 5.19 5.25 8.615 5.25 12.75A8.25 8.25 0 0 0 12 21Z" clip-rule="evenodd"></path></svg>
+                Welcome to Dev2ndBrain
+            </h1>
+            <p>This guide will walk you through setting up, using, and mastering the application to create your own powerful, interconnected knowledge base for all your development projects. Dev2ndBrain is a local-first application designed to be a developer's "second brain," ensuring your data is private, secure, and always available offline.</p>
         </header>
 
-        <main class="px-8 pb-8 space-y-10">
+        <main>
             <section>
-                <h2 class="text-2xl font-semibold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Getting Started</h2>
-                <div class="feature-card bg-white p-6 rounded-lg shadow space-y-4">
-                    <h3 class="font-bold text-xl text-teal-600 dark:text-teal-400">Using the Command Palette</h3>
-                    <p>The Command Palette is the fastest way to navigate and perform actions. It allows you to do almost anything without taking your hands off the keyboard.</p>
-                    <div class="step border-t border-gray-200 pt-3 mt-3">
-                        <h4 class="font-semibold">How to Use It:</h4>
-                        <ol class="mt-2 list-decimal list-inside space-y-1">
-                            <li>Press <code>Ctrl+K</code> (or <code>Cmd+K</code> on Mac) to open the palette.</li>
-                            <li>Start typing what you want to do. For example:
-                                <ul class="list-disc list-inside ml-4 mt-1">
-                                    <li>Type <code>Create new note</code> to make a new note.</li>
-                                    <li>Type <code>Go to settings</code> to open the settings page.</li>
-                                    <li>Type the name of a note or snippet (e.g., <code>My API notes</code>) to find and open it.</li>
-                                </ul>
-                            </li>
-                            <li>Use the arrow keys (<code>↑</code> and <code>↓</code>) to select a result and press <strong>Enter</strong> to execute the action.</li>
-                        </ol>
-                    </div>
-                </div>
-            </section>
-
-            <section>
-                <h2 class="text-2xl font-semibold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Projects</h2>
-                <div class="feature-card bg-white p-6 rounded-lg shadow space-y-4">
-                     <h3 class="font-bold text-xl text-sky-500 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>Managing a Project</h3>
-                    <p>The Projects section is a dedicated workspace to organize all aspects of a single initiative, from high-level goals to specific code snippets.</p>
-                    <div class="step border-t border-gray-200 pt-3 mt-3">
-                        <h4 class="font-semibold">Step-by-Step Instructions:</h4>
-                        <ol class="mt-2 list-decimal list-inside space-y-2">
-                            <li><strong>Create a Project:</strong> Navigate to the <strong>Projects</strong> page from the sidebar and click the <strong>New</strong> button. A new project will be created and selected for you.</li>
-                            <li><strong>Define the Overview:</strong> In the <strong>Overview</strong> tab, click the title to rename your project. Click the description area to add details, goals, and next steps using Markdown.</li>
-                            <li><strong>Track Features:</strong> Go to the <strong>Features</strong> tab to add and manage tasks, bugs, or enhancements. Set their status to keep track of your progress.</li>
-                             <li><strong>Link Resources:</strong> In the <strong>Resources</strong> tab, click <strong>Add Resource</strong> to link to your existing Notes and Snippets, or to add external URLs relevant to your project.</li>
-                        </ol>
-                    </div>
+                <h2 id="setup">
+                    <svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 5.857a.75.75 0 0 1-.552.502l-3.32.83a1.875 1.875 0 0 0-1.78 2.305l.83 3.32a.75.75 0 0 1-.032.637l-2.076 2.842a1.875 1.875 0 0 0 .945 3.087l3.32.83a.75.75 0 0 1 .552.502l.173 2.043a1.875 1.875 0 0 0 2.305 1.78l3.32-.83a.75.75 0 0 1 .637-.032l2.842-2.076a1.875 1.875 0 0 0 3.087-.945l.83-3.32a.75.75 0 0 1 .502-.552l2.043-.173a1.875 1.875 0 0 0 1.78-2.305l-.83-3.32a.75.75 0 0 1-.032-.637l-2.076-2.842a1.875 1.875 0 0 0-.945-3.087l-3.32-.83a.75.75 0 0 1-.552-.502l-.173-2.043a1.875 1.875 0 0 0-2.305-1.78l-3.32.83a.75.75 0 0 1-.637.032L9.05 5.857 7.22 4.027a1.875 1.875 0 0 0-1.567-1.777A11.962 11.962 0 0 1 12 2.25c.917 0 1.799.103 2.622.298a1.875 1.875 0 0 0-1.567 1.777l-1.83 1.83-1.25.173a.75.75 0 0 1-.502.552l-.83 3.32a.75.75 0 0 1 .032.637l2.076 2.842a.75.75 0 0 1-.032.637l-.83 3.32a.75.75 0 0 1 .502.552l.173 2.043a.75.75 0 0 1 .552.502l.83 3.32a.75.75 0 0 1-.637.032l-2.842 2.076a.75.75 0 0 1-.637-.032l-.83-3.32a.75.75 0 0 1-.502-.552l-.173-2.043a.75.75 0 0 1-.552-.502l-.83-3.32a.75.75 0 0 1 .032-.637l2.076-2.842a.75.75 0 0 1 .032-.637l.83-3.32a.75.75 0 0 1 .502-.552l2.043-.173a.75.75 0 0 1 .552-.502l1.83-1.83A1.875 1.875 0 0 0 12.98 2.548 11.962 11.962 0 0 1 12 2.25Z" clip-rule="evenodd"></path></svg>
+                    1. Installation & Initial Setup
+                </h2>
+                <h3>Critical First Step: Configuring `appsettings.json`</h3>
+                <div class="card">
+                    <p>To connect your GitHub account for Gist syncing and cloud backups, you must configure the application's backend settings. This is a one-time setup.</p>
+                    <ol>
+                        <li>
+                            <strong>Locate the Backend Folder:</strong> After installation, navigate to the following folder. Replace <code>[User]</code> with your Windows username.
+                            <p><strong>Path:</strong> <code>C:\Users\[User]\AppData\Local\Programs\dev2ndbrain\resources\backend</code></p>
+                        </li>
+                        <li>
+                            <strong>Create a GitHub OAuth App:</strong>
+                            <ul>
+                                <li>Log in to GitHub and go to <strong>Settings > Developer settings > OAuth Apps > New OAuth App</strong>.</li>
+                                <li>Use the following configuration:
+                                    <ul>
+                                        <li><strong>Application name:</strong> Dev2ndBrain Local</li>
+                                        <li><strong>Homepage URL:</strong> <code>http://localhost:5174</code></li>
+                                        <li><strong>Authorization callback URL:</strong> <code>http://localhost:5174/oauth/callback</code> <em>(This must be exact!)</em></li>
+                                    </ul>
+                                </li>
+                                <li>Click <strong>Register application</strong>.</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Generate a Client Secret:</strong> On the next page, copy your **Client ID**. Then, click **Generate a new client secret** and copy the secret immediately.
+                        </li>
+                        <li>
+                            <strong>Edit the `appsettings.json` File:</strong> In the `backend` folder, open `appsettings.json` and replace its contents with the template below, pasting in your credentials.
+                            <pre><code>{
+  "Logging": { "LogLevel": { "Default": "Information", "Microsoft.AspNetCore": "Warning" } },
+  "AllowedHosts": "*",
+  "ConnectionStrings": { "DefaultConnection": "Data Source=dev2ndbrain.db" },
+  "GitHub": {
+    "ClientId": "PASTE_YOUR_CLIENT_ID_HERE",
+    "ClientSecret": "PASTE_YOUR_CLIENT_SECRET_HERE"
+  },
+  "FrontendOrigin": "http://localhost:5174",
+  "Gemini": { "ApiKey": "YOUR_GOOGLE_AI_STUDIO_API_KEY_HERE" }
+}</code></pre>
+                        </li>
+                        <li>
+                            <strong>Save and Restart:</strong> Save the file and restart the Dev2ndBrain application. Your app is now fully configured!
+                        </li>
+                    </ol>
                 </div>
             </section>
             
             <section>
-                <h2 class="text-2xl font-semibold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Notes</h2>
-                <div class="feature-card bg-white p-6 rounded-lg shadow space-y-4">
-                    <h3 class="font-bold text-xl text-emerald-500 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>Working with Notes</h3>
-                     <p>Notes are the core of your knowledge base. Use them for anything from meeting minutes to technical documentation.</p>
-                     <div class="step border-t border-gray-200 pt-3 mt-3">
-                        <h4 class="font-semibold">Step-by-Step Instructions:</h4>
-                        <ol class="mt-2 list-decimal list-inside space-y-2">
-                           <li><strong>Create a Note:</strong> Go to the <strong>Notes</strong> page and click <strong>New</strong>. You can choose to start with a blank note or select a pre-made template.</li>
-                           <li><strong>Link Notes Together:</strong> While editing a note, click the <strong>Link Note</strong> button in the toolbar. A search box will appear. Find and select the note you want to link to, and a special clickable link will be inserted.</li>
-                           <li><strong>Generate Flashcards:</strong> In the editor, structure your text in a question/answer format:
-                                <ul class="list-disc list-inside ml-4 mt-1">
-                                    <li><code>Q: What is the capital of the Philippines?</code></li>
-                                    <li><code>A: Manila</code></li>
-                                </ul>
-                                Then, click the <strong>Create Flashcards</strong> button and choose which deck to add them to.
-                           </li>
-                        </ol>
-                    </div>
+                <h2 id="quick-tour">
+                    <svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd"></path></svg>
+                    Optional: Import Sample Data for a Quick Tour
+                </h2>
+                <div class="info-box">
+                    <p>Want to see how the app works without creating content from scratch? The installer includes a sample data file that will populate the application with pre-made notes, projects, snippets, and flashcards.</p>
+                    <h4>How to Import the Sample Data:</h4>
+                    <ol>
+                        <li>Go to the <strong>Settings</strong> page using the left sidebar.</li>
+                        <li>Find the **Database Management** section.</li>
+                        <li>Click the **Import Data** button.</li>
+                        <li>A file picker will open. Navigate to the application's installation directory (usually `C:\Users\[User]\AppData\Local\Programs\dev2ndbrain`) and select the file named <code>dev2ndbrain_db_local.json</code>.</li>
+                        <li>Read the confirmation warning carefully. This will overwrite any data you've already created. Click "OK" to proceed.</li>
+                        <li>The application will process the file and then automatically reload, presenting you with the fully populated sample data. Now you can explore!</li>
+                    </ol>
                 </div>
             </section>
 
-             <section>
-                <h2 class="text-2xl font-semibold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Graph View & Annotations</h2>
-                <div class="feature-card bg-white p-6 rounded-lg shadow space-y-4">
-                     <h3 class="font-bold text-xl text-amber-500 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>Visualizing Your Knowledge</h3>
-                    <p>The Graph View turns your notes into a visual, interactive web of ideas, and the Annotation Layer lets you build diagrams on top of it.</p>
-                     <div class="step border-t border-gray-200 pt-3 mt-3">
-                        <h4 class="font-semibold">Step-by-Step Instructions:</h4>
-                        <ol class="mt-2 list-decimal list-inside space-y-2">
-                           <li><strong>Filter Your View:</strong> On the <strong>Graph</strong> page, use the <strong>Tag Tree</strong> on the left to filter what notes appear. Checking a parent tag (e.g., `programming`) will also show notes with child tags (e.g., `programming/javascript`).</li>
-                           <li><strong>Interact with Notes:</strong> Click on any note (node) in the graph to see a quick preview. If a node has a <code>+/-</code> icon, click it to collapse or expand its connected notes.</li>
-                           <li><strong>Use the Annotation Layer:</strong> In a graph view tab, use the toolbar at the top-left to add diagrams. You can add draggable and resizable sticky notes, shapes, tables, and icons to create rich visual context. Click the "connector" button on an item to draw arrows between them.</li>
-                        </ol>
-                    </div>
+            <section>
+                <h2 id="interface">
+                    <svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 18.75a.75.75 0 0 0 0 1.5h3a.75.75 0 0 0 0-1.5h-3Z"></path><path fill-rule="evenodd" d="M8.625.75A3.375 3.375 0 0 0 5.25 4.125v15.75a3.375 3.375 0 0 0 3.375 3.375h6.75a3.375 3.375 0 0 0 3.375-3.375V4.125A3.375 3.375 0 0 0 15.375.75h-6.75ZM7.5 4.125a1.125 1.125 0 0 1 1.125-1.125h6.75a1.125 1.125 0 0 1 1.125 1.125v15.75a1.125 1.125 0 0 1-1.125 1.125h-6.75a1.125 1.125 0 0 1-1.125-1.125V4.125Z" clip-rule="evenodd"></path></svg>
+                    The Dev2ndBrain Interface
+                </h2>
+                <div class="card">
+                     <ul>
+                        <li><strong>Sidebar:</strong> Your main navigation on the left. Access all major pages like Notes, Projects, and Settings.</li>
+                        <li><strong>Header:</strong> Contains the global search bar, GitHub login status, and the button to collapse/expand the sidebar.</li>
+                        <li><strong>Command Palette:</strong> Your power tool. Press <code>Ctrl+K</code> to open a search bar that can find anything and create new items on the fly.</li>
+                        <li><strong>Tab Bar:</strong> Located below the header, it allows you to switch between main pages and any items (notes, projects, etc.) you've opened in a new tab.</li>
+                        <li><strong>Main Content Area:</strong> The central part of the screen where you'll interact with your notes, projects, and other content.</li>
+                    </ul>
                 </div>
             </section>
+
+            <section>
+                <h2 id="deep-dive">
+                    <svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12.378 1.602a.75.75 0 0 0-.756 0L3 7.232V18a2.25 2.25 0 0 0 2.25 2.25h13.5A2.25 2.25 0 0 0 21 18V7.232l-8.622-5.63ZM12 7.5a.75.75 0 0 1 .75.75v3.75h3.75a.75.75 0 0 1 0 1.5h-3.75v3.75a.75.75 0 0 1-1.5 0v-3.75H7.5a.75.75 0 0 1 0-1.5h3.75V8.25A.75.75 0 0 1 12 7.5Z"></path></svg>
+                    A Deep Dive into Each Page
+                </h2>
+
+                <article>
+                    <h3 id="page-dashboard">Dashboard</h3>
+                    <p>The Dashboard is your application's homepage and mission control center.</p>
+                    <ul>
+                        <li><strong>Flashcard Summary:</strong> Shows how many flashcards are currently due for review, encouraging you to keep up with your learning.</li>
+                        <li><strong>Recent Items:</strong> Provides quick links to your most recently edited notes and projects.</li>
+                        <li><strong>Quick Actions:</strong> Buttons to instantly create a new Note, Snippet, or Deck.</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3 id="page-notes">Notes</h3>
+                    <p>The Notes page is where you'll do most of your writing. It uses a powerful Markdown editor and allows you to create a web of interconnected knowledge.</p>
+                    <h4>Advanced Guide: Mastering Markdown</h4>
+                    <div class="info-box">
+                        <p>Markdown is a lightweight markup language for creating formatted text. Here are some essentials:</p>
+                        <ul>
+                            <li><strong>Headings:</strong> Start a line with <code>#</code> for a large heading, <code>##</code> for a smaller one, and so on, up to <code>######</code>.</li>
+                            <li><strong>Emphasis:</strong> Wrap text in <code>*asterisks*</code> for italics and <code>**double asterisks**</code> for bold.</li>
+                            <li><strong>Lists:</strong> Start a line with <code>-</code>, <code>*</code>, or <code>1.</code> to create a list item.</li>
+                            <li><strong>Code:</strong> Use backticks for inline <code>`code()`</code>. For larger code blocks, wrap your code in triple backticks, specifying the language for syntax highlighting: <br><code>```javascript<br>// your code here<br>```</code></li>
+                            <li><strong>Blockquotes:</strong> Start a line with <code>></code> to create a quote.</li>
+                            <li><strong>Adding Images:</strong> To add an image from a URL, use the Markdown syntax: <code>![alt text](https://url.to/your/image.png)</code>. For more control over size, use an HTML <code>&lt;img&gt;</code> tag: <code>&lt;img src="https://url.to/image.png" width="300"&gt;</code></li>
+                        </ul>
+                    </div>
+                    <h4>Linking Notes: The Core of Your Second Brain</h4>
+                    <p>To create a link to another note, type <code>[[</code>. A search box will appear, allowing you to select the note you want to link to. This creates a bi-directional link that powers the Graph View.</p>
+                    <h4>Using the Note AI Assistant</h4>
+                    <p>Click the "Ask AI" button in the editor toolbar for powerful actions:</p>
+                    <ul>
+                        <li><strong>Summarize:</strong> Condenses long notes into key bullet points.</li>
+                        <li><strong>Find Action Items:</strong> Extracts and elaborates on any to-do tasks or action items found in your text.</li>
+                        <li><strong>Explain This:</strong> Explains complex topics from your notes in simpler terms.</li>
+                    </ul>
+                </article>
+
+                <article>
+                    <h3 id="page-snippets">Snippets</h3>
+                    <p>A dedicated, searchable library for all your essential code snippets.</p>
+                    <ul>
+                        <li><strong>Running Code:</strong> `React`, `HTML`, `JavaScript`, and `C#` snippets have a "Run" or "Popout" button that executes the code in a sandboxed environment so you can test it instantly.</li>
+                        <li><strong>AI Assistant:</strong> Ask the AI to explain what a snippet does, suggest refactoring improvements, or ask a custom question about the code.</li>
+                        <li><strong>Gist Sync:</strong> After logging in with GitHub, you can sync any snippet to a private GitHub Gist, or push/pull updates between your local copy and the cloud.</li>
+                    </ul>
+                </article>
+                
+                <article>
+                    <h3 id="page-projects">Projects</h3>
+                    <p>The Project Workspace is the central hub for managing a project's lifecycle, from idea to completion.</p>
+                     <ul>
+                        <li><strong>Overview Tab:</strong> A showcase of the project's title, Markdown-enabled description, and prominent cards for the **Current Goal** and **Next Step**.</li>
+                        <li><strong>Features Tab:</strong> A searchable list to track all work items (features, bugs, etc.) with their status and description.</li>
+                        <li><strong>Resources Tab:</strong> A searchable table of linked materials. Notes and Snippets are **clickable links** that open in a new app tab.</li>
+                        <li><strong>History Tab:</strong> A complete, time-stamped audit trail with powerful search and filtering capabilities.</li>
+                    </ul>
+                </article>
+                
+                <article>
+                    <h3 id="page-flashcards">Flashcards</h3>
+                    <p>Master new topics with a powerful spaced repetition system (SRS).</p>
+                    <ul>
+                        <li><strong>Decks & Cards:</strong> Organize your knowledge into decks, and create cards with questions and answers.</li>
+                        <li><strong>SRS Review:</strong> When you review cards, you'll rate how well you knew the answer. The app's algorithm will then schedule the next review for that card at the optimal time to maximize retention.</li>
+                        <li><strong>AI Review:</strong> After a review session, you can ask the AI to analyze your performance, giving you feedback on your answers and suggestions for improvement.</li>
+                    </ul>
+                </article>
+
+                 <article>
+                    <h3 id="page-graph">Graph View</h3>
+                    <p>Visualize the connections between your notes to discover new insights.</p>
+                    <ul>
+                        <li><strong>Filtering:</strong> Use the tag tree on the left to filter the graph and focus on specific topics.</li>
+                        <li><strong>Annotation Layer:</strong> Use the toolbar in the graph to add shapes, text, icons, and arrows, turning your knowledge graph into an infinite mind-mapping canvas.</li>
+                    </ul>
+                </article>
+                
+                <article>
+                    <h3 id="page-settings">Settings</h3>
+                    <h4>Database Management (Backup & Restore)</h4>
+                    <div class="card">
+                        <p>This is the most important feature for safeguarding your data. It allows you to create a complete, portable backup of your entire second brain.</p>
+                        <h5>Exporting Your Data</h5>
+                        <ol>
+                            <li>Navigate to the **Settings** page.</li>
+                            <li>In the "Database Management" section, click the **Export Data** button.</li>
+                            <li>A JSON file named <code>dev2ndbrain-backup-YYYY-MM-DD.json</code> will be downloaded.</li>
+                            <li>Store this file in a safe, secure location (like a cloud drive or external hard drive).</li>
+                        </ol>
+                        <h5>Importing Your Data</h5>
+                        <div class="warning-box">
+                            <p>⚠️ <strong>Warning: This Will Overwrite Everything!</strong></p>
+                            <p>Importing a file is a destructive action. It will **completely erase all current data** in the application and replace it with the data from the backup file. This cannot be undone.</p>
+                        </div>
+                        <ol>
+                            <li>Navigate to the **Settings** page.</li>
+                            <li>Click the **Import Data** button. A file picker will open.</li>
+                            <li>Select the <code>.json</code> backup file you previously exported.</li>
+                            <li>Read the confirmation warning carefully and click "OK" to proceed.</li>
+                            <li>The application will process the file and then automatically reload, presenting your fully restored data.</li>
+                        </ol>
+                    </div>
+                </article>
+            </section>
+            
+            <section>
+                <h2 id="clipper">
+                     <svg class="heading-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7.5 3.375c0-1.036.84-1.875 1.875-1.875h.375a3.75 3.75 0 0 1 3.75 3.75v1.875C13.5 8.161 14.839 9 16.5 9h1.875a1.875 1.875 0 0 1 1.875 1.875v11.25A1.875 1.875 0 0 1 18.375 24H9.375A1.875 1.875 0 0 1 7.5 22.125V3.375Z"></path><path d="M10.125 3a2.25 2.25 0 0 0-2.25 2.25v.375a.75.75 0 0 1-1.5 0V5.625a3.75 3.75 0 0 1 3.75-3.75h.375a2.25 2.25 0 0 1 2.25 2.25v1.5a.75.75 0 0 1-1.5 0v-1.5a.75.75 0 0 0-.75-.75h-.375Z"></path></svg>
+                    Web Clipper Extension
+                </h2>
+                 <p>The Dev2ndBrain Chrome extension allows you to clip content from any webpage directly into your notes.</p>
+                 <ol>
+                     <li>Install the extension from the Chrome Web Store (link to be provided).</li>
+                     <li>Select any text on a webpage.</li>
+                     <li>Right-click the selection and choose "Save to Dev2ndBrain".</li>
+                     <li>A new tab will open in your browser, automatically creating a new note with the clipped content, a link to the source page, and the tag <code>#clipped</code>.</li>
+                 </ol>
+            </section>
+
         </main>
-    </div>
 
-    <script>
-        // This script checks the user's OS preference and applies the 'dark' class if needed.
-        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-            document.documentElement.classList.add('dark');
-        }
-    </script>
+        <footer>
+            <p id="about"><strong>Dev2ndBrain</strong> | An application by <strong>ERWIN WILSON CENIZA</strong></p>
+        </footer>
+    </div>
 </body>
 </html>
