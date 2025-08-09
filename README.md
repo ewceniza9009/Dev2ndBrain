@@ -118,11 +118,11 @@ https://github.com/user-attachments/assets/a7b5bd69-8b47-4cf3-8c9f-51c893af2fab
   - [Settings](#settings)
 - [5. Web Clipper Extension](#5-web-clipper-extension)
 
-## ## 1. Installation & Setup
+## 1. Installation & Setup
 
 Download the latest release from the project's GitHub page and run the installer.
 
-### ### Critical First Step: Configuring `appsettings.json`
+### Critical First Step: Configuring `appsettings.json`
 To enable GitHub integration (for Gist syncing and cloud backups), you must perform this one-time setup.
 
 1.  **Locate the Backend Folder:** Navigate to the following folder on your computer, replacing `[User]` with your Windows username.
@@ -155,61 +155,61 @@ To enable GitHub integration (for Gist syncing and cloud backups), you must perf
 
 5.  Save the file and restart the Dev2ndBrain application.
 
-## ## 2. Quick Tour (Sample Data)
+## 2. Quick Tour (Sample Data)
 Want to see how the app works without creating content from scratch? The installer includes a sample data file that will populate the application with pre-made notes, projects, snippets, and flashcards.
 
-### ### How to Import the Sample Data:
+### How to Import the Sample Data:
 1.  Go to the **Settings** page.
 2.  Find the **Database Management** section and click **Import Data**.
 3.  Navigate to the application's installation directory (usually `C:\Users\[User]\AppData\Local\Programs\dev2ndbrain`) and select the file named `dev2ndbrain_db_local.json`.
 4.  Confirm the overwrite warning. The app will reload with the sample data.
 
-## ## 3. The Dev2ndBrain Interface
+### 3. The Dev2ndBrain Interface
 * **Sidebar:** Your main navigation on the left to access all major pages.
 * **Header:** Contains the global search bar and GitHub login status.
 * **Command Palette:** Your power tool. Press `Ctrl+K` to open a search bar that can find anything and create new items on the fly.
 * **Tab Bar:** Switch between main pages and any items you've opened in a new tab.
 
-## ## 4. A Deep Dive into Each Page
+### 4. A Deep Dive into Each Page
 
-### ### Dashboard
+#### Dashboard
 Your mission control, featuring widgets for:
 * **Flashcard Summary:** Cards currently due for review.
 * **Recent Items:** Quick links to your most recently edited notes and projects.
 * **Quick Actions:** Buttons to instantly create a new Note, Snippet, or Deck.
 
-### ### Notes
+#### Notes
 The core of your knowledge base.
 * **Mastering Markdown:** The editor includes a toolbar for easy formatting. You can use standard Markdown for headings (`#`), lists (`-`), emphasis (`**bold**`), and more.
     * **To Add Images:** Use the standard syntax `![alt text](https://url.to/image.png)`. For size control, use an HTML `<img>` tag: `<img src="..." width="300">`.
 * **Linking Notes:** Create a link to another note by typing `[[` and selecting a note. This is the foundation of the Graph View.
 * **Note AI Assistant:** Click "Ask AI" to summarize text, find action items, or explain complex concepts in simpler terms.
 
-### ### Snippets
+#### Snippets
 A searchable library for your code.
 * **Running Code:** Test `React`, `HTML`, `JavaScript`, and `C#` snippets in a sandboxed environment directly from the app.
 * **Snippet AI Assistant:** Ask the AI to explain what a snippet does, suggest refactoring improvements, or answer custom questions about the code.
 * **Gist Sync:** Sync snippets to private GitHub Gists for cloud access.
 
-### ### Projects
+#### Projects
 A dedicated workspace to manage your projects from start to finish.
 * **Overview Tab:** A showcase of the project's title, Markdown-enabled description, and prominent cards for the **Current Goal** and **Next Step**.
 * **Features Tab:** A searchable list to track all work items (features, bugs, etc.) with their status and description.
 * **Resources Tab:** A searchable table of linked materials. Notes and Snippets are **clickable links** that open in a new app tab.
 * **History Tab:** A complete, time-stamped audit trail with powerful search and filtering capabilities.
 
-### ### Flashcards
+#### Flashcards
 Memorize anything using a powerful Spaced Repetition System (SRS).
 * Create decks and cards manually or generate them automatically from your notes.
 * During review, rate your confidence, and the app's algorithm will schedule the card's next appearance for optimal learning.
 * Use the **AI Review** after a session to get feedback on your performance and improve your understanding.
 
-### ### Graph View
+#### Graph View
 Visualize the connections between your notes.
 * Use the tag tree to filter the graph and focus on specific areas of knowledge.
 * Use the **Annotation Layer** to add shapes, text, and arrows, turning your graph into an infinite mind-mapping canvas.
 
-### ### Settings
+#### Settings
 * **Note Templates:** Create templates for frequently used note structures.
 * **Database Management (Backup & Restore):**
     * **Export Data:** Creates a full backup of your database as a single JSON file. Store this file in a safe place.
@@ -217,7 +217,7 @@ Visualize the connections between your notes.
         > **⚠️ Warning:** This is a destructive action. Importing a file will **completely erase all current data** in the application and replace it with the contents of the backup file. Please confirm the dialog box prompt before proceeding.
 
 
-## ## 5. Web Clipper Extension
+### 5. Web Clipper Extension
 The Dev2ndBrain Chrome extension allows you to clip content from any webpage. Simply select text, right-click, and choose "Save to Dev2ndBrain" to automatically create a new, pre-formatted note.
 
 ---
