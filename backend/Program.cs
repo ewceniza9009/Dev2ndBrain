@@ -110,11 +110,13 @@ var app = builder.Build();
 // --- Middleware Pipeline ---
 if (app.Environment.IsDevelopment())
 {
-    using (var scope = app.Services.CreateScope())
-    {
-        var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        dbContext.Database.Migrate();
-    }
+    //Do nothing for now
+}
+
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    dbContext.Database.Migrate();
 }
 
 app.UseHttpsRedirection();
@@ -128,7 +130,7 @@ if (isSelfHosted)
     app.UseStaticFiles(new StaticFileOptions
     {
         FileProvider = new PhysicalFileProvider(
-            Path.Combine(builder.Environment.ContentRootPath, "../frontend/dist")
+            Path.Combine(builder.Environment.ContentRootPath, "../frontend")
         )
     });
 }
@@ -144,7 +146,7 @@ if (isSelfHosted)
     app.MapFallbackToFile("index.html", new StaticFileOptions
     {
         FileProvider = new PhysicalFileProvider(
-            Path.Combine(builder.Environment.ContentRootPath, "../frontend/dist")
+            Path.Combine(builder.Environment.ContentRootPath, "../frontend")
         )
     });
 }

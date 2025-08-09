@@ -5,14 +5,16 @@ import { useNoteStore } from '../stores/useNoteStore';
 import { useSnippetStore } from '../stores/useSnippetStore';
 import ProjectList from '../components/projects/ProjectList';
 import ProjectDetail from '../components/projects/ProjectDetail';
+import ConfirmationModal from '../components/ConfirmationModal';
+import { PlusIcon, TrashIcon } from '@heroicons/react/20/solid';
 import type { Project } from '../types';
-import { PlusIcon } from '@heroicons/react/20/solid';
 
 const ProjectsPage: React.FC = () => {
-    const { projects, fetchProjects, addProject } = useProjectStore();
+    const { projects, fetchProjects, addProject, deleteProject } = useProjectStore();
     const { fetchNotes } = useNoteStore();
     const { fetchSnippets } = useSnippetStore();
     const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+    const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -22,29 +24,22 @@ const ProjectsPage: React.FC = () => {
         fetchSnippets();
     }, [fetchProjects, fetchNotes, fetchSnippets]);
 
-    // Effect to handle incoming navigation from other pages (like Dashboard)
     useEffect(() => {
         const stateId = location.state?.selectedId;
         if (stateId) {
             setSelectedProjectId(stateId);
-            // Clear the state from history so a refresh doesn't bring it back
             navigate(location.pathname, { replace: true });
         }
     }, [location.state, navigate]);
 
-    // Effect to set a default selection ONLY if needed
     useEffect(() => {
         if (!projects || projects.length === 0) return;
-
         const selectionIsValid = selectedProjectId && projects.some(p => p.id === selectedProjectId);
-
-        // If there is no valid selection, set a default
         if (!selectionIsValid) {
             const sortedProjects = [...projects].sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
             setSelectedProjectId(sortedProjects[0]?.id || null);
         }
     }, [projects, selectedProjectId]);
-
 
     const handleNewProject = async () => {
         const newProject = await addProject({
@@ -61,31 +56,71 @@ const ProjectsPage: React.FC = () => {
         }
     };
 
+    const handleDeleteProject = () => {
+        if (selectedProject) {
+            setIsConfirmModalOpen(true);
+        }
+    };
+
+    const handleConfirmDelete = () => {
+        if (selectedProjectId) {
+            deleteProject(selectedProjectId);
+            setIsConfirmModalOpen(false);
+            // Optionally, select the first project in the list after deletion
+            const remainingProjects = projects.filter(p => p.id !== selectedProjectId);
+            setSelectedProjectId(remainingProjects.length > 0 ? remainingProjects[0].id! : null);
+        }
+    };
+
     const selectedProject = projects.find((p: Project) => p.id === selectedProjectId) || null;
 
     return (
-        <div className="flex h-full">
-            <div className="w-1/4 flex flex-col h-full border-r border-gray-200 dark:border-gray-700">
-                <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Projects</h2>
-                    <button
-                        onClick={handleNewProject}
-                        className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
-                    >
-                        <PlusIcon className="h-4 w-4" />
-                        <span>New</span>
-                    </button>
+        <>
+            <div className="flex h-full">
+                <div className="w-1/4 flex flex-col h-full border-r border-gray-200 dark:border-gray-700">
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Projects</h2>
+                        <button
+                            onClick={handleNewProject}
+                            className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
+                        >
+                            <PlusIcon className="h-4 w-4" />
+                            <span>New</span>
+                        </button>
+                    </div>
+                    <ProjectList
+                        projects={projects}
+                        selectedProjectId={selectedProjectId}
+                        onSelectProject={setSelectedProjectId}
+                    />
                 </div>
-                <ProjectList
-                    projects={projects}
-                    selectedProjectId={selectedProjectId}
-                    onSelectProject={setSelectedProjectId}
-                />
+                <div className="w-3/4 h-full flex flex-col overflow-y-auto">
+                    {selectedProject && (
+                        <div className="flex-shrink-0 p-6 pb-0 flex justify-between items-center">
+                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white truncate">
+                                {selectedProject.title}
+                            </h2>
+                            <button
+                                onClick={handleDeleteProject}
+                                className="flex items-center space-x-2 bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-red-700 shadow-md hover:shadow-lg transition-all duration-200"
+                            >
+                                <TrashIcon className="h-5 w-5" />
+                                <span>Delete Project</span>
+                            </button>
+                        </div>
+                    )}
+                    <ProjectDetail project={selectedProject} />
+                </div>
             </div>
-            <div className="w-3/4 h-full overflow-y-auto">
-                <ProjectDetail project={selectedProject} />
-            </div>
-        </div>
+
+            <ConfirmationModal
+                isOpen={isConfirmModalOpen}
+                onClose={() => setIsConfirmModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                title="Confirm Project Deletion"
+                message={`Are you sure you want to delete the project "${selectedProject?.title}"? This action cannot be undone.`}
+            />
+        </>
     );
 };
 

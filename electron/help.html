@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dev2ndBrain Help</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #f3f4f6; /* gray-100 */
+        }
+        html.dark body {
+            background-color: #111827; /* gray-900 */
+        }
+        html.dark .feature-card {
+             background-color: #1f2937; /* gray-800 */
+        }
+        html.dark .step {
+            border-color: #374151; /* gray-700 */
+        }
+        code {
+            background-color: #e5e7eb;
+            color: #be123c; /* rose-700 */
+            font-weight: 600;
+            padding: 0.2em 0.4em;
+            margin: 0;
+            font-size: 85%;
+            border-radius: 6px;
+        }
+        html.dark code {
+            background-color: #374151;
+            color: #f472b6; /* pink-400 */
+        }
+    </style>
+</head>
+<body class="antialiased text-gray-800 dark:text-gray-300">
+    <div class="h-screen overflow-y-auto">
+        <header class="p-8 pb-4">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Dev2ndBrain Help Guide</h1>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">By Erwin Wilson Ceniza</p>
+        </header>
+
+        <main class="px-8 pb-8 space-y-10">
+            <section>
+                <h2 class="text-2xl font-semibold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Getting Started</h2>
+                <div class="feature-card bg-white p-6 rounded-lg shadow space-y-4">
+                    <h3 class="font-bold text-xl text-teal-600 dark:text-teal-400">Using the Command Palette</h3>
+                    <p>The Command Palette is the fastest way to navigate and perform actions. It allows you to do almost anything without taking your hands off the keyboard.</p>
+                    <div class="step border-t border-gray-200 pt-3 mt-3">
+                        <h4 class="font-semibold">How to Use It:</h4>
+                        <ol class="mt-2 list-decimal list-inside space-y-1">
+                            <li>Press <code>Ctrl+K</code> (or <code>Cmd+K</code> on Mac) to open the palette.</li>
+                            <li>Start typing what you want to do. For example:
+                                <ul class="list-disc list-inside ml-4 mt-1">
+                                    <li>Type <code>Create new note</code> to make a new note.</li>
+                                    <li>Type <code>Go to settings</code> to open the settings page.</li>
+                                    <li>Type the name of a note or snippet (e.g., <code>My API notes</code>) to find and open it.</li>
+                                </ul>
+                            </li>
+                            <li>Use the arrow keys (<code>↑</code> and <code>↓</code>) to select a result and press <strong>Enter</strong> to execute the action.</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+            <section>
+                <h2 class="text-2xl font-semibold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Projects</h2>
+                <div class="feature-card bg-white p-6 rounded-lg shadow space-y-4">
+                     <h3 class="font-bold text-xl text-sky-500 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>Managing a Project</h3>
+                    <p>The Projects section is a dedicated workspace to organize all aspects of a single initiative, from high-level goals to specific code snippets.</p>
+                    <div class="step border-t border-gray-200 pt-3 mt-3">
+                        <h4 class="font-semibold">Step-by-Step Instructions:</h4>
+                        <ol class="mt-2 list-decimal list-inside space-y-2">
+                            <li><strong>Create a Project:</strong> Navigate to the <strong>Projects</strong> page from the sidebar and click the <strong>New</strong> button. A new project will be created and selected for you.</li>
+                            <li><strong>Define the Overview:</strong> In the <strong>Overview</strong> tab, click the title to rename your project. Click the description area to add details, goals, and next steps using Markdown.</li>
+                            <li><strong>Track Features:</strong> Go to the <strong>Features</strong> tab to add and manage tasks, bugs, or enhancements. Set their status to keep track of your progress.</li>
+                             <li><strong>Link Resources:</strong> In the <strong>Resources</strong> tab, click <strong>Add Resource</strong> to link to your existing Notes and Snippets, or to add external URLs relevant to your project.</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+            
+            <section>
+                <h2 class="text-2xl font-semibold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Notes</h2>
+                <div class="feature-card bg-white p-6 rounded-lg shadow space-y-4">
+                    <h3 class="font-bold text-xl text-emerald-500 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>Working with Notes</h3>
+                     <p>Notes are the core of your knowledge base. Use them for anything from meeting minutes to technical documentation.</p>
+                     <div class="step border-t border-gray-200 pt-3 mt-3">
+                        <h4 class="font-semibold">Step-by-Step Instructions:</h4>
+                        <ol class="mt-2 list-decimal list-inside space-y-2">
+                           <li><strong>Create a Note:</strong> Go to the <strong>Notes</strong> page and click <strong>New</strong>. You can choose to start with a blank note or select a pre-made template.</li>
+                           <li><strong>Link Notes Together:</strong> While editing a note, click the <strong>Link Note</strong> button in the toolbar. A search box will appear. Find and select the note you want to link to, and a special clickable link will be inserted.</li>
+                           <li><strong>Generate Flashcards:</strong> In the editor, structure your text in a question/answer format:
+                                <ul class="list-disc list-inside ml-4 mt-1">
+                                    <li><code>Q: What is the capital of the Philippines?</code></li>
+                                    <li><code>A: Manila</code></li>
+                                </ul>
+                                Then, click the <strong>Create Flashcards</strong> button and choose which deck to add them to.
+                           </li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+
+             <section>
+                <h2 class="text-2xl font-semibold border-b border-gray-200 dark:border-gray-700 pb-2 mb-4">Graph View & Annotations</h2>
+                <div class="feature-card bg-white p-6 rounded-lg shadow space-y-4">
+                     <h3 class="font-bold text-xl text-amber-500 flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>Visualizing Your Knowledge</h3>
+                    <p>The Graph View turns your notes into a visual, interactive web of ideas, and the Annotation Layer lets you build diagrams on top of it.</p>
+                     <div class="step border-t border-gray-200 pt-3 mt-3">
+                        <h4 class="font-semibold">Step-by-Step Instructions:</h4>
+                        <ol class="mt-2 list-decimal list-inside space-y-2">
+                           <li><strong>Filter Your View:</strong> On the <strong>Graph</strong> page, use the <strong>Tag Tree</strong> on the left to filter what notes appear. Checking a parent tag (e.g., `programming`) will also show notes with child tags (e.g., `programming/javascript`).</li>
+                           <li><strong>Interact with Notes:</strong> Click on any note (node) in the graph to see a quick preview. If a node has a <code>+/-</code> icon, click it to collapse or expand its connected notes.</li>
+                           <li><strong>Use the Annotation Layer:</strong> In a graph view tab, use the toolbar at the top-left to add diagrams. You can add draggable and resizable sticky notes, shapes, tables, and icons to create rich visual context. Click the "connector" button on an item to draw arrows between them.</li>
+                        </ol>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        // This script checks the user's OS preference and applies the 'dark' class if needed.
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
+</body>
+</html>
