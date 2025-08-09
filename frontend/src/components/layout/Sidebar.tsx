@@ -2,10 +2,11 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAppStore } from '../../stores/useAppStore';
 import clsx from 'clsx';
-import { Squares2X2Icon, BookOpenIcon, CodeBracketSquareIcon, RectangleStackIcon, ShareIcon, Cog8ToothIcon } from '@heroicons/react/24/outline';
+import { Squares2X2Icon, BookOpenIcon, CodeBracketSquareIcon, RectangleStackIcon, ShareIcon, Cog8ToothIcon, FolderIcon } from '@heroicons/react/24/outline';
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: <Squares2X2Icon className="h-5 w-5" /> },
+  { name: 'Projects', path: '/projects', icon: <FolderIcon className="h-5 w-5" /> },
   { name: 'Notes', path: '/notes', icon: <BookOpenIcon className="h-5 w-5" /> },
   { name: 'Snippets', path: '/snippets', icon: <CodeBracketSquareIcon className="h-5 w-5" /> },
   { name: 'Flashcards', path: '/flashcards', icon: <RectangleStackIcon className="h-5 w-5" /> },

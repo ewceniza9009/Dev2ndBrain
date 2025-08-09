@@ -1,5 +1,5 @@
 import Dexie, { type Table } from 'dexie';
-import type { Note, Snippet, Flashcard, Deck, GitHubUser, EncryptedData, Template, AiReview, AnnotationRecord } from '../types';
+import type { Note, Snippet, Flashcard, Deck, GitHubUser, EncryptedData, Template, AiReview, AnnotationRecord, Project } from '../types';
 
 class AppDatabase extends Dexie {
     notes!: Table<Note, number>;
@@ -7,19 +7,21 @@ class AppDatabase extends Dexie {
     flashcards!: Table<Flashcard, number>;
     decks!: Table<Deck, number>;
     templates!: Table<Template, number>;
+    projects!: Table<Project, number>; // New table for projects
     settings!: Table<{ key: string; value: any }, string>;
     aiReviews!: Table<AiReview, number>;
     annotations!: Table<AnnotationRecord, string>;
 
     constructor() {
         super('Dev2ndBrainDB');
-        // VITAL CHANGE: Increment version number to 8 to apply schema changes
-        this.version(8).stores({
+        // VITAL CHANGE: Increment version number to 9 to apply schema changes
+        this.version(9).stores({
             notes: '++id, uuid, title, *tags, updatedAt, isDeleted',
             snippets: '++id, title, language, *tags, gistId, updatedAt, isDeleted',
             flashcards: '++id, deckId, nextReview, isDeleted',
             decks: '++id, name, isDeleted',
             templates: '++id, title, isDeleted',
+            projects: '++id, title, updatedAt, isDeleted', 
             settings: 'key',
             aiReviews: '++id, deckId, timestamp',
             annotations: '&filterCriteria',

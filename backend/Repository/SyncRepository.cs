@@ -1,7 +1,7 @@
 ﻿using Dev2ndBrain.Data;
 using Dev2ndBrain.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;        
+using System.Text.Json;
 
 namespace Dev2ndBrain.Repositories
 {
@@ -164,6 +164,29 @@ namespace Dev2ndBrain.Repositories
             await _context.SaveChangesAsync();
         }
 
+        public async Task SaveProjectsAsync(List<ProjectDto> projects)
+        {
+            foreach (var project in projects)
+            {
+                if (project.IsDeleted == true && project.Id.HasValue)
+                {
+                    var projectToDelete = await _context.Projects.FindAsync(project.Id.Value);
+                    if (projectToDelete != null) _context.Projects.Remove(projectToDelete);
+                    continue;
+                }
+                var existingProject = await _context.Projects.FindAsync(project.Id);
+                if (existingProject == null)
+                {
+                    _context.Projects.Add(project);
+                }
+                else if (project.UpdatedAt > existingProject.UpdatedAt)
+                {
+                    _context.Entry(existingProject).CurrentValues.SetValues(project);
+                }
+            }
+            await _context.SaveChangesAsync();
+        }
+
         public async Task<List<NoteDto>> GetNotesAsync() => await _context.Notes.ToListAsync();
         public async Task<List<SnippetDto>> GetSnippetsAsync() => await _context.Snippets.ToListAsync();
         public async Task<List<DeckDto>> GetDecksAsync() => await _context.Decks.ToListAsync();
@@ -171,5 +194,6 @@ namespace Dev2ndBrain.Repositories
         public async Task<List<TemplateDto>> GetTemplatesAsync() => await _context.Templates.ToListAsync();
         public async Task<List<AiReviewDto>> GetAiReviewsAsync() => await _context.AiReviews.ToListAsync();
         public async Task<List<AnnotationRecordDto>> GetAnnotationsAsync() => await _context.Annotations.ToListAsync();
+        public async Task<List<ProjectDto>> GetProjectsAsync() => await _context.Projects.ToListAsync();
     }
 }

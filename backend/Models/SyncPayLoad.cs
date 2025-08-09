@@ -5,7 +5,6 @@ using System.Text.Json.Serialization;
 
 namespace Dev2ndBrain.Models
 {
-
     public class NoteDto
     {
         public int? Id { get; set; }
@@ -81,13 +80,64 @@ namespace Dev2ndBrain.Models
         public bool? IsDeleted { get; set; }
     }
 
+    public class GoalDto
+    {
+        public string Text { get; set; } = string.Empty;
+    }
+
+    public class NextStepDto
+    {
+        public string Text { get; set; } = string.Empty;
+    }
+
+    public class ProjectFeatureDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class ProjectResourceDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Type { get; set; } = string.Empty;
+        public string Link { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class HistoryEntryDto
+    {
+        public DateTime Timestamp { get; set; }
+        public string ActionType { get; set; } = string.Empty;
+        public string Field { get; set; } = string.Empty;
+        public string? OldValue { get; set; }
+        public string? NewValue { get; set; }
+    }
+
+    public class ProjectDto
+    {
+        public int? Id { get; set; }
+        public string Title { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public List<GoalDto> Goals { get; set; } = new();
+        public List<NextStepDto> NextSteps { get; set; } = new();
+        public List<ProjectFeatureDto> Features { get; set; } = new();
+        public List<ProjectResourceDto> Resources { get; set; } = new();
+        public List<HistoryEntryDto> History { get; set; } = new();
+        public DateTime CreatedAt { get; set; }
+        public DateTime UpdatedAt { get; set; }
+        public bool? IsDeleted { get; set; }
+    }
+
+
     public class AnnotationRecordDto
     {
         public string FilterCriteria { get; set; } = string.Empty;
         public AnnotationStateDto State { get; set; } = new();
     }
 
-    // DTOs to match the frontend AnnotationState structure
     public class AnnotationStateDto
     {
         public List<CanvasItemDto> Items { get; set; } = new();
@@ -125,6 +175,7 @@ namespace Dev2ndBrain.Models
         public List<FlashcardDto> Flashcards { get; set; } = new();
         public List<AiReviewDto> AiReviews { get; set; } = new();
         public List<TemplateDto> Templates { get; set; } = new();
+        public List<ProjectDto> Projects { get; set; } = new();
 
         [JsonPropertyName("annotations")]
         public List<AnnotationRecordDto> Annotations { get; set; } = new();

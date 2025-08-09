@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useAuthStore, type AuthState } from './stores/useAuthStore';
-import { useAppStore } from './stores/useAppStore'; 
+import { useAppStore } from './stores/useAppStore'; 
 import Layout from './components/layout/Layout';
 import DashboardPage from './pages/DashboardPage';
 import NotesListPage from './pages/NotesListPage';
@@ -10,39 +10,41 @@ import FlashcardsPage from './pages/FlashcardsPage';
 import GraphPage from './pages/GraphPage';
 import SettingsPage from './pages/SettingsPage';
 import OAuthCallbackPage from './pages/OAuthCallbackPage';
-import ClipPage from './pages/ClipPage'; // Import the new clip page
+import ClipPage from './pages/ClipPage';
+import ProjectsPage from './pages/ProjectsPage';
 
 const App: React.FC = () => {
-  const initializeAuth = useAuthStore((state: AuthState) => state.initializeAuth);
-  const isLoading = useAuthStore((state: AuthState) => state.isLoading);
-  const initTheme = useAppStore((state) => state.initTheme); 
+  const initializeAuth = useAuthStore((state: AuthState) => state.initializeAuth);
+  const isLoading = useAuthStore((state: AuthState) => state.isLoading);
+  const initTheme = useAppStore((state) => state.initTheme); 
 
-  useEffect(() => {
-    initializeAuth();
-    initTheme(); 
-  }, [initializeAuth, initTheme]);
+  useEffect(() => {
+    initializeAuth();
+    initTheme(); 
+  }, [initializeAuth, initTheme]);
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-screen bg-gray-900 text-white">Loading Application...</div>;
-  }
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-screen bg-gray-900 text-white">Loading Application...</div>;
+  }
 
-  return (
-    <Router>
-      <Routes>
-        <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
-        <Route path="/clip" element={<ClipPage />} /> {/* Add the new clip route */}
-        <Route path="/" element={<Layout />}>
-          <Route index element={<DashboardPage />} />
-          <Route path="notes" element={<NotesListPage />} />
-          <Route path="snippets" element={<SnippetsPage />} />
-          <Route path="flashcards" element={<FlashcardsPage />} />
-          <Route path="graph" element={<GraphPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-        </Route>
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
-  );
+  return (
+    <Router>
+      <Routes>
+        <Route path="/oauth/callback" element={<OAuthCallbackPage />} />
+        <Route path="/clip" element={<ClipPage />} />
+        <Route path="/" element={<Layout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="projects" element={<ProjectsPage />} />
+            <Route path="notes" element={<NotesListPage />} />
+            <Route path="snippets" element={<SnippetsPage />} />
+            <Route path="flashcards" element={<FlashcardsPage />} />
+            <Route path="graph" element={<GraphPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+  );
 };
 
 export default App;

@@ -22,6 +22,7 @@ namespace Dev2ndBrain.Services
             await _repository.SaveTemplatesAsync(payload.Templates);
             await _repository.SaveAiReviewsAsync(payload.AiReviews);
             await _repository.SaveAnnotationsAsync(payload.Annotations);
+            await _repository.SaveProjectsAsync(payload.Projects);    
         }
 
         public async Task<SyncPayload> Pull(long userId)
@@ -33,6 +34,7 @@ namespace Dev2ndBrain.Services
             var templates = await _repository.GetTemplatesAsync();
             var aiReviews = await _repository.GetAiReviewsAsync();
             var annotations = await _repository.GetAnnotationsAsync();
+            var projects = await _repository.GetProjectsAsync();    
 
             return new SyncPayload
             {
@@ -42,7 +44,8 @@ namespace Dev2ndBrain.Services
                 Flashcards = flashcards,
                 Templates = templates,
                 AiReviews = aiReviews,
-                Annotations = annotations
+                Annotations = annotations,
+                Projects = projects    
             };
         }
     }
