@@ -1,130 +1,123 @@
 import { create } from 'zustand';
-
-// Define the shape of our annotation data so the store knows about it
-export interface CanvasItem {
-    id: string;
-    type: 'annotation' | 'shape' | 'table' | 'icon';
-    x: number;
-    y: number;
-    width?: number;
-    height?: number;
-    text?: string;
-    shape?: 'rectangle' | 'circle' | 'triangle';
-    icon?: string;
-    color?: string;
-    content?: string[][]; // For tables
-}
-export interface Edge {
-    start: string;
-    end: string;
-}
-export interface AnnotationState {
-    items: CanvasItem[];
-    edges: Edge[];
-}
+import { persist, createJSONStorage } from 'zustand/middleware';
 
 type Theme = 'light' | 'dark';
 
 export interface Tab {
-    id: string;
-    type: 'note' | 'snippet' | 'deck' | 'project' | 'graph-filter';
-    entityId?: number;
-    title: string;
-    filterCriteria?: string;
+    id: string;
+    type: 'note' | 'snippet' | 'deck' | 'project' | 'graph-filter';
+    entityId?: number;
+    title: string;
+    filterCriteria?: string;
 }
 
 interface AppState {
-    theme: Theme;
-    isCommandPaletteOpen: boolean;
-    isSidebarCollapsed: boolean;
-    tabs: Tab[];
-    activeTabId: string | null;
-    initTheme: () => void;
-    toggleTheme: () => void;
-    toggleCommandPalette: () => void;
-    toggleSidebar: () => void;
-    openTab: (tabInfo: Omit<Tab, 'id'>) => void;
-    closeTab: (tabId: string) => void;
-    setActiveTab: (tabId: string | null) => void;
+    theme: Theme;
+    isCommandPaletteOpen: boolean;
+    isSidebarCollapsed: boolean;
+    tabs: Tab[];
+    activeTabId: string | null;
+    toggleTheme: () => void;
+    toggleCommandPalette: () => void;
+    toggleSidebar: () => void;
+    openTab: (tabInfo: Omit<Tab, 'id'>) => void;
+    closeTab: (tabId: string) => void;
+    setActiveTab: (tabId: string | null) => void;
 }
 
-export const useAppStore = create<AppState>((set, get) => ({
-    theme: 'dark',
-    isCommandPaletteOpen: false,
-    isSidebarCollapsed: false,
-    tabs: [],
-    activeTabId: null,
+// Wrap the entire store creation with the `persist` middleware
+export const useAppStore = create<AppState>()(
+  persist(
+    (set, get) => ({
+      theme: 'dark',
+      isCommandPaletteOpen: false,
+      isSidebarCollapsed: false,
+      tabs: [],
+      activeTabId: null,
 
-    initTheme: () => {
-        const savedTheme = localStorage.getItem('theme') as Theme | null;
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        const initialTheme = savedTheme || (prefersDark ? 'dark' : 'light');
-        set({ theme: initialTheme });
-        if (initialTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    },
+      toggleTheme: () => {
+        set(state => {
+            const newTheme = state.theme === 'light' ? 'dark' : 'light';
+            if (newTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            return { theme: newTheme };
+        });
+      },
 
-    toggleTheme: () => {
-        const newTheme = get().theme === 'light' ? 'dark' : 'light';
-        set({ theme: newTheme });
-        localStorage.setItem('theme', newTheme);
-        if (newTheme === 'dark') {
-            document.documentElement.classList.add('dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-        }
-    },
+      toggleCommandPalette: () => {
+          set(state => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen }));
+      },
 
-    toggleCommandPalette: () => {
-        set(state => ({ isCommandPaletteOpen: !state.isCommandPaletteOpen }));
-    },
+      toggleSidebar: () => {
+          set(state => ({ isSidebarCollapsed: !state.isSidebarCollapsed }));
+      },
 
-    toggleSidebar: () => {
-        set(state => ({ isSidebarCollapsed: !state.isSidebarCollapsed }));
-    },
+      setActiveTab: (tabId: string | null) => {
+          set({ activeTabId: tabId });
+      },
 
-    setActiveTab: (tabId: string | null) => {
-        set({ activeTabId: tabId });
-    },
+      openTab: (tabInfo: Omit<Tab, 'id'>) => {
+          const newTabId = tabInfo.type === 'graph-filter'
+              ? `${tabInfo.type}-${tabInfo.filterCriteria}`
+              : `${tabInfo.type}-${tabInfo.entityId}`;
 
-    openTab: (tabInfo: Omit<Tab, 'id'>) => {
-        const newTabId = tabInfo.type === 'graph-filter'
-            ? `${tabInfo.type}-${tabInfo.filterCriteria}`
-            : `${tabInfo.type}-${tabInfo.entityId}`;
+          const existingTab = get().tabs.find(t => t.id === newTabId);
 
-        const existingTab = get().tabs.find(t => t.id === newTabId);
+          if (existingTab) {
+              set({ activeTabId: existingTab.id });
+          } else {
+              const newTab: Tab = { ...tabInfo, id: newTabId };
+              set(state => ({
+                  tabs: [...state.tabs, newTab],
+                  activeTabId: newTab.id,
+              }));
+          }
+      },
 
-        if (existingTab) {
-            set({ activeTabId: existingTab.id });
-        } else {
-            const newTab: Tab = { ...tabInfo, id: newTabId };
-            set(state => ({
-                tabs: [...state.tabs, newTab],
-                activeTabId: newTab.id,
-            }));
-        }
-    },
+      closeTab: (tabId: string) => {
+          set(state => {
+              const tabIndex = state.tabs.findIndex(t => t.id === tabId);
+              if (tabIndex === -1) return {};
 
-    closeTab: (tabId: string) => {
-        set(state => {
-            const tabIndex = state.tabs.findIndex(t => t.id === tabId);
-            if (tabIndex === -1) return {};
+              const newTabs = state.tabs.filter(t => t.id !== tabId);
+              let newActiveTabId = state.activeTabId;
 
-            const newTabs = state.tabs.filter(t => t.id !== tabId);
-            let newActiveTabId = state.activeTabId;
+              if (state.activeTabId === tabId) {
+                  if (newTabs.length === 0) {
+                      newActiveTabId = null;
+                  } else {
+                      newActiveTabId = newTabs[Math.max(0, tabIndex - 1)].id;
+                  }
+              }
 
-            if (state.activeTabId === tabId) {
-                if (newTabs.length === 0) {
-                    newActiveTabId = null;
-                } else {
-                    newActiveTabId = newTabs[Math.max(0, tabIndex - 1)].id;
-                }
-            }
-
-            return { tabs: newTabs, activeTabId: newActiveTabId };
-        });
-    },
-}));
+              return { tabs: newTabs, activeTabId: newActiveTabId };
+          });
+      },
+    }),
+    {
+      // Configuration for the persist middleware
+      name: 'dev2ndbrain-app-storage', // The key to use in localStorage
+      storage: createJSONStorage(() => localStorage), // Use localStorage
+      // Only persist the theme and tab information, ignore transient UI state
+      partialize: (state) => ({
+        theme: state.theme,
+        tabs: state.tabs,
+        activeTabId: state.activeTabId,
+      }),
+      // This function runs after the state has been loaded from storage
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+            // Apply the theme immediately on app load
+            if (state.theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+      },
+    }
+  )
+);

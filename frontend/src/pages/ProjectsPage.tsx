@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useProjectStore } from '../stores/useProjectStore';
 import { useNoteStore } from '../stores/useNoteStore';
@@ -6,7 +6,7 @@ import { useSnippetStore } from '../stores/useSnippetStore';
 import ProjectList from '../components/projects/ProjectList';
 import ProjectDetail from '../components/projects/ProjectDetail';
 import ConfirmationModal from '../components/ConfirmationModal';
-import { PlusIcon, TrashIcon } from '@heroicons/react/20/solid';
+import { PlusIcon, TrashIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 import type { Project } from '../types';
 
 const ProjectsPage: React.FC = () => {
@@ -17,6 +17,7 @@ const ProjectsPage: React.FC = () => {
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
+    const [filterTerm, setFilterTerm] = useState('');
 
     useEffect(() => {
         fetchProjects();
@@ -40,6 +41,15 @@ const ProjectsPage: React.FC = () => {
             setSelectedProjectId(sortedProjects[0]?.id || null);
         }
     }, [projects, selectedProjectId]);
+
+    const filteredProjects = useMemo(() => {
+        if (!filterTerm) return projects;
+        const lowercasedFilter = filterTerm.toLowerCase();
+        return projects.filter(project => 
+            project.title.toLowerCase().includes(lowercasedFilter) ||
+            project.description.toLowerCase().includes(lowercasedFilter)
+        );
+    }, [projects, filterTerm]);
 
     const handleNewProject = async () => {
         const newProject = await addProject({
@@ -66,7 +76,6 @@ const ProjectsPage: React.FC = () => {
         if (selectedProjectId) {
             deleteProject(selectedProjectId);
             setIsConfirmModalOpen(false);
-            // Optionally, select the first project in the list after deletion
             const remainingProjects = projects.filter(p => p.id !== selectedProjectId);
             setSelectedProjectId(remainingProjects.length > 0 ? remainingProjects[0].id! : null);
         }
@@ -74,22 +83,41 @@ const ProjectsPage: React.FC = () => {
 
     const selectedProject = projects.find((p: Project) => p.id === selectedProjectId) || null;
 
+    const handleFilterKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === 'Enter') {
+            setFilterTerm((e.target as HTMLInputElement).value);
+        }
+    };
+
     return (
         <>
             <div className="flex h-full">
                 <div className="w-1/4 flex flex-col h-full border-r border-gray-200 dark:border-gray-700">
-                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-                        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Projects</h2>
-                        <button
-                            onClick={handleNewProject}
-                            className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
-                        >
-                            <PlusIcon className="h-4 w-4" />
-                            <span>New</span>
-                        </button>
+                    <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Projects</h2>
+                            <button
+                                onClick={handleNewProject}
+                                className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md"
+                            >
+                                <PlusIcon className="h-4 w-4" />
+                                <span>New</span>
+                            </button>
+                        </div>
+                        <div className="relative">
+                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Filter projects and press Enter..."
+                                onKeyDown={handleFilterKeyDown}
+                                className="block w-full rounded-md border-0 bg-white dark:bg-gray-700 py-1.5 pl-10 pr-3 text-gray-900 dark:text-gray-200 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+                            />
+                        </div>
                     </div>
                     <ProjectList
-                        projects={projects}
+                        projects={filteredProjects}
                         selectedProjectId={selectedProjectId}
                         onSelectProject={setSelectedProjectId}
                     />
@@ -102,7 +130,7 @@ const ProjectsPage: React.FC = () => {
                             </h2>
                             <button
                                 onClick={handleDeleteProject}
-                                className="flex items-center space-x-2 bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-red-700 shadow-md hover:shadow-lg transition-all duration-200"
+                                className="flex items-center space-x-2 bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-red-700 shadow-md"
                             >
                                 <TrashIcon className="h-5 w-5" />
                                 <span>Delete Project</span>

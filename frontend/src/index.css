@@ -2,27 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom Scrollbar Styling */
-/* Works on Firefox */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #14b8a6 #374151; /* Teal thumb, gray track */
-}
+/*
+ VITAL CHANGE:
+ The entire scrollbar styling block has been replaced with theme-aware styles.
+*/
+@layer base {
+  /* Works on Firefox */
+  * {
+    /* Light mode default: Teal thumb, light gray track */
+    scrollbar-width: thin;
+    scrollbar-color: #14b8a6 #e5e7eb;
+  }
 
-/* Works on Chrome, Edge, and Safari */
-*::-webkit-scrollbar {
-  width: 12px;
-}
+  .dark * {
+    /* Dark mode override: Teal thumb, dark gray track */
+    scrollbar-color: #14b8a6 #374151;
+  }
 
-*::-webkit-scrollbar-track {
-  background: #374151; /* Gray-700 from Tailwind */
-  border-radius: 10px;
-}
+  /* Works on Chrome, Edge, and Safari */
+  *::-webkit-scrollbar {
+    width: 12px;
+  }
 
-*::-webkit-scrollbar-thumb {
-  background-color: #14b8a6; /* Teal-500 from Tailwind */
-  border-radius: 10px;
-  border: 3px solid #374151;
+  *::-webkit-scrollbar-track {
+    /* Light mode default track color */
+    background: #e5e7eb; /* gray-200 */
+    border-radius: 10px;
+  }
+
+  .dark *::-webkit-scrollbar-track {
+    /* Dark mode override track color */
+    background: #374151; /* gray-700 */
+  }
+
+  *::-webkit-scrollbar-thumb {
+    /* Light mode default thumb with a border matching the light track */
+    background-color: #14b8a6; /* teal-500 */
+    border-radius: 10px;
+    border: 3px solid #e5e7eb; /* gray-200 */
+  }
+
+  .dark *::-webkit-scrollbar-thumb {
+    /* Dark mode override thumb with a border matching the dark track */
+    border-color: #374151; /* gray-700 */
+  }
 }
 
 mark{
@@ -42,5 +65,5 @@ mark.active-match {
 }
 
 .dark mark.active-match {
-    background-color: #f97316; 
+    background-color: #f97316;  
 }

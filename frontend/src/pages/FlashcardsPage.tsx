@@ -7,212 +7,236 @@ import ConfirmationModal from '../components/ConfirmationModal';
 import NewDeckModal from '../components/NewDeckModal';
 import type { Flashcard } from '../types';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { PlusIcon, TrashIcon, PlayCircleIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
+import { PlusIcon, TrashIcon, PlayCircleIcon, PencilIcon, CheckIcon, XMarkIcon, MagnifyingGlassIcon } from '@heroicons/react/20/solid';
 
 const FlashcardsPage: React.FC = () => {
-  const { decks, allCards, fetchDecks, fetchAllCards, addDeck, deleteDeck, updateDeck } = useFlashcardStore();
-  const [selectedDeckId, setSelectedDeckId] = useState<number | null>(null);
-  const [view, setView] = useState<'list' | 'review'>('list');
-  const [reviewMode, setReviewMode] = useState<'due' | 'all'>('due');
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [isNewDeckModalOpen, setIsNewDeckModalOpen] = useState(false);
-  const [isEditingDeckName, setIsEditingDeckName] = useState(false);
-  const [editedDeckName, setEditedDeckName] = useState('');
-  const location = useLocation();
-  const navigate = useNavigate();
+  const { decks, allCards, fetchDecks, fetchAllCards, addDeck, deleteDeck, updateDeck } = useFlashcardStore();
+  const [selectedDeckId, setSelectedDeckId] = useState<number | null>(null);
+  const [view, setView] = useState<'list' | 'review'>('list');
+  const [reviewMode, setReviewMode] = useState<'due' | 'all'>('due');
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isNewDeckModalOpen, setIsNewDeckModalOpen] = useState(false);
+  const [isEditingDeckName, setIsEditingDeckName] = useState(false);
+  const [editedDeckName, setEditedDeckName] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [filterTerm, setFilterTerm] = useState('');
 
-  useEffect(() => {
-    fetchDecks();
-    fetchAllCards();
-  }, [fetchDecks, fetchAllCards]);
+  useEffect(() => {
+    fetchDecks();
+    fetchAllCards();
+  }, [fetchDecks, fetchAllCards]);
 
-  useEffect(() => {
-    if (location.state?.selectedDeckId) {
-        setSelectedDeckId(location.state.selectedDeckId);
-        navigate(location.pathname, { replace: true });
-    }
-    else if (selectedDeckId && !decks.find(d => d.id === selectedDeckId)) {
-      setSelectedDeckId(decks.length > 0 ? decks[0].id! : null);
-    } else if (!selectedDeckId && decks.length > 0) {
-      setSelectedDeckId(decks[0].id!);
-    }
-  }, [decks, selectedDeckId, location.state, navigate]);
+  useEffect(() => {
+    if (location.state?.selectedDeckId) {
+        setSelectedDeckId(location.state.selectedDeckId);
+        navigate(location.pathname, { replace: true });
+    }
+    else if (selectedDeckId && !decks.find(d => d.id === selectedDeckId)) {
+      setSelectedDeckId(decks.length > 0 ? decks[0].id! : null);
+    } else if (!selectedDeckId && decks.length > 0) {
+      setSelectedDeckId(decks[0].id!);
+    }
+  }, [decks, selectedDeckId, location.state, navigate]);
 
-  const cardCounts = useMemo(() => {
-    return allCards.reduce((acc: { [key: number]: number }, card: Flashcard) => {
-      acc[card.deckId] = (acc[card.deckId] || 0) + 1;
-      return acc;
-    }, {});
-  }, [allCards]);
-  
-  const handleNewDeckClick = () => {
-    setIsNewDeckModalOpen(true);
-  };
-  
-  const handleAddDeck = async (name: string) => {
-    if (name && name.trim()) {
-      await addDeck(name.trim());
-      const newDecks = useFlashcardStore.getState().decks;
-      setSelectedDeckId(newDecks[newDecks.length - 1].id!);
-    }
-    setIsNewDeckModalOpen(false);
-  };
+  const cardCounts = useMemo(() => {
+    return allCards.reduce((acc: { [key: number]: number }, card: Flashcard) => {
+      acc[card.deckId] = (acc[card.deckId] || 0) + 1;
+      return acc;
+    }, {});
+  }, [allCards]);
+  
+  const filteredDecks = useMemo(() => {
+    if (!filterTerm) return decks;
+    const lowercasedFilter = filterTerm.toLowerCase();
+    return decks.filter(deck => deck.name.toLowerCase().includes(lowercasedFilter));
+  }, [decks, filterTerm]);
 
-  const handleDeleteDeck = () => {
-    setIsConfirmModalOpen(true);
-  };
+  const handleNewDeckClick = () => {
+    setIsNewDeckModalOpen(true);
+  };
+  
+  const handleAddDeck = async (name: string) => {
+    if (name && name.trim()) {
+      await addDeck(name.trim());
+      const newDecks = useFlashcardStore.getState().decks;
+      setSelectedDeckId(newDecks[newDecks.length - 1].id!);
+    }
+    setIsNewDeckModalOpen(false);
+  };
 
-  const handleConfirmDeleteDeck = () => {
-    if (selectedDeckId) {
-      deleteDeck(selectedDeckId);
-      setIsConfirmModalOpen(false);
-    }
-  };
+  const handleDeleteDeck = () => {
+    setIsConfirmModalOpen(true);
+  };
 
-  const handleEditDeckName = () => {
-    if (selectedDeck) {
-      setIsEditingDeckName(true);
-      setEditedDeckName(selectedDeck.name);
-    }
-  };
+  const handleConfirmDeleteDeck = () => {
+    if (selectedDeckId) {
+      deleteDeck(selectedDeckId);
+      setIsConfirmModalOpen(false);
+    }
+  };
 
-  const handleSaveDeckName = async () => {
-    if (selectedDeckId && editedDeckName.trim()) {
-      await updateDeck(selectedDeckId, editedDeckName.trim());
-      setIsEditingDeckName(false);
-    }
-  };
+  const handleEditDeckName = () => {
+    if (selectedDeck) {
+      setIsEditingDeckName(true);
+      setEditedDeckName(selectedDeck.name);
+    }
+  };
 
-  const handleCancelEditDeckName = () => {
-    setIsEditingDeckName(false);
-  };
+  const handleSaveDeckName = async () => {
+    if (selectedDeckId && editedDeckName.trim()) {
+      await updateDeck(selectedDeckId, editedDeckName.trim());
+      setIsEditingDeckName(false);
+    }
+  };
 
-  const selectedDeck = decks.find(d => d.id === selectedDeckId) || null;
+  const handleCancelEditDeckName = () => {
+    setIsEditingDeckName(false);
+  };
 
-  if (view === 'review' && selectedDeck) {
-    return (
-      <div className="p-6">
-        <FlashcardPlayer
-          deckId={selectedDeck.id!}
-          reviewMode={reviewMode}
-          onFinish={() => setView('list')}
-        />
-      </div>
-    );
-  }
+  const handleFilterKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+        setFilterTerm((e.target as HTMLInputElement).value);
+    }
+  };
 
-  return (
-    <div className="flex h-full">
-      <div className="w-1/4 border-gray-200 dark:border-gray-700">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Decks</h2>
-            <button
-                onClick={handleNewDeckClick}
-                className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md hover:shadow-lg transition-all duration-200"
-            >
-                <PlusIcon className="h-4 w-4" />
-                <span>New</span>
-            </button>
-        </div>
-        <DeckList
-          decks={decks}
-          cardCounts={cardCounts}
-          selectedDeckId={selectedDeckId}
-          onSelectDeck={setSelectedDeckId}
-          onNewDeck={handleNewDeckClick}
-        />
-      </div>
-      
-      <div className="w-3/4 flex flex-col h-full overflow-y-auto">
-        {selectedDeck ? (
-          <div className="p-6">
-            <div className="flex justify-between items-center mb-6">
-              {/* Deck Name or Input Field */}
-              <div className="flex items-center space-x-3 flex-grow pr-4">
-                  {!isEditingDeckName ? (
-                      <>
-                          <h2 className="text-3xl text-gray-900 dark:text-white font-bold truncate">{selectedDeck.name}</h2>
-                          <button onClick={handleEditDeckName} className="text-gray-500 hover:text-gray-700 dark:hover:text-white flex-shrink-0">
-                              <PencilIcon className="h-5 w-5" />
-                          </button>
-                      </>
-                  ) : (
-                      <input 
-                          type="text"
-                          value={editedDeckName}
-                          onChange={(e) => setEditedDeckName(e.target.value)}
-                          className="text-3xl font-bold bg-transparent dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg px-2 py-1 w-full focus:ring-2 focus:ring-teal-500 focus:outline-none border border-gray-300 dark:border-gray-600"
-                          onKeyDown={(e) => e.key === 'Enter' && handleSaveDeckName()}
-                          autoFocus
-                      />
-                  )}
-              </div>
-              
-              {/* Action Buttons */}
-              <div className="flex items-center space-x-2 flex-shrink-0">
-                  {isEditingDeckName ? (
-                      <>
-                          <button onClick={handleSaveDeckName} className="flex items-center space-x-2 bg-green-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-700 shadow-md hover:shadow-lg transition-all duration-200">
-                              <CheckIcon className="h-5 w-5" />
-                              <span>Save</span>
-                          </button>
-                           <button onClick={handleCancelEditDeckName} className="flex items-center space-x-2 bg-gray-500 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200">
-                              <XMarkIcon className="h-5 w-5" />
-                              <span>Cancel</span>
-                          </button>
-                      </>
-                  ) : (
-                      <>
-                          <button 
-                              onClick={() => { setReviewMode('all'); setView('review'); }} 
-                              className="flex items-center space-x-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700 shadow-md hover:shadow-lg transition-all duration-200"
-                            >
-                              <PlayCircleIcon className="h-5 w-5" />
-                              <span>Review All Cards</span>
-                            </button>
-                          <button 
-                            onClick={() => { setReviewMode('due'); setView('review'); }} 
-                            className="flex items-center space-x-2 bg-purple-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-purple-700 shadow-md hover:shadow-lg transition-all duration-200"
-                          >
-                            <PlayCircleIcon className="h-5 w-5" />
-                            <span>Review Due</span>
-                          </button>
-                          <button 
-                            onClick={handleDeleteDeck} 
-                            className="flex items-center space-x-2 bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-red-700 shadow-md hover:shadow-lg transition-all duration-200"
-                          >
-                            <TrashIcon className="h-5 w-5" />
-                            <span>Delete</span>
-                          </button>
-                      </>
-                  )}
-              </div>
-            </div>
-            
-            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">                
-                <DeckView deck={selectedDeck} />
-            </div>
-          </div>
-        ) : (
-          <div className="p-8 text-gray-500 dark:text-gray-400">Select a deck or create a new one.</div>
-        )}
-      </div>
+  const selectedDeck = decks.find(d => d.id === selectedDeckId) || null;
 
-      <ConfirmationModal
-        isOpen={isConfirmModalOpen}
-        onClose={() => setIsConfirmModalOpen(false)}
-        onConfirm={handleConfirmDeleteDeck}
-        title="Confirm Deck Deletion"
-        message={`Are you sure you want to delete the deck "${selectedDeck?.name}"? This action cannot be undone.`}
-      />
+  if (view === 'review' && selectedDeck) {
+    return (
+      <div className="p-6">
+        <FlashcardPlayer
+          deckId={selectedDeck.id!}
+          reviewMode={reviewMode}
+          onFinish={() => setView('list')}
+        />
+      </div>
+    );
+  }
 
-      <NewDeckModal
-        isOpen={isNewDeckModalOpen}
-        onClose={() => setIsNewDeckModalOpen(false)}
-        onConfirm={handleAddDeck}
-      />
-    </div>
-  );
+  return (
+    <div className="flex h-full">
+      <div className="w-1/4 flex flex-col h-full border-r border-gray-200 dark:border-gray-700">
+        <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">All Decks</h2>
+            <button
+              onClick={handleNewDeckClick}
+              className="flex items-center space-x-1 bg-teal-600 text-white rounded-lg px-3 py-1 text-sm font-semibold hover:bg-teal-700 shadow-md"
+            >
+              <PlusIcon className="h-4 w-4" />
+              <span>New</span>
+            </button>
+          </div>
+          <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                  <MagnifyingGlassIcon className="h-5 w-5 text-gray-400" />
+              </div>
+              <input
+                  type="text"
+                  placeholder="Filter decks and press Enter..."
+                  onKeyDown={handleFilterKeyDown}
+                  className="block w-full rounded-md border-0 bg-white dark:bg-gray-700 py-1.5 pl-10 pr-3 text-gray-900 dark:text-gray-200 ring-1 ring-inset ring-gray-300 dark:ring-gray-600 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-teal-600 sm:text-sm sm:leading-6"
+              />
+          </div>
+        </div>
+        <DeckList
+          decks={filteredDecks}
+          cardCounts={cardCounts}
+          selectedDeckId={selectedDeckId}
+          onSelectDeck={setSelectedDeckId}
+          onNewDeck={handleNewDeckClick}
+        />
+      </div>
+      
+      <div className="w-3/4 flex flex-col h-full overflow-y-auto">
+        {selectedDeck ? (
+          <div className="p-6">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center space-x-3 flex-grow pr-4">
+                  {!isEditingDeckName ? (
+                      <>
+                          <h2 className="text-3xl text-gray-900 dark:text-white font-bold truncate">{selectedDeck.name}</h2>
+                          <button onClick={handleEditDeckName} className="text-gray-500 hover:text-gray-700 dark:hover:text-white flex-shrink-0">
+                              <PencilIcon className="h-5 w-5" />
+                          </button>
+                      </>
+                  ) : (
+                      <input 
+                          type="text"
+                          value={editedDeckName}
+                          onChange={(e) => setEditedDeckName(e.target.value)}
+                          className="text-3xl font-bold bg-transparent dark:bg-gray-800 text-gray-900 dark:text-white rounded-lg px-2 py-1 w-full focus:ring-2 focus:ring-teal-500 focus:outline-none border border-gray-300 dark:border-gray-600"
+                          onKeyDown={(e) => e.key === 'Enter' && handleSaveDeckName()}
+                          autoFocus
+                      />
+                  )}
+              </div>
+              
+              <div className="flex items-center space-x-2 flex-shrink-0">
+                  {isEditingDeckName ? (
+                      <>
+                          <button onClick={handleSaveDeckName} className="flex items-center space-x-2 bg-green-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-green-700 shadow-md">
+                              <CheckIcon className="h-5 w-5" />
+                              <span>Save</span>
+                          </button>
+                            <button onClick={handleCancelEditDeckName} className="flex items-center space-x-2 bg-gray-500 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-gray-600 shadow-md">
+                              <XMarkIcon className="h-5 w-5" />
+                              <span>Cancel</span>
+                          </button>
+                      </>
+                  ) : (
+                      <>
+                          <button 
+                              onClick={() => { setReviewMode('all'); setView('review'); }} 
+                              className="flex items-center space-x-1 bg-blue-600 text-white rounded-lg px-4 py-2 text-sm hover:bg-blue-700 shadow-md"
+                          >
+                              <PlayCircleIcon className="h-5 w-5" />
+                              <span>Review All Cards</span>
+                          </button>
+                          <button 
+                            onClick={() => { setReviewMode('due'); setView('review'); }} 
+                            className="flex items-center space-x-2 bg-purple-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-purple-700 shadow-md"
+                          >
+                              <PlayCircleIcon className="h-5 w-5" />
+                              <span>Review Due</span>
+                          </button>
+                          <button 
+                            onClick={handleDeleteDeck} 
+                            className="flex items-center space-x-2 bg-red-600 text-white rounded-lg px-4 py-2 text-sm font-semibold hover:bg-red-700 shadow-md"
+                          >
+                              <TrashIcon className="h-5 w-5" />
+                              <span>Delete</span>
+                          </button>
+                      </>
+                  )}
+              </div>
+            </div>
+            
+            <div className="border-t border-gray-200 dark:border-gray-700 pt-6">                  
+                <DeckView deck={selectedDeck} />
+            </div>
+          </div>
+        ) : (
+          <div className="p-8 text-gray-500 dark:text-gray-400">Select a deck or create a new one.</div>
+        )}
+      </div>
+
+      <ConfirmationModal
+        isOpen={isConfirmModalOpen}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmDeleteDeck}
+        title="Confirm Deck Deletion"
+        message={`Are you sure you want to delete the deck "${selectedDeck?.name}"? This action cannot be undone.`}
+      />
+
+      <NewDeckModal
+        isOpen={isNewDeckModalOpen}
+        onClose={() => setIsNewDeckModalOpen(false)}
+        onConfirm={handleAddDeck}
+      />
+    </div>
+  );
 };
 
 export default FlashcardsPage;
