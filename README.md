@@ -122,7 +122,7 @@ https://github.com/user-attachments/assets/a7b5bd69-8b47-4cf3-8c9f-51c893af2fab
 
 Download the latest release from the project's GitHub page and run the installer.
 
-### Critical First Step: Configuring `appsettings.json`
+## Critical First Step: Configuring `appsettings.json`
 To enable GitHub integration (for Gist syncing and cloud backups), you must perform this one-time setup.
 
 1.  **Locate the Backend Folder:** Navigate to the following folder on your computer, replacing `[User]` with your Windows username.
