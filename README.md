@@ -102,7 +102,7 @@ https://github.com/user-attachments/assets/a7b5bd69-8b47-4cf3-8c9f-51c893af2fab
 
 ---
 
-# Dev2ndBrain(Electron Installer) - Installation Guide
+# Dev2ndBrain(Electron Installer) - Guide
 ## Table of Contents
 
 - [1. Installation & Setup](#1-installation--setup)
