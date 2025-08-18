@@ -5,9 +5,6 @@ import { githubService } from '../services/githubService';
 import type { Snippet } from '../types';
 
 interface SnippetState {
-  snippets: Snippet[];
-  isLoading: boolean;
-  fetchSnippets: () => Promise<void>;
   addSnippet: (newSnippet: Omit<Snippet, 'id' | 'createdAt' | 'updatedAt'>) => Promise<Snippet | undefined>;
   updateSnippet: (id: number, updatedContent: Partial<Snippet>) => Promise<void>;
   deleteSnippet: (id: number) => Promise<void>;
@@ -17,16 +14,7 @@ interface SnippetState {
   pushToGist: (snippetId: number) => Promise<void>;
 }
 
-export const useSnippetStore = create<SnippetState>((set, get) => ({
-  snippets: [],
-  isLoading: true,
-
-  fetchSnippets: async () => {
-    set({ isLoading: true });
-    const snippets = await db.snippets.filter(s => !s.isDeleted).toArray();
-    set({ snippets, isLoading: false });
-  },
-
+export const useSnippetStore = create<SnippetState>((_set, get) => ({
   addSnippet: async (newSnippetData) => {
     const now = new Date();
     const snippet: Snippet = {
@@ -36,34 +24,27 @@ export const useSnippetStore = create<SnippetState>((set, get) => ({
     };
     const id = await db.snippets.add(snippet);
     const createdSnippet = { ...snippet, id };
-    
-    set((state) => ({ snippets: [...state.snippets, createdSnippet] }));
     searchService.add(createdSnippet, 'snippet');
     return createdSnippet;
   },
 
   updateSnippet: async (id, updatedContent) => {
     const now = new Date();
-    const payload = { ...updatedContent, updatedAt: now };
-    await db.snippets.update(id, payload);
-    const updatedSnippet = { ...get().snippets.find(s => s.id === id)!, ...payload };
+    await db.snippets.update(id, { ...updatedContent, updatedAt: now });
+    const updatedSnippet = await db.snippets.get(id);
 
-    set((state) => ({
-      snippets: state.snippets.map((s) => (s.id === id ? updatedSnippet : s)),
-    }));
-    searchService.add(updatedSnippet, 'snippet');
+    if (updatedSnippet) {
+      searchService.add(updatedSnippet, 'snippet');
+    }
   },
 
   deleteSnippet: async (id) => {
     await db.snippets.update(id, { isDeleted: true, updatedAt: new Date() });
-    set((state) => ({
-      snippets: state.snippets.filter((s) => s.id !== id),
-    }));
     searchService.remove(id, 'snippet');
   },
 
   syncSnippetToGist: async (snippetId: number) => {
-    const snippet = get().snippets.find(s => s.id === snippetId);
+    const snippet = await db.snippets.get(snippetId);
     if (!snippet) throw new Error("Snippet not found.");
 
     try {
@@ -78,45 +59,45 @@ export const useSnippetStore = create<SnippetState>((set, get) => ({
 
   importFromGists: async () => {
     try {
-        const gists = await githubService.importGists();
-        const existingGistIds = new Set(get().snippets.map(s => s.gistId).filter(Boolean));
-        let importCount = 0;
+      const gists = await githubService.importGists();
+      const allSnippets = await db.snippets.toArray();
+      const existingGistIds = new Set(allSnippets.map(s => s.gistId).filter(Boolean));
+      let importCount = 0;
 
-        for (const gist of gists) {
-            if (existingGistIds.has(gist.id)) continue;
+      for (const gist of gists) {
+        if (existingGistIds.has(gist.id)) continue;
 
-            const firstFile = Object.values(gist.files)[0] as any;
-            if (!firstFile) continue;
-            
-            const fullGist = await githubService.getGist(gist.id);
-            const fullFirstFile = Object.values(fullGist.files)[0] as any;
-            
-            if (fullFirstFile && fullFirstFile.content) {
-                await get().addSnippet({
-                    title: fullGist.description || fullFirstFile.filename || 'Untitled Gist',
-                    language: (fullFirstFile.language || 'plaintext').toLowerCase(),
-                    code: fullFirstFile.content,
-                    tags: ['imported'],
-                    gistId: fullGist.id,
-                });
-                importCount++;
-            }
+        const firstFile = Object.values(gist.files)[0] as any;
+        if (!firstFile) continue;
+        
+        const fullGist = await githubService.getGist(gist.id);
+        const fullFirstFile = Object.values(fullGist.files)[0] as any;
+        
+        if (fullFirstFile && fullFirstFile.content) {
+          await get().addSnippet({
+            title: fullGist.description || fullFirstFile.filename || 'Untitled Gist',
+            language: (fullFirstFile.language || 'plaintext').toLowerCase(),
+            code: fullFirstFile.content,
+            tags: ['imported'],
+            gistId: fullGist.id,
+          });
+          importCount++;
         }
-        
-        if (importCount > 0) {
-            get().fetchSnippets();
-            alert(`Successfully imported ${importCount} new snippets!`);
-        } else {
-            alert("No new gists to import.");
-        }
+      }
+      
+      if (importCount > 0) {
+        alert(`Successfully imported ${importCount} new snippets!`);
+      } else {
+        alert("No new gists to import.");
+      }
     } catch (error) {
-        console.error("Gist import failed:", error);
-        alert("Failed to import snippets from Gists.");
+      console.error("Gist import failed:", error);
+      alert("Failed to import snippets from Gists.");
     }
   },
 
   pullFromGist: async (snippetId: number) => {
-    const snippet = get().snippets.find(s => s.id === snippetId);
+    const snippet = await db.snippets.get(snippetId);
     if (!snippet?.gistId) throw new Error("Snippet is not linked to a Gist.");
 
     try {
@@ -139,7 +120,7 @@ export const useSnippetStore = create<SnippetState>((set, get) => ({
   },
 
   pushToGist: async (snippetId: number) => {
-    const snippet = get().snippets.find(s => s.id === snippetId);
+    const snippet = await db.snippets.get(snippetId);
     if (!snippet?.gistId) throw new Error("Snippet is not linked to a Gist.");
 
     try {

@@ -1,10 +1,11 @@
 import React, { useState, useMemo } from 'react';
 import GraphView from '../components/graph/GraphView';
-import { useNoteStore } from '../stores/useNoteStore';
 import TagTreeNodeComponent from '../components/graph/TagTree';
 import AnnotationLayer from '../components/graph/AnnotationLayer';
 import { useAnnotationStore } from '../stores/useAnnotationStore';
 import { MagnifyingGlassIcon } from '@heroicons/react/20/solid';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../services/db';
 
 interface TagTreeNode {
     children: { [key: string]: TagTreeNode };
@@ -12,11 +13,16 @@ interface TagTreeNode {
 }
 
 const GraphPage: React.FC = () => {
-    const { notes, getUniqueTags } = useNoteStore();
+    
+    const allNotes = useLiveQuery(() => db.notes.filter(note => !note.isDeleted).toArray(), []) || [];
     const { updateAnnotationState } = useAnnotationStore();
     const [selectedTags, setSelectedTags] = useState<string[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const uniqueTags = useMemo(() => getUniqueTags(), [notes]);
+
+    const uniqueTags = useMemo(() => {
+        const tags = allNotes.flatMap(note => note.tags || []);
+        return [...new Set(tags)].sort();
+    }, [allNotes]);
 
     const filteredTags = useMemo(() => {
         if (!searchTerm) return uniqueTags;
@@ -60,10 +66,10 @@ const GraphPage: React.FC = () => {
         }
     };
 
-    const filteredNotes = useMemo(() => notes.filter(note => {
+    const filteredNotes = useMemo(() => allNotes.filter(note => {
         if (selectedTags.length === 0) return true;
         return selectedTags.some(tag => note.tags.includes(tag));
-    }), [notes, selectedTags]);
+    }), [allNotes, selectedTags]);
 
     return (
         <div className="flex h-full bg-white dark:bg-gray-800">
@@ -104,7 +110,7 @@ const GraphPage: React.FC = () => {
 
             <div className="flex-grow bg-white dark:bg-gray-900 rounded-lg overflow-hidden relative">
                 <div className="h-full w-full">
-                    <GraphView notes={filteredNotes} />
+                    <GraphView visibleNotes={filteredNotes} allNotes={allNotes} />
                 </div>
                 <AnnotationLayer />
             </div>

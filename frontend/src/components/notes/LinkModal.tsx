@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { useNoteStore } from '../../stores/useNoteStore';
 import type { Note } from '../../types';
 import { XMarkIcon } from '@heroicons/react/20/solid';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../services/db';
+
 interface LinkModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -10,17 +12,33 @@ interface LinkModalProps {
 
 const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSelectNote }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const notes = useNoteStore((state) => state.notes);
+
+  const filteredNotes = useLiveQuery(
+    () => {
+      const lowerSearchTerm = searchTerm.toLowerCase().trim();
+      if (!lowerSearchTerm) {
+    
+        return db.notes
+          .orderBy('updatedAt')
+          .reverse()
+          .filter(note => !note.isDeleted)
+          .limit(20)
+          .toArray();
+      }
+
+      return db.notes
+        .filter(note => 
+          !note.isDeleted && note.title.toLowerCase().includes(lowerSearchTerm)
+        ).toArray();
+    },
+    [searchTerm]
+  ) || [];
 
   if (!isOpen) return null;
 
-  const filteredNotes = notes.filter(note =>
-    note.title.toLowerCase().includes(searchTerm.toLowerCase())
-  );
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md p-6" onClick={e => e.stopPropagation()}>
         <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Link to Note</h2>
         <input
           type="text"
@@ -28,9 +46,10 @@ const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSelectNote }) 
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full p-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-white mb-4"
+          autoFocus
         />
         <ul className="max-h-64 overflow-y-auto">
-          {filteredNotes.map(note => (
+          {filteredNotes.map((note: Note) => (
             <li
               key={note.id}
               onClick={() => onSelectNote(note)}
@@ -40,11 +59,11 @@ const LinkModal: React.FC<LinkModalProps> = ({ isOpen, onClose, onSelectNote }) 
             </li>
           ))}
         </ul>
-        <button 
-          onClick={onClose} 
+        <button 
+          onClick={onClose} 
           className="mt-4 flex items-center justify-center space-x-1 w-full bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg px-4 py-2 hover:bg-gray-300 dark:hover:bg-gray-600 shadow-md hover:shadow-lg transition-all duration-200"
         >
-          <XMarkIcon className="h-5 w-5" />
+          <XMarkIcon className="h-5 w-5" />
           <span>Close</span>
         </button>
       </div>

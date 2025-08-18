@@ -1,24 +1,26 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
 import type { Deck, Flashcard } from '../../types';
 import { PlusIcon, CheckIcon, XMarkIcon, PencilSquareIcon } from '@heroicons/react/20/solid';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../services/db';
 
 interface DeckViewProps {
   deck: Deck;
 }
 
 const DeckView: React.FC<DeckViewProps> = ({ deck }) => {
-  const { cards, fetchCardsByDeck, addCard, updateCard } = useFlashcardStore();
+  const { addCard, updateCard } = useFlashcardStore();
   const [newCard, setNewCard] = useState({ question: '', answer: '' });
   const [editingCardId, setEditingCardId] = useState<number | null>(null);
   const [editedCard, setEditedCard] = useState<Partial<Flashcard> | null>(null);
   const questionInputRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (deck.id) {
-      fetchCardsByDeck(deck.id);
-    }
-  }, [deck.id, fetchCardsByDeck]);
+  const cards = useLiveQuery(
+    () => db.flashcards.where({ deckId: deck.id! }).filter(c => !c.isDeleted).toArray(),
+    [deck.id]
+  ) || [];
+
 
   const handleAddCard = async (e: React.FormEvent) => {
     e.preventDefault();

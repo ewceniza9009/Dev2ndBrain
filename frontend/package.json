@@ -15,6 +15,7 @@
     "@heroicons/react": "^2.2.0",
     "@monaco-editor/react": "^4.7.0",
     "@tailwindcss/typography": "^0.5.16",
+    "@tanstack/react-virtual": "^3.8.0",
     "@types/react-resizable": "^3.0.8",
     "clsx": "^2.1.1",
     "dexie": "^4.0.11",

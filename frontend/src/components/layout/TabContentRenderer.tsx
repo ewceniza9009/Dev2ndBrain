@@ -1,9 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppStore } from '../../stores/useAppStore';
-import { useNoteStore } from '../../stores/useNoteStore';
-import { useSnippetStore } from '../../stores/useSnippetStore';
 import { useFlashcardStore } from '../../stores/useFlashcardStore';
-import { useProjectStore } from '../../stores/useProjectStore';
 import NoteDetailView from '../notes/NoteDetailView';
 import SnippetDetail from '../snippets/SnippetDetail';
 import DeckView from '../flashcards/DeckView';
@@ -14,6 +11,8 @@ import GraphView from '../graph/GraphView';
 import AnnotationLayer from '../graph/AnnotationLayer';
 import { TrashIcon, PlayCircleIcon, PencilIcon, CheckIcon, XMarkIcon } from '@heroicons/react/20/solid';
 import { useAnnotationStore } from '../../stores/useAnnotationStore';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../services/db';
 
 interface TabContentRendererProps {
     tabId: string;
@@ -24,18 +23,39 @@ const TabContentRenderer: React.FC<TabContentRendererProps> = ({ tabId }) => {
     const { updateAnnotationState } = useAnnotationStore();
     const tab = tabs.find(t => t.id === tabId);
 
+    const note = useLiveQuery(
+        () => (tab?.type === 'note' && tab.entityId ? db.notes.get(tab.entityId) : undefined),
+        [tab?.id]
+    );
+    const snippet = useLiveQuery(
+        () => (tab?.type === 'snippet' && tab.entityId ? db.snippets.get(tab.entityId) : undefined),
+        [tab?.id]
+    );
+    const deck = useLiveQuery(
+        () => (tab?.type === 'deck' && tab.entityId ? db.decks.get(tab.entityId) : undefined),
+        [tab?.id]
+    );
+    const project = useLiveQuery(
+        () => (tab?.type === 'project' && tab.entityId ? db.projects.get(tab.entityId) : undefined),
+        [tab?.id]
+    );
+
+    const allNotes = useLiveQuery(
+        () => db.notes.filter(note => !note.isDeleted).toArray(),
+        []
+    ) || [];
+
     const [view, setView] = useState<'list' | 'review'>('list');
     const [reviewMode, setReviewMode] = useState<'due' | 'all'>('due');
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isEditingDeckName, setIsEditingDeckName] = useState(false);
     const [editedDeckName, setEditedDeckName] = useState('');
 
-    const note = useNoteStore(state => tab?.type === 'note' ? state.notes.find(n => n.id === tab.entityId) : null);
-    const allNotes = useNoteStore(state => state.notes);
-    const snippet = useSnippetStore(state => tab?.type === 'snippet' ? state.snippets.find(s => s.id === tab.entityId) : null);
-    const deck = useFlashcardStore(state => tab?.type === 'deck' ? state.decks.find(d => d.id === tab.entityId) : null);
-    const project = useProjectStore(state => tab?.type === 'project' ? state.projects.find(p => p.id === tab.entityId) : null);
     const { deleteDeck, updateDeck } = useFlashcardStore();
+
+    useEffect(() => {
+        setView('list');
+    }, [tabId]);
 
     if (!tab) {
         return <div className="p-8 text-gray-500">Loading tab...</div>;
@@ -66,9 +86,9 @@ const TabContentRenderer: React.FC<TabContentRendererProps> = ({ tabId }) => {
 
         case 'snippet':
             return snippet ? <SnippetDetail snippet={snippet} /> : <div className="p-8 text-gray-500">Snippet not found...</div>;
-        
-        case 'project':
-            return project ? <ProjectDetail project={project} /> : <div className="p-8 text-gray-500">Project not found...</div>;
+        
+        case 'project':
+            return project ? <ProjectDetail project={project} /> : <div className="p-8 text-gray-500">Project not found...</div>;
 
         case 'deck':
             if (!deck) return <div className="p-8 text-gray-500">Deck not found...</div>;
@@ -131,7 +151,7 @@ const TabContentRenderer: React.FC<TabContentRendererProps> = ({ tabId }) => {
             return (
                 <div className="h-full w-full relative">
                     <div className="h-full w-full">
-                        <GraphView notes={filteredNotes} />
+                        <GraphView visibleNotes={filteredNotes} allNotes={allNotes} />
                     </div>
                     <AnnotationLayer />
                 </div>

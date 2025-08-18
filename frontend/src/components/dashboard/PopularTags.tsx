@@ -1,18 +1,16 @@
 import React, { useMemo } from 'react';
-import { useNoteStore } from '../../stores/useNoteStore';
-import { useSnippetStore } from '../../stores/useSnippetStore';
-import { useFlashcardStore } from '../../stores/useFlashcardStore';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db } from '../../services/db';
 
 const PopularTags: React.FC = () => {
-  const notes = useNoteStore(state => state.notes);
-  const snippets = useSnippetStore(state => state.snippets);
-  const decks = useFlashcardStore(state => state.decks);
+  const notes = useLiveQuery(() => db.notes.where('isDeleted').notEqual(1).toArray(), []) || [];
+  const snippets = useLiveQuery(() => db.snippets.where('isDeleted').notEqual(1).toArray(), []) || [];
+  const decks = useLiveQuery(() => db.decks.where('isDeleted').notEqual(1).toArray(), []) || [];
 
   const popularTags = useMemo(() => {
     const allTags: string[] = [];
     notes.forEach(note => allTags.push(...note.tags));
     snippets.forEach(snippet => allTags.push(...snippet.tags));
-    // Deck names can also be treated as a form of tagging or categorization
     decks.forEach(deck => allTags.push(deck.name));
 
     const tagCounts = allTags.reduce((acc, tag) => {
