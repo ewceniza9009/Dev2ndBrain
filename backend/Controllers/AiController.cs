@@ -45,7 +45,9 @@ namespace Dev2ndBrain.Controllers
         [HttpPost("prompt")]
         public async Task<IActionResult> GetCompletion([FromBody] AiRequest request)
         {
+            var model = _configuration["Gemini:Model"];
             var apiKey = _configuration["Gemini:ApiKey"];
+
             if (string.IsNullOrEmpty(apiKey))
             {
                 return StatusCode(500, new { message = "AI service is not configured." });
@@ -53,7 +55,7 @@ namespace Dev2ndBrain.Controllers
 
             var fullPrompt = $"{request.Prompt}:\n\n---\n{request.Content}\n---";
             var client = _httpClientFactory.CreateClient();
-            var apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={apiKey}";
+            var apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
 
             var payload = new
             {
@@ -102,7 +104,7 @@ namespace Dev2ndBrain.Controllers
             }
 
             var client = _httpClientFactory.CreateClient();
-            var apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={apiKey}";
+            var apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={apiKey}";
 
             var actionItemsPrompt = $"Please extract and list all potential action items or to-do tasks from the following note. Format the response as a simple markdown bulleted list.\n\n---\n{request.Content}\n---";
             var actionItemsPayload = new { contents = new[] { new { parts = new[] { new { text = actionItemsPrompt } } } } };
